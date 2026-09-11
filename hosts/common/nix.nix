@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   ...
 }:
@@ -14,15 +15,20 @@
 
   nix.package = pkgs.lix;
 
-  # Weekly GC keeping the last 14 days of generations as a rollback window.
-  nix.gc = {
-    automatic = true;
-    interval = {
+  # Weekly GC via `nh clean all` instead of nix.gc: besides system and user
+  # generations it also drops stale GC roots (`result` links, nix-direnv
+  # profiles). Keeps the last 14 days as a rollback window. Runs as root, so
+  # nh skips self-elevation. home-manager's programs.nh.clean is not used
+  # because on Darwin it only runs `nh clean user`.
+  launchd.daemons.nh-clean = {
+    command = "${lib.getExe pkgs.nh} clean all --keep-since 14d";
+    path = [ config.nix.package ];
+    serviceConfig.RunAtLoad = false;
+    serviceConfig.StartCalendarInterval = {
       Weekday = 0;
       Hour = 3;
       Minute = 15;
     };
-    options = "--delete-older-than 14d";
   };
   nix.optimise = {
     automatic = true;
