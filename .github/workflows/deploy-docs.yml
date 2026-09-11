@@ -1,0 +1,40 @@
+name: deploy-docs
+
+on:
+  workflow_dispatch:
+  # No paths filter: the site globs *.nix, README.md, workflows, etc. from
+  # across the repository at build time, so almost any change to main alters
+  # what it renders.
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Queue deploys instead of cancelling one mid-upload; only the newest pending
+# run is kept, so a burst of merges still ends on the latest main.
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          working-directory: docs
+          node-version: "26"
+          cache: true
+
+      # .void/project.json is gitignored, so the project is named explicitly.
+      - name: Deploy
+        run: vp run deploy
+        env:
+          VOID_TOKEN: ${{ secrets.VOID_TOKEN }}
+          VOID_PROJECT: naitokosuke-dotfiles

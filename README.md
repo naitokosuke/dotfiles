@@ -145,4 +145,6 @@ vp build     # production build
 vp check     # format, lint, and type-check
 ```
 
-It is deployed to <https://naitokosuke-dotfiles.void.app/>.
+It is deployed to <https://naitokosuke-dotfiles.void.app/> on every push to `main` by
+[`.github/workflows/deploy-docs.yml`](.github/workflows/deploy-docs.yml), which needs a `VOID_TOKEN` repository
+secret (`vp exec void auth token` in `docs/` copies the token to the clipboard). `vp run deploy` deploys by hand.
