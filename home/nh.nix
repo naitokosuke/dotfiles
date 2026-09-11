@@ -5,7 +5,8 @@
 # https://github.com/nix-community/nh
 #
 # Try it with `nh darwin switch` (picks darwinConfigurations.<hostname>).
-# Store GC stays on nix-darwin's `nix.gc`, so `programs.nh.clean` is left off.
+# Store GC runs as a root `nh clean all` daemon in hosts/common/nix.nix;
+# `programs.nh.clean` is left off since on Darwin it only cleans user profiles.
 { config, ... }:
 
 let
