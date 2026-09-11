@@ -52,11 +52,11 @@ An interactive, VS Code-flavoured walkthrough of this repository is published at
 │   └── Macbook-heavy/ # MacBook host (Touch ID for sudo)
 ├── home/              # User-level settings (home-manager), one module per program
 │   ├── shell/         # Shell configurations (Nushell, Zsh)
-│   ├── git.nix        # Git, gh, gwq, …
+│   ├── git.nix        # Git
 │   ├── claude.nix     # Claude Code settings, rules, skills
 │   ├── ghostty.nix    # Terminal
 │   ├── starship.nix   # Prompt
-│   └── …              # atuin, direnv, mcp, octorus, vscode, zoxide, …
+│   └── …              # atuin, direnv, gh, gwq, mcp, nh, ssh, vscode, …
 └── docs/              # Interactive walkthrough web app (Vite+ / void)
                        #   deployed to https://naitokosuke-dotfiles.void.app/
 ```
@@ -134,8 +134,8 @@ VSCode settings are automatically synchronized from the [vscode-settings](https:
 ## Walkthrough Site (`docs/`)
 
 [`docs/`](docs/) is a [Vite+](https://viteplus.dev/) / [void](https://void.app/) single-page app that renders this
-repository as an interactive, VS Code-flavoured walkthrough. It reads the actual `*.nix`, `README.md`, and `flake.nix`
-files at build time, so the published site always mirrors the real configuration.
+repository as an interactive, VS Code-flavoured walkthrough. It reads the actual `*.nix` files, `nvfetcher.toml`, the
+GitHub workflows, and this README at build time, so the published site always mirrors the real configuration.
 
 ```bash
 cd docs
