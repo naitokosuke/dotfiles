@@ -221,6 +221,29 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
+  ".github/workflows/deploy-docs.yml": {
+    about: "CI — redeploys this walkthrough site to void on every push to main.",
+    tags: ["ci", "web"],
+    walkthrough: {
+      intro:
+        "The site reads the repository's real config files at build time, so it's only as current as its last deploy. This workflow redeploys it to void on every push to `main` (or on manual dispatch), so the published walkthrough never lags behind the configuration it describes.",
+      sections: [
+        {
+          title: "Triggers and concurrency",
+          prose:
+            "There's no `paths` filter: the build globs `*.nix`, the README, and the workflows from across the repository, so almost any change to `main` alters what the site renders. Deploys share one concurrency group without cancelling, so an upload is never interrupted midway, and since only the newest pending run is kept, a burst of merges still ends on the latest `main`.",
+          lines: [3, 18],
+        },
+        {
+          title: "Deploy",
+          prose:
+            "`voidzero-dev/setup-vp` installs Vite+ and runs `vp install` in `docs/`, then `vp run deploy` runs the same `void deploy` used locally. `VOID_TOKEN` is a repository secret holding the token `void auth token` copies to the clipboard. The local project link in `.void/project.json` is gitignored, so `VOID_PROJECT` names the project explicitly — without it, `void deploy` would fail in CI rather than prompt.",
+          lines: [26, 40],
+        },
+      ],
+    },
+  },
+
   "modules/naitokosuke/default.nix": {
     about: "Typed personal-constants module — username, full name, email, home directory.",
     tags: ["module", "config"],
