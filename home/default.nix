@@ -16,6 +16,7 @@
     ./gomi.nix
     ./gwq.nix
     ./mcp.nix
+    ./nh.nix
     ./octorus.nix
     ./shell
     ./ssh.nix
