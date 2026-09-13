@@ -75,10 +75,10 @@
   };
   vize-darwin-arm64 = {
     pname = "vize-darwin-arm64";
-    version = "v0.424.1";
+    version = "v0.424.10";
     src = fetchurl {
-      url = "https://github.com/ubugeeei-prod/vize/releases/download/v0.424.1/vize-aarch64-apple-darwin.tar.gz";
-      sha256 = "sha256-XywY/Y50h6dwlpY4UvTSKqCThtmTmo9LHstXwkEKlqE=";
+      url = "https://github.com/ubugeeei-prod/vize/releases/download/v0.424.10/vize-aarch64-apple-darwin.tar.gz";
+      sha256 = "sha256-XmOVwb+h32oo5V7ZaK6TSM84kXUyq1jvc2Bkau+wlG4=";
     };
   };
 }
