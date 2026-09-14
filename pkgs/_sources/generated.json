@@ -103,12 +103,12 @@
             "name": null,
             "owner": "microsoft",
             "repo": "playwright-cli",
-            "rev": "v0.1.19",
-            "sha256": "sha256-pbv51ybubbjoIpKg0k7lfXfZ9Z+qdZI2lRhQeI+/mFA=",
+            "rev": "v0.1.20",
+            "sha256": "sha256-MSBXygESmOlZi8qryAsUN6jb30RbysdEZRBXocrXZ14=",
             "sparseCheckout": [],
             "type": "github"
         },
-        "version": "v0.1.19"
+        "version": "v0.1.20"
     },
     "vite-plus-darwin-arm64": {
         "cargoLock": null,
@@ -119,11 +119,11 @@
         "pinned": false,
         "src": {
             "name": null,
-            "sha256": "sha256-erSnHmwDq57N4UP8eop3m6fcsJnZYEESHtZMniZBz44=",
+            "sha256": "sha256-2kwbpgdmN1YrZne04p3/ClEYKhsbo4ZFCN9QCu6nKHk=",
             "type": "url",
-            "url": "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-0.3.1.tgz"
+            "url": "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-0.3.2.tgz"
         },
-        "version": "0.3.1"
+        "version": "0.3.2"
     },
     "vize-darwin-arm64": {
         "cargoLock": null,

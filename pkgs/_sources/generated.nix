@@ -56,21 +56,21 @@
   };
   playwright-cli = {
     pname = "playwright-cli";
-    version = "v0.1.19";
+    version = "v0.1.20";
     src = fetchFromGitHub {
       owner = "microsoft";
       repo = "playwright-cli";
-      rev = "v0.1.19";
+      rev = "v0.1.20";
       fetchSubmodules = false;
-      sha256 = "sha256-pbv51ybubbjoIpKg0k7lfXfZ9Z+qdZI2lRhQeI+/mFA=";
+      sha256 = "sha256-MSBXygESmOlZi8qryAsUN6jb30RbysdEZRBXocrXZ14=";
     };
   };
   vite-plus-darwin-arm64 = {
     pname = "vite-plus-darwin-arm64";
-    version = "0.3.1";
+    version = "0.3.2";
     src = fetchurl {
-      url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-0.3.1.tgz";
-      sha256 = "sha256-erSnHmwDq57N4UP8eop3m6fcsJnZYEESHtZMniZBz44=";
+      url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-0.3.2.tgz";
+      sha256 = "sha256-2kwbpgdmN1YrZne04p3/ClEYKhsbo4ZFCN9QCu6nKHk=";
     };
   };
   vize-darwin-arm64 = {
