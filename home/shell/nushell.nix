@@ -62,7 +62,7 @@ in
 
       # Default directory on terminal launch (non-VSCode)
       if ($env.VSCODE_GIT_IPC_HANDLE? | is-empty) and ($env.TERM_PROGRAM? != "vscode") {
-        cd ${config.home.homeDirectory}/src/github.com/${config.home.username}
+        cd ${config.naitokosuke.srcDirectory}/github.com/${config.home.username}
       }
     '';
   };

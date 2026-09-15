@@ -97,7 +97,7 @@
   # "outside $HOME" when the directory is a symlink.
   home.file =
     let
-      ghqRoot = "${config.home.homeDirectory}/src/github.com/${config.home.username}";
+      ghqRoot = "${config.naitokosuke.srcDirectory}/github.com/${config.home.username}";
       link = path: { source = config.lib.file.mkOutOfStoreSymlink "${ghqRoot}/${path}"; };
       # Skill names are discovered from the locked skill-skill-skill input
       # (pure eval cannot readDir the live working tree). The links themselves
