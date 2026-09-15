@@ -840,7 +840,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["ai", "mcp"],
     walkthrough: {
       intro:
-        "MCP (Model Context Protocol) lets Claude Code talk to external tools. `natsukium/mcp-servers-nix` provides the registry through its home-manager module (injected via `sharedModules`), `programs.mcp` collects the servers, and `enableMcpIntegration` hands them to Claude Code. Chrome DevTools isn't covered by the registry's built-in modules, so it slots in via the `settings.servers` freeform escape hatch — pointing at the Nix-packaged `pkgs.chrome-devtools-mcp` rather than an `npx -y …@latest` fetched at launch.",
+        "MCP (Model Context Protocol) lets Claude Code talk to external tools. `natsukium/mcp-servers-nix` provides the registry through its home-manager module (injected via `sharedModules`), `programs.mcp` collects the servers, and `enableMcpIntegration` hands them to Claude Code. Chrome DevTools isn't covered by the registry's built-in modules, so it slots in via the `settings.servers` freeform escape hatch — pointing at the Nix-packaged `pkgs.chrome-devtools-mcp` rather than an `npx -y …@latest` fetched at launch. Adrafinil's `keep_awake` server sits next to it and runs the CLI inside the Homebrew-installed app bundle. It lets an agent keep the Mac awake for work that outlives its turn, which the hooks in `home/claude.nix` do not cover.",
     },
   },
 
