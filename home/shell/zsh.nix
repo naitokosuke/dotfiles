@@ -9,7 +9,8 @@
 # Nushell is used as the interactive shell in Ghostty terminal,
 # but Zsh handles login shell responsibilities.
 #
-# PATH is configured in .zprofile (not .zshenv) per Nix best practices.
+# PATH (home.sessionPath, set in ./default.nix) is loaded in .zprofile
+# (not .zshenv) per Nix best practices.
 # See: https://github.com/nix-community/home-manager/issues/2991
 {
   config,
@@ -21,13 +22,6 @@ let
   common = import ./common.nix { inherit (config.naitokosuke) username; };
 in
 {
-  # PATH configuration via home-manager's sessionPath
-  # common.pathEntries is low-to-high priority; sessionPath is high-to-low, so reverse
-  home.sessionPath = [
-    "${config.home.homeDirectory}/.nix-profile/bin"
-  ]
-  ++ lib.reverseList common.pathEntries;
-
   programs.zsh = {
     enable = true;
 

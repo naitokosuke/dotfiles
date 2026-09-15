@@ -4,7 +4,8 @@
 # Non-POSIX shell with structured data and modern features.
 #
 # Note: Claude Code and other IDE integrations use zsh (login shell),
-# so PATH and environment variables are also configured in zsh.nix.
+# so PATH and environment variables are also configured for zsh
+# (home.sessionPath in default.nix, the rest in zsh.nix).
 {
   config,
   inputs,
