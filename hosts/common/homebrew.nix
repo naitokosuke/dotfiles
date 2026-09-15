@@ -6,6 +6,8 @@
 }:
 
 let
+  brewVersion = (builtins.fromJSON (builtins.readFile ../../flake.lock)).nodes.brew-src.original.ref;
+
   # Homebrew calls `sudo --reset-timestamp` on every invocation
   # (`Library/Homebrew/brew.sh`), and cask uninstall directives such as
   # `launchctl:` shell out to sudo once per launchd domain, so a cask upgrade
@@ -24,6 +26,14 @@ in
 {
   nix-homebrew = {
     enable = true;
+    # nix-homebrew labels its default package with the brew-src ref from its
+    # own flake.lock, so with brew-src following ours the store path would
+    # still read `brew-6.x-patched`. Rebuild the label from this repo's
+    # flake.lock so it names the ref actually pinned in flake.nix (#432).
+    package = inputs.brew-src // {
+      name = "brew-${brewVersion}";
+      version = brewVersion;
+    };
     enableRosetta = false;
     user = config.naitokosuke.username;
     autoMigrate = true;
