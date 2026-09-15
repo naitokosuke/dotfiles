@@ -13,7 +13,7 @@ let
 in
 {
   xdg.configFile."gwq/config.toml".source = tomlFormat.generate "gwq-config.toml" {
-    worktree.basedir = "${config.home.homeDirectory}/src";
+    worktree.basedir = config.naitokosuke.srcDirectory;
     naming.template = "{{.Host}}/{{.Owner}}/{{.Repository}}---{{.Branch}}";
   };
 }

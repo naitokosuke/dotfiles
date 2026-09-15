@@ -10,7 +10,7 @@
 { config, ... }:
 
 let
-  darwinFlake = "${config.home.homeDirectory}/src/github.com/${config.home.username}/dotfiles";
+  darwinFlake = "${config.naitokosuke.srcDirectory}/github.com/${config.home.username}/dotfiles";
 in
 {
   programs.nh = {

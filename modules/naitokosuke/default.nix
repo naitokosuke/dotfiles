@@ -4,7 +4,7 @@
 # they can be referenced as `config.naitokosuke.*` instead of being hardcoded
 # across the tree. Loaded into both nix-darwin and home-manager (via
 # `home-manager.sharedModules`) so both module trees can read the same values.
-{ lib, ... }:
+{ config, lib, ... }:
 
 let
   inherit (lib) mkOption types;
@@ -27,6 +27,10 @@ in
       type = types.str;
       description = "Absolute path to the primary user's home directory.";
     };
+    srcDirectory = mkOption {
+      type = types.str;
+      description = "Root directory for source checkouts, shared by ghq and gwq.";
+    };
   };
 
   config.naitokosuke = {
@@ -34,5 +38,6 @@ in
     fullName = "naitokosuke";
     email = "kosuke.naito.engineer@gmail.com";
     homeDirectory = "/Users/naitokosuke";
+    srcDirectory = "${config.naitokosuke.homeDirectory}/src";
   };
 }

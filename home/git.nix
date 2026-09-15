@@ -33,7 +33,7 @@
       diff.algorithm = "histogram";
       fetch.prune = true;
       init.defaultBranch = "main";
-      ghq.root = "${config.home.homeDirectory}/src";
+      ghq.root = config.naitokosuke.srcDirectory;
       merge.conflictStyle = "zdiff3";
       pull.rebase = true;
       push.autoSetupRemote = true;
