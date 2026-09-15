@@ -21,4 +21,12 @@ export default defineConfig({
       allow: [".."],
     },
   },
+  test: {
+    tags: [
+      {
+        name: "sanity",
+        description: "Proves `vp test` can resolve its Vitest runner and execute a test file.",
+      },
+    ],
+  },
 });
