@@ -33,6 +33,7 @@ in
     # Shell aliases (inherit common + zsh-specific)
     shellAliases = common.aliases // {
       cl = "clear";
+      cpwd = "pwd | pbcopy";
     };
   };
 }
