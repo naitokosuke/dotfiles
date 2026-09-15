@@ -14,6 +14,15 @@
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    nix-homebrew.inputs.brew-src.follows = "brew-src";
+
+    # Homebrew itself, pinned ahead of nix-homebrew's own brew-src (issue #432).
+    # hosts/common/homebrew.nix sets `nix-homebrew.package` from this input so
+    # the package name follows the ref below.
+    brew-src = {
+      url = "github:Homebrew/brew/7.0.1";
+      flake = false;
+    };
 
     # brew bundle unconditionally loads the core tap when
     # HOMEBREW_NO_INSTALL_FROM_API is set, so it must be pinned even though
