@@ -72,27 +72,6 @@
         "type": "github"
       }
     },
-    "herdr": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rust-overlay": "rust-overlay"
-      },
-      "locked": {
-        "lastModified": 1789435259,
-        "narHash": "sha256-S9zjcDVbtnE6iLJLS3U/VLxuZA1WyK673bfAFPnrffU=",
-        "owner": "ogulcancelik",
-        "repo": "herdr",
-        "rev": "052779c4159ed851ae78ed1271130811986d1166",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ogulcancelik",
-        "repo": "herdr",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -295,7 +274,6 @@
     },
     "root": {
       "inputs": {
-        "herdr": "herdr",
         "home-manager": "home-manager",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
@@ -310,27 +288,6 @@
         "skill-skill-skill": "skill-skill-skill",
         "treefmt-nix": "treefmt-nix",
         "vscode-settings": "vscode-settings"
-      }
-    },
-    "rust-overlay": {
-      "inputs": {
-        "nixpkgs": [
-          "herdr",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1783577481,
-        "narHash": "sha256-EWMxOWrJ031f8f/lrcEmhTRs4npw1/5N3Hcjin846c8=",
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "rev": "4cdea398dc491b082dccdce0fad1ed0b75fa3394",
-        "type": "github"
-      },
-      "original": {
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "type": "github"
       }
     },
     "skill-skill-skill": {

@@ -46,7 +46,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Inputs",
           prose:
-            "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings`, `skill-skill-skill`, and `nu-scripts`. `llm-agents` supplies Claude Code, `mcp-servers-nix` the MCP module, and `herdr` is the one tool still wired in as a flake input — with a TODO to return to `pkgs.herdr`.",
+            "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings`, `skill-skill-skill`, and `nu-scripts`. `llm-agents` supplies Claude Code and `mcp-servers-nix` the MCP module.",
           lines: [4, 68],
         },
         {
@@ -598,8 +598,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. Claude Code comes from the `llm-agents` overlay; `ax`, `frog`, `gwq`, `octorus`, `playwright-cli`, `vite-plus` (`vp`), and `vize` from the `./pkgs` overlay; only `herdr` is still wired in via a flake input.",
-          lines: [20, 55],
+            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. Claude Code comes from the `llm-agents` overlay; `ax`, `frog`, `gwq`, `octorus`, `playwright-cli`, `vite-plus` (`vp`), and `vize` from the `./pkgs` overlay.",
+          lines: [16, 51],
         },
       ],
     },
