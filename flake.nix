@@ -50,11 +50,6 @@
       flake = false;
     };
 
-    # TODO: Once the herdr Darwin build fix (NixOS/nixpkgs#536015) lands in
-    # nixpkgs-unstable, switch back to pkgs.herdr and delete this input.
-    herdr.url = "github:ogulcancelik/herdr";
-    herdr.inputs.nixpkgs.follows = "nixpkgs";
-
     llm-agents.url = "github:numtide/llm-agents.nix";
     llm-agents.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.inputs.treefmt-nix.follows = "treefmt-nix";

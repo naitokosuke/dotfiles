@@ -1,8 +1,4 @@
-{
-  inputs,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 
 let
   # darwin-rebuild output piped through nix-output-monitor for richer build progress.
@@ -34,7 +30,7 @@ in
     git
     gomi
     gwq
-    inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
+    herdr
     idris2
     ni
     nixd
