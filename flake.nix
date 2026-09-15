@@ -108,24 +108,6 @@
                   # Custom packages tracked by nvfetcher (./pkgs, issue #342)
                   (final: _: import ./pkgs { pkgs = final; })
                   llm-agents.overlays.shared-nixpkgs
-                  # TODO: Remove after nixpkgs fixes nushell test failures in sandbox
-                  # https://github.com/NixOS/nixpkgs/issues (nushell 0.112.1 SHLVL tests fail with "Operation not permitted")
-                  (final: prev: {
-                    nushell = prev.nushell.overrideAttrs (old: {
-                      doCheck = false;
-                    });
-                  })
-                  # FIXME: Remove once nixpkgs ships a fix for direnv checkPhase hang on Darwin.
-                  # cache.nixos.org serves fish/zsh binaries with broken code signatures, so
-                  # macOS Gatekeeper SIGKILLs them during `zsh ./test/direnv-test.zsh`, causing
-                  # the build to hang indefinitely.
-                  # https://github.com/NixOS/nixpkgs/issues/513019
-                  # https://github.com/NixOS/nixpkgs/pull/513081 (proposed fix, not merged)
-                  (final: prev: {
-                    direnv = prev.direnv.overrideAttrs (old: {
-                      doCheck = false;
-                    });
-                  })
                 ];
               }
             )
