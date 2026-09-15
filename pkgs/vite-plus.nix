@@ -113,6 +113,14 @@ lib.throwIf (lockedVersion != version)
         ln -s vp $out/bin/vpr
         ln -s vp $out/bin/vpx
 
+        # Since 0.3.2 vp installs itself on first start unless this marker sits
+        # next to the resolved executable (issue #434). Without it the first run
+        # downloads a second, unmanaged copy of vite-plus into the Vite+ home and
+        # appends to ~/.zshenv — and in the sandbox it dies on an interactive
+        # prompt instead. wrapProgram moved the binary to .vp-wrapped, which is
+        # still in this directory, so the marker is found through the wrapper.
+        touch $out/bin/.vp-setup-complete
+
         runHook postInstall
       '';
 
@@ -125,10 +133,26 @@ lib.throwIf (lockedVersion != version)
       installCheckPhase = ''
         runHook preInstallCheck
         checkdir=$(mktemp -d)
+        checkhome=$(mktemp -d)
+        # Mirrors home/vite-plus.nix. Without it vp falls back to managed mode
+        # and downloads its own Node into $HOME, which is not how it runs on a
+        # configured machine.
+        mkdir -p "$checkhome/.config/vite-plus"
+        echo '{"shimMode":"system_first"}' > "$checkhome/.config/vite-plus/config.json"
+        before=$(cd "$checkhome" && find . | sort)
         # Deliberately no .node-version. Pinning one sends vp off to its own
         # managed Node instead of the one wrapProgram put on PATH, and in the
         # sandbox that fails outright with "Failed to download Node.js runtime".
-        ( cd "$checkdir" && HOME="$checkdir" $out/bin/vp fmt --help ) > /dev/null
+        ( cd "$checkdir" && HOME="$checkhome" $out/bin/vp fmt --help ) > /dev/null
+        # A store-installed vp must never set itself up again in $HOME. If
+        # upstream changes how self-setup is skipped, fail here rather than
+        # write into the user's home on first use.
+        after=$(cd "$checkhome" && find . | sort)
+        if [ "$before" != "$after" ]; then
+          echo "vp wrote into HOME:" >&2
+          echo "$after" >&2
+          exit 1
+        fi
         runHook postInstallCheck
       '';
 
