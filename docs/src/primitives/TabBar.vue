@@ -1,5 +1,5 @@
 <script setup lang="ts">
- /**
+/**
  * Generic tab strip. A horizontally scrolling `<header>` that
  * lays its slot children (`<Tab>` primitives, typically) in a
  * row and fills any remaining space with an under-line spacer.
