@@ -5,6 +5,6 @@
 
 {
   system.defaults.screencapture = {
-    location = "/Users/${config.system.primaryUser}/Pictures/screenshots/";
+    location = "${config.naitokosuke.homeDirectory}/Pictures/screenshots/";
   };
 }
