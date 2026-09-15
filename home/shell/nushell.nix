@@ -61,6 +61,12 @@ in
         cd $dir
       }
 
+      # Custom function: cpwd (copy the current directory to the clipboard)
+      # Defined as a command because Nushell aliases cannot contain pipelines
+      def cpwd [] {
+        pwd | pbcopy
+      }
+
       # Default directory on terminal launch (non-VSCode)
       if ($env.VSCODE_GIT_IPC_HANDLE? | is-empty) and ($env.TERM_PROGRAM? != "vscode") {
         cd ${config.naitokosuke.srcDirectory}/github.com/${config.home.username}
