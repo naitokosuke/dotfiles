@@ -60,6 +60,11 @@ in
     };
 
     casks = [
+      # Keeps the Mac awake only while an AI agent is working; the Claude Code
+      # hooks that drive it live in home/claude.nix. The cask requires macOS 26
+      # (`depends_on macos: :tahoe`) and is `auto_updates true` — Adrafinil
+      # swaps itself in place, so the flake.lock pin is only the floor version.
+      "adrafinil"
       "alt-tab"
       "arc"
       "blender"
