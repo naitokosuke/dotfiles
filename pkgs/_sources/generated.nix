@@ -14,14 +14,6 @@
       sha256 = "sha256-lGM/nWHHQ8/89R5TOCidl0whQo77cL0plebG7BPgYsE=";
     };
   };
-  chrome-devtools-mcp = {
-    pname = "chrome-devtools-mcp";
-    version = "1.9.0";
-    src = fetchurl {
-      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.9.0.tgz";
-      sha256 = "sha256-X3U7HL9XdcjkNxE1Is0QwfDO/RZSHgVyVA1XhgVWwTM=";
-    };
-  };
   frog-darwin-arm64 = {
     pname = "frog-darwin-arm64";
     version = "1.1.0";
