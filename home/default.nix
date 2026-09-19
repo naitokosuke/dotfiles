@@ -3,6 +3,7 @@
 {
   imports = [
     ./atuin.nix
+    ./claude-sandbox.nix
     ./claude.nix
     ./direnv.nix
     ./gh-dash.nix
