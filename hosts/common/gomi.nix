@@ -4,6 +4,9 @@
   ...
 }:
 
+# No StandardOutPath / StandardErrorPath: gomi records each prune in its own
+# log (~/.local/share/gomi/debug.log, see home/gomi.nix), so launchd's copy of
+# stdout/stderr is discarded (issue #369).
 {
   launchd.user.agents.gomi-prune = {
     serviceConfig = {
@@ -17,8 +20,6 @@
           Hour = 3;
         }
       ];
-      StandardOutPath = "/tmp/gomi-prune.log";
-      StandardErrorPath = "/tmp/gomi-prune.log";
     };
   };
 }

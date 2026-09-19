@@ -463,8 +463,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The launchd agent",
           prose:
-            "`ProgramArguments` resolves `gomi` from the Nix store via `lib.getExe` — no `$PATH` dependency. `StartCalendarInterval` runs the prune every Sunday at 03:00, logging to `/tmp/gomi-prune.log`; the agent is owned by the user, so it doesn't need root.",
-          lines: [8, 23],
+            "`ProgramArguments` resolves `gomi` from the Nix store via `lib.getExe` — no `$PATH` dependency. `StartCalendarInterval` runs the prune every Sunday at 03:00; the agent is owned by the user, so it doesn't need root. No stdout/stderr paths are set, since gomi already records each prune in its own log (`~/.local/share/gomi/debug.log`).",
+          lines: [7, 24],
         },
       ],
     },
