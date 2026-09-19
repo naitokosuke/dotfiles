@@ -58,12 +58,12 @@
             "name": null,
             "owner": "microsoft",
             "repo": "playwright-cli",
-            "rev": "v0.1.20",
-            "sha256": "sha256-MSBXygESmOlZi8qryAsUN6jb30RbysdEZRBXocrXZ14=",
+            "rev": "v0.1.21",
+            "sha256": "sha256-ZHfQBZQejJKNYfhszd99i4GIzEpomBzX0/HkMK2T8DQ=",
             "sparseCheckout": [],
             "type": "github"
         },
-        "version": "v0.1.20"
+        "version": "v0.1.21"
     },
     "vite-plus-darwin-arm64": {
         "cargoLock": null,

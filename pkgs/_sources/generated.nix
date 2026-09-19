@@ -32,13 +32,13 @@
   };
   playwright-cli = {
     pname = "playwright-cli";
-    version = "v0.1.20";
+    version = "v0.1.21";
     src = fetchFromGitHub {
       owner = "microsoft";
       repo = "playwright-cli";
-      rev = "v0.1.20";
+      rev = "v0.1.21";
       fetchSubmodules = false;
-      sha256 = "sha256-MSBXygESmOlZi8qryAsUN6jb30RbysdEZRBXocrXZ14=";
+      sha256 = "sha256-ZHfQBZQejJKNYfhszd99i4GIzEpomBzX0/HkMK2T8DQ=";
     };
   };
   vite-plus-darwin-arm64 = {
