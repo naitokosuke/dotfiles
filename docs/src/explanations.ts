@@ -673,6 +673,35 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
+  "home/claude-rm-guard/default.nix": {
+    about: "PreToolUse hook that blocks irreversible deletions in shell commands and points to gomi.",
+    tags: ["ai", "claude"],
+    walkthrough: {
+      intro:
+        "Instructions in CLAUDE.md or skills can be ignored; a hook runs on every Bash call. This one blocks `rm`, `unlink`, `rmdir`, `shred`, `find -delete` / `-exec rm`, and `git clean` (but not `git rm`, which history can undo), and the reason it returns tells the agent to use `gomi` instead. It is the first of two layers: the Seatbelt sandbox in `home/claude-sandbox.nix` catches whatever slips past, but cannot tell deletion apart from the rename `gomi` relies on, so forcing `gomi` has to happen here.",
+      sections: [
+        {
+          title: "Parsing instead of matching",
+          prose:
+            "The command is parsed with `shfmt --to-json` (zsh dialect, bash as a fallback), and `classify.jq` walks every call in the AST, so `$(...)`, backticks, pipelines, and `&&` chains are all covered. Wrappers such as `sudo`, `env`, `xargs`, `timeout`, and `find -exec` are peeled off before the command name is checked, and `sh -c` / `eval` bodies go through the parser again. Anything that cannot be checked — unparsable input, a script read from stdin, a dynamically built `-c` body — is blocked rather than let through.",
+          lines: [17, 79],
+        },
+        {
+          title: "Denying, and failing closed",
+          prose:
+            "A block is returned as a JSON `permissionDecision: \"deny\"`, which Claude Code shows as a denied call rather than a hook error; exit code 2 is the fallback if the JSON cannot be written. Any other non-zero exit would be a non-blocking error that lets the command run, so an `ERR` trap turns unexpected failures into a deny as well.",
+          lines: [25, 45],
+        },
+        {
+          title: "Registration",
+          prose:
+            "The hook is added to `programs.claude-code.settings.hooks.PreToolUse` for the `Bash` and `Monitor` tools. home-manager merges it with the `ExitPlanMode` hook in `home/claude.nix`.",
+          lines: [82, 93],
+        },
+      ],
+    },
+  },
+
   "home/claude-sandbox.nix": {
     about: "Runs every Claude Code session under a Seatbelt profile that limits where it can write.",
     tags: ["ai", "claude"],
