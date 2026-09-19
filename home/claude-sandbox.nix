@@ -64,6 +64,9 @@ in
     ];
     # `$1` in the sd replacement is a capture group, not a shell variable
     excludeShellChecks = [ "SC2016" ];
+    # home-manager picks its plugin mechanism from the package version; without
+    # one it falls back to the legacy `--plugin-dir` wrapper
+    derivationArgs.version = pkgs.llm-agents.claude-code.version;
     text = ''
       cwd=$(pwd -P)
       # Commits from a worktree write to the main checkout's .git
