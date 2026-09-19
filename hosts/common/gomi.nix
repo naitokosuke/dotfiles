@@ -1,9 +1,15 @@
 {
+  config,
   lib,
   pkgs,
   ...
 }:
 
+let
+  # /tmp is cleared on reboot, so a weekly job's output would be gone by the
+  # time it is needed (issue #369)
+  logFile = "${config.naitokosuke.homeDirectory}/Library/Logs/gomi-prune.log";
+in
 {
   launchd.user.agents.gomi-prune = {
     serviceConfig = {
@@ -17,8 +23,8 @@
           Hour = 3;
         }
       ];
-      StandardOutPath = "/tmp/gomi-prune.log";
-      StandardErrorPath = "/tmp/gomi-prune.log";
+      StandardOutPath = logFile;
+      StandardErrorPath = logFile;
     };
   };
 }
