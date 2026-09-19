@@ -41,7 +41,7 @@ const entries: ReadonlyArray<Entry> = [
         An Apple Silicon macOS, declared end-to-end in
         <strong>Nix</strong>. <strong>nix-darwin</strong> owns the system layer and
         <strong>home-manager</strong> owns the user layer — the whole environment rebuilds from
-        <code>flake.nix</code> with <code>darwin-rebuild switch --flake .#&lt;host&gt;</code>.
+        <code>flake.nix</code> with <code>sudo darwin-rebuild switch --flake .#&lt;host&gt;</code>.
       </p>
       <nav class="entry-row" aria-label="entry points">
         <Link

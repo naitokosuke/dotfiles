@@ -31,7 +31,7 @@ An interactive, VS Code-flavoured walkthrough of this repository is published at
 
 4. Apply the configuration:
    ```bash
-   nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake .#Mac-big
+   sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake .#Mac-big
    ```
 
 ## Configuration Structure
@@ -40,7 +40,7 @@ An interactive, VS Code-flavoured walkthrough of this repository is published at
 .
 ├── flake.nix          # Entry point: flake inputs and darwinConfigurations
 ├── nvfetcher.toml     # Version tracker for CLI tools not in nixpkgs (nvfetcher)
-├── pkgs/              # Custom package derivations (gwq, playwright-cli, vite-plus, …)
+├── pkgs/              # Custom package derivations (frog, gh-sub-issue, gwq, playwright-cli, vite-plus)
 │   └── _sources/      # nvfetcher-generated pins (version + URL + hash) — never edit by hand
 ├── modules/
 │   └── naitokosuke/   # Shared module: personal constants (username, email, …)
@@ -56,7 +56,8 @@ An interactive, VS Code-flavoured walkthrough of this repository is published at
 │   ├── claude.nix     # Claude Code settings, rules, skills
 │   ├── ghostty.nix    # Terminal
 │   ├── starship.nix   # Prompt
-│   └── …              # atuin, direnv, gh, gwq, mcp, nh, ssh, vscode, …
+│   ├── claude-*       # Claude Code deletion guard hook and Seatbelt sandbox
+│   └── …              # atuin, direnv, gh, gh-dash, gomi, gwq, mcp, nh, ssh, vite-plus, vscode, zoxide
 └── docs/              # Interactive walkthrough web app (Vite+ / void)
                        #   deployed to https://naitokosuke-dotfiles.void.app/
 ```
@@ -67,7 +68,8 @@ Each `default.nix` aggregates the modules in its directory — see them for the 
 
 Managed via nixpkgs. See [`hosts/common/packages.nix`](hosts/common/packages.nix).
 
-Tools not available in nixpkgs (e.g. [`gwq`](https://github.com/d-kuro/gwq),
+Tools not available in nixpkgs ([`frog`](https://github.com/wevm/frog),
+[`gh-sub-issue`](https://github.com/yahsan2/gh-sub-issue), [`gwq`](https://github.com/d-kuro/gwq),
 [`vite-plus`](https://github.com/voidzero-dev/vite-plus) (`vp`),
 [`playwright-cli`](https://github.com/microsoft/playwright-cli))
 are packaged in [`pkgs/`](pkgs/),
@@ -107,13 +109,16 @@ The flake builds one `darwinConfiguration` per host listed in [`flake.nix`](flak
 
 Apply configuration changes:
 ```bash
-darwin-rebuild switch --flake .#Mac-big
+sudo darwin-rebuild switch --flake .#Mac-big
 ```
+
+`sudo darwin-rebuild-nom switch --flake .#Mac-big` does the same with nix-output-monitor progress, and
+`nh darwin switch` picks the host from the hostname and shows a closure diff before activating.
 
 Update flake inputs:
 ```bash
 nix flake update
-darwin-rebuild switch --flake .#Mac-big
+sudo darwin-rebuild switch --flake .#Mac-big
 ```
 
 Update nvfetcher-tracked tool versions (regenerates `pkgs/_sources/`):
@@ -128,7 +133,7 @@ VSCode settings are automatically synchronized from the [vscode-settings](https:
 - Settings and keybindings are managed through Home Manager
 - Existing settings are automatically backed up with `.backup` extension
 - JSONC keybindings are converted to JSON format automatically
-- Changes to the settings repository are applied with `darwin-rebuild switch`
+- Changes to the settings repository are applied with `nix flake update vscode-settings` and a rebuild
 
 ## Walkthrough Site (`docs/`)
 

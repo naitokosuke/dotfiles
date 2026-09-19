@@ -1,8 +1,9 @@
 # gomi configuration
 #
 # gomi is a trash-can alternative to rm.
-# The package and the weekly prune launchd agent are managed in
-# hosts/common/gomi.nix; this module manages the user configuration.
+# The package is installed in hosts/common/packages.nix and the weekly prune
+# launchd agent lives in hosts/common/gomi.nix; this module manages the user
+# configuration.
 # https://github.com/babarot/gomi
 {
   config,
