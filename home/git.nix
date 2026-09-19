@@ -20,6 +20,13 @@
       # with "!.agents/" in its own .gitignore (issue #385).
       ".agents/"
     ];
+    # Sign commits and tags with the SSH key home/ssh.nix already uses for
+    # GitHub. The public key must be registered on GitHub as a signing key.
+    signing = {
+      format = "ssh";
+      key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+      signByDefault = true;
+    };
     settings = {
       user = {
         name = config.naitokosuke.fullName;

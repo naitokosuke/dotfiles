@@ -815,10 +815,16 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           lines: [9, 22],
         },
         {
+          title: "Commit signing",
+          prose:
+            "Commits and tags are signed by default with `~/.ssh/id_ed25519`, the same key `home/ssh.nix` uses for GitHub, so GitHub marks them Verified and nobody can pass off a commit as this identity. The public key also has to be registered on GitHub as a signing key, which is the one step outside Nix.",
+          lines: [23, 29],
+        },
+        {
           title: "Defaults",
           prose:
             "`histogram` diffs, `zdiff3` conflict markers, `rerere`, rebase on pull with auto-stash, `push.autoSetupRemote`, and `fetch.prune`. Branches sort by recent commit, non-ASCII filenames print verbatim, `ghq.root` is `~/src`, and GitHub HTTPS URLs are rewritten to SSH.",
-          lines: [23, 43],
+          lines: [30, 50],
         },
       ],
     },
