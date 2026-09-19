@@ -587,7 +587,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["cli", "packages"],
     walkthrough: {
       intro:
-        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked overlay in `./pkgs` (`ax`, `frog`, `gwq`, `octorus`, `vite-plus`, `vize`, …), from the `llm-agents` overlay, or from a flake input.",
+        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked overlay in `./pkgs` (`ax`, `frog`, `gwq`, `octorus`, `vite-plus`, `vize`, …), or from a flake input.",
       sections: [
         {
           title: "darwin-rebuild-nom wrapper",
@@ -598,8 +598,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. Claude Code comes from the `llm-agents` overlay; `ax`, `frog`, `gwq`, `octorus`, `playwright-cli`, `vite-plus` (`vp`), and `vize` from the `./pkgs` overlay.",
-          lines: [16, 51],
+            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `ax`, `frog`, `gwq`, `octorus`, `playwright-cli`, `vite-plus` (`vp`), and `vize` from the `./pkgs` overlay.",
+          lines: [16, 50],
         },
       ],
     },
@@ -670,6 +670,29 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     walkthrough: {
       intro:
         "atuin replaces the shell's built-in history with a synced, fuzzy-searchable SQLite store. Both Zsh and Nushell hook into it, search mode is fuzzy, and the scope is global so the same history surfaces no matter which directory the search starts from. The search UI is compact, 20 lines tall, with a preview of the selected command.",
+    },
+  },
+
+  "home/claude-sandbox.nix": {
+    about: "Runs every Claude Code session under a Seatbelt profile that limits where it can write.",
+    tags: ["ai", "claude"],
+    walkthrough: {
+      intro:
+        "`claude` is wrapped so the whole process — its Bash commands, hooks, and MCP servers — runs under `/usr/bin/sandbox-exec` with a profile generated here. Any deletion that slips past the Bash hooks (`/bin/rm` from a script, `fs.rmSync`, and so on) still cannot touch files outside the directory the session started in. Seatbelt cannot block deletion alone: denying unlink also blocks the rename `gomi` relies on, so this layer limits *where* writes land rather than *what* they are. The approach follows Warashi/cage, minus the extra binary.",
+      sections: [
+        {
+          title: "The profile",
+          prose:
+            "Everything is allowed except file writes, which are limited to the per-user temp dirs, `/private/tmp`, Claude Code's own state, the login keychain, `gomi`'s trash and log directories, and toolchain caches that are safe to lose. On top of that come the working directory, the git common dir, and — through a regex rule — any `<main checkout>---<branch>` sibling, so gwq can create and use worktrees next to the main checkout while the main checkout itself and other repositories stay read-only. These are only known at launch, so they arrive as SBPL parameters instead of being spliced into the profile text.",
+          lines: [18, 56],
+        },
+        {
+          title: "Wrapping claude",
+          prose:
+            "`programs.claude-code.package` is a script that resolves the parameters — the git common dir lets commits from a worktree reach the main checkout's `.git`, and the main checkout path is regex-escaped for the sibling rule — and execs the real binary through `sandbox-exec`. home-manager's own wrapper — plugin dir, MCP servers — sits on top, so it ends up inside the sandbox too.",
+          lines: [59, 86],
+        },
+      ],
     },
   },
 
