@@ -12,7 +12,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["docs", "entry"],
     walkthrough: {
       intro:
-        "The README is the single page a newcomer should be able to read end-to-end and reproduce this machine. It states the OS prerequisites (Apple Silicon + Lix), the bootstrap command, the directory split between `hosts/` and `home/`, and the everyday `darwin-rebuild` workflow.",
+        "The README is the single page a newcomer should be able to read end-to-end and reproduce this machine. It states the OS prerequisites (Apple Silicon + Lix), the bootstrap command, the directory split between `hosts/` and `home/`, and the everyday `sudo darwin-rebuild` workflow.",
       sections: [
         {
           title: "Prerequisites",
@@ -23,14 +23,14 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Bootstrapping",
           prose:
-            "Install the Xcode CLT and Lix, clone, then run nix-darwin once through `nix run nix-darwin -- switch --flake .#<host>`. The `--extra-experimental-features` flag is only needed for that first run, before `hosts/common/nix.nix` has turned flakes on globally; after it, plain `darwin-rebuild switch` takes over.",
+            "Install the Xcode CLT and Lix, clone, then run nix-darwin once through `sudo nix run nix-darwin -- switch --flake .#<host>`. The `--extra-experimental-features` flag is only needed for that first run, before `hosts/common/nix.nix` has turned flakes on globally; after it, `sudo darwin-rebuild switch` takes over — activation runs as root.",
           lines: [14, 35],
         },
         {
           title: "Packages outside nixpkgs",
           prose:
             "Tools nixpkgs doesn't ship are packaged under `pkgs/` and version-tracked by nvfetcher, with a daily workflow opening the update PR. vite-plus is the one package in two halves — the `vp` launcher and the JavaScript toolchain it delegates to — which must stay on the same version.",
-          lines: [66, 84],
+          lines: [67, 86],
         },
       ],
     },
@@ -41,37 +41,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["flake", "entry"],
     walkthrough: {
       intro:
-        "`flake.nix` is the single source of truth for the whole environment. It pins every upstream input (nixpkgs, nix-darwin, home-manager, nix-homebrew, the Homebrew taps, and a handful of tool and settings repositories), then assembles `darwinConfigurations` for each Mac. `darwin-rebuild` resolves everything from this file alone — given the same `flake.lock`, each host evaluates to the same system every time.",
+        "`flake.nix` is the single source of truth for the whole environment. It pins every upstream input (nixpkgs, nix-darwin, home-manager, nix-homebrew, Homebrew itself and its taps, and a handful of tool and settings repositories), then assembles `darwinConfigurations` for each Mac. `darwin-rebuild` resolves everything from this file alone — given the same `flake.lock`, each host evaluates to the same system every time.",
       sections: [
         {
           title: "Inputs",
           prose:
-            "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings`, `skill-skill-skill`, and `nu-scripts`. `llm-agents` supplies Claude Code and `mcp-servers-nix` the MCP module.",
-          lines: [4, 68],
+            "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: `brew-src`, the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings`, `skill-skill-skill`, and `nu-scripts`. `brew-src` pins Homebrew itself at a release tag (7.0.1) ahead of the one nix-homebrew locks, and nix-homebrew's own `brew-src` follows it. `llm-agents` supplies Claude Code and `mcp-servers-nix` the MCP module.",
+          lines: [4, 73],
         },
         {
           title: "mkDarwinConfig",
           prose:
-            "A small helper that builds one `darwinSystem` per host. An inline module pins `aarch64-darwin` and the Nixpkgs config: `allowUnfree`, plus overlays for the custom `./pkgs` set, `llm-agents`' shared-nixpkgs packages, and `nushell` / `direnv` overrides that switch off test suites broken in the Darwin sandbox. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
-          lines: [91, 137],
+            "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module pins `aarch64-darwin` and the Nixpkgs config: `allowUnfree`, plus overlays for the custom `./pkgs` set and `llm-agents`' shared-nixpkgs packages. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
+          lines: [96, 124],
         },
         {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [140, 140],
+          lines: [127, 127],
         },
         {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay injects, so `nix build .#gwq` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [142, 142],
+          lines: [129, 129],
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root.",
-          lines: [144, 147],
+          lines: [131, 134],
         },
       ],
     },
@@ -87,7 +87,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Release binaries",
           prose:
-            "`src.github` watches `d-kuro/gwq` releases; `fetch.url` downloads the `gwq_Darwin_arm64.tar.gz` asset for that tag (`$ver` is substituted). Each entry is named after the exact asset it pins, so adding another platform later is a new entry, not a rewrite. `gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag's `v` prefix, so `src.prefix = \"v\"` strips it at the tracker level and the URL re-adds it where needed.",
+            '`src.github` watches `d-kuro/gwq` releases; `fetch.url` downloads the `gwq_Darwin_arm64.tar.gz` asset for that tag (`$ver` is substituted). Each entry is named after the exact asset it pins, so adding another platform later is a new entry, not a rewrite. `gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag\'s `v` prefix, so `src.prefix = "v"` strips it at the tracker level and the URL re-adds it where needed.',
           lines: [4, 13],
         },
         {
@@ -215,7 +215,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["packages", "cli"],
     walkthrough: {
       intro:
-        '`vp` itself is only a Rust launcher. Every subcommand that does real work (`dev`, `build`, `check`, `fmt`, …) is handed to a JavaScript toolchain that vp looks for at `<prefix>/node_modules/vite-plus`, next to its own executable. Installing the launcher alone left all of them failing with "Cannot find module" (issue #413), so this derivation also builds the npm dependency tree from `pkgs/vite-plus-runtime` and installs it alongside. The approach follows ryoppippi/nix-vite-plus. The TODO on top marks the exit plan: once nixpkgs ships vite-plus (NixOS/nixpkgs#533925), this file, `pkgs/vite-plus-runtime`, and the nvfetcher entry give way to `pkgs.vite-plus`.',
+        '`vp` itself is only a Rust launcher. Every subcommand that does real work (`dev`, `build`, `check`, `fmt`, …) is handed to a JavaScript toolchain that vp looks for at `<prefix>/node_modules/vite-plus`, next to its own executable. Without it they all fail with "Cannot find module" (issue #413), so this derivation also builds the npm dependency tree from `pkgs/vite-plus-runtime` and installs it alongside. The approach follows ryoppippi/nix-vite-plus. The TODO on top marks the exit plan: once nixpkgs ships vite-plus (NixOS/nixpkgs#533925), this file, `pkgs/vite-plus-runtime`, and the nvfetcher entry give way to `pkgs.vite-plus`.',
       sections: [
         {
           title: "The JavaScript toolchain",
@@ -232,14 +232,14 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Install",
           prose:
-            "The launcher comes from the npm platform tarball (everything under `package/`). `node_modules` is symlinked next to it rather than copied, `wrapProgram` puts Nix's Node on `$PATH` for the JavaScript half, and `vpr` / `vpx` are linked the way the official installer's `vp env setup` would — vp dispatches on `argv[0]` (`vpr` → `vp run`, `vpx` → `vp dlx`), which the wrapper preserves. The `node` / `npm` / `npx` / `corepack` shims that step also creates are deliberately omitted: they belong to vp's Node version manager and would shadow Nix-managed Node.",
-          lines: [94, 117],
+            "The launcher comes from the npm platform tarball (everything under `package/`). `node_modules` is symlinked next to it rather than copied, `wrapProgram` puts Nix's Node on `$PATH` for the JavaScript half, and `vpr` / `vpx` are linked the way the official installer's `vp env setup` would — vp dispatches on `argv[0]` (`vpr` → `vp run`, `vpx` → `vp dlx`), which the wrapper preserves. The `node` / `npm` / `npx` / `corepack` shims that step also creates are deliberately omitted: they belong to vp's Node version manager and would shadow Nix-managed Node. Finally, a `.vp-setup-complete` marker next to the binary stops vp from installing a second, unmanaged copy of itself into `$HOME` on first start (issue #434).",
+          lines: [94, 125],
         },
         {
           title: "An install check that runs the toolchain",
           prose:
-            "`vp --version` is answered by the launcher alone and passed even while every JavaScript subcommand was broken. The check runs `vp fmt --help` from an empty directory instead — exactly where the launcher-only build used to fail.",
-          lines: [119, 133],
+            "`vp --version` is answered by the launcher alone, so it passes even when every JavaScript subcommand is broken. The check runs `vp fmt --help` from an empty directory instead, which only succeeds when the launcher finds the toolchain installed next to it. It runs against a throwaway `$HOME` holding the same `shimMode` config as `home/vite-plus.nix`, and fails if vp wrote anything into it, so a change in how upstream skips self-setup is caught at build time rather than in the user's home.",
+          lines: [127, 157],
         },
       ],
     },
@@ -298,23 +298,24 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "modules/naitokosuke/default.nix": {
-    about: "Typed personal-constants module — username, full name, email, home directory.",
+    about:
+      "Typed personal-constants module — username, full name, email, home and source directories.",
     tags: ["module", "config"],
     walkthrough: {
       intro:
-        "A small NixOS-module-style namespace that centralizes the personal literals that used to be scattered across the tree. It declares typed `naitokosuke.{username,fullName,email,homeDirectory}` options and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
+        "A small NixOS-module-style namespace that centralizes the personal literals the rest of the tree needs. It declares typed `naitokosuke.{username,fullName,email,homeDirectory,srcDirectory}` options and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
       sections: [
         {
           title: "Typed options",
           prose:
             "Each constant is an `mkOption` with `type = types.str` and a description, so the values are self-documenting and type-checked rather than bare strings copied around the repo.",
-          lines: [13, 30],
+          lines: [13, 34],
         },
         {
           title: "Defaults",
           prose:
-            "`config.naitokosuke` sets the defaults for this user. Because they're module options, a per-host module can override any field without touching the call sites that consume them.",
-          lines: [32, 37],
+            "`config.naitokosuke` sets the defaults for this user. `srcDirectory` is derived from `homeDirectory` and is the one root that ghq, gwq, nh, and the Claude Code rule and skill links all build their paths from. Because they're module options, a per-host module can override any field without touching the call sites that consume them.",
+          lines: [36, 42],
         },
       ],
     },
@@ -383,7 +384,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["bridge", "home-manager"],
     walkthrough: {
       intro:
-        "Wires `home-manager` into nix-darwin so the user-side configuration ships alongside the system. `useGlobalPkgs` and `useUserPackages` keep both layers on the same nixpkgs instance, and a pre-existing file in the way of a managed one is renamed with a `.backup` extension rather than failing activation. `sharedModules` injects the `modules/naitokosuke` personal-constants module and `mcp-servers-nix`'s home-manager module into the home-manager tree, and `home/` (its `default.nix`) is imported as the user's home configuration.",
+        "Wires `home-manager` into nix-darwin so the user-side configuration ships alongside the system. `useGlobalPkgs` and `useUserPackages` keep both layers on the same nixpkgs instance, and a pre-existing file in the way of a managed one is renamed with a `.backup` extension rather than failing activation. `sharedModules` injects the `modules/naitokosuke` personal-constants module and `mcp-servers-nix`'s home-manager module into the home-manager tree, and `home/` (its `default.nix`) is imported as the user's home configuration. `users.users.<name>.home` is set explicitly because home-manager derives `home.username` / `home.homeDirectory` from it, and nix-darwin leaves it null by default (issue #321). `extraSpecialArgs` forwards nix-darwin's `specialArgs` minus its `modulesPath`, so home modules receive the flake `inputs` from `flake.nix` directly (issue #324).",
     },
   },
 
@@ -398,25 +399,31 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Sudo prompts go to a dialog",
           prose:
             "Homebrew resets sudo's timestamp on every invocation, and some cask uninstall steps shell out to sudo repeatedly, so a cask upgrade during activation would ask for a password over and over on the very terminal `nom` is repainting. `SUDO_ASKPASS` points at a small `osascript` dialog instead — Homebrew adds `-A` to sudo whenever it's set, so the prompt appears as a GUI dialog that says what it's for (issue #416).",
-          lines: [9, 21],
+          lines: [11, 23],
         },
         {
-          title: "nix-homebrew setup",
+          title: "Homebrew ahead of nix-homebrew",
           prose:
-            "`nix-homebrew` installs and pins the Homebrew binary itself via Nix. `taps` pulls every tap from a flake input, so even Homebrew's tap repos are pinned. `mutableTaps = false` makes them read-only — `brew tap` is disabled, and a new tap has to arrive as a flake input.",
-          lines: [25, 38],
+            "`nix-homebrew` installs and pins the Homebrew binary itself via Nix. That binary comes from the `brew-src` input in `flake.nix`, pinned at 7.0.1 ahead of the version nix-homebrew locks (issue #432). nix-homebrew labels its package with the ref from its own `flake.lock`, so the store path would otherwise name that ref rather than the one pinned here; `package` rebuilds the name and version from this repository's `flake.lock` (`brewVersion` at the top of the file) so they match the ref pinned in `flake.nix`.",
+          lines: [27, 36],
+        },
+        {
+          title: "Pinned, read-only taps",
+          prose:
+            "`taps` pulls every tap from a flake input, so even Homebrew's tap repos are pinned. `mutableTaps = false` makes them read-only — `brew tap` is disabled, and a new tap has to arrive as a flake input.",
+          lines: [37, 48],
         },
         {
           title: "Taps and activation policy",
           prose:
             'The Brewfile mirrors the pinned tap list so `brew bundle` cleanup does not untap them. `HOMEBREW_NO_INSTALL_FROM_API` forces cask definitions to come from those pinned taps rather than Homebrew\'s API, and `cleanup = "uninstall"` converges the machine onto exactly the cask list below — new versions arrive via `nix flake update`.',
-          lines: [40, 60],
+          lines: [50, 70],
         },
         {
           title: "Casks",
           prose:
-            "Everything in `casks` is materialised on `darwin-rebuild`. `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
-          lines: [62, 86],
+            "Everything in `casks` is materialised on `darwin-rebuild`. `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
+          lines: [72, 96],
         },
       ],
     },
@@ -495,13 +502,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["cli", "packages"],
     walkthrough: {
       intro:
-        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked overlay in `./pkgs` (`frog`, `gwq`, `playwright-cli`, `vite-plus`, …), or from a flake input.",
+        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked overlay in `./pkgs` (`frog`, `gwq`, `playwright-cli`, `vite-plus`, …).",
       sections: [
         {
           title: "darwin-rebuild-nom wrapper",
           prose:
             "`darwin-rebuild` rejects `--log-format`, and Lix doesn't expose it as a setting either, so a small shell application pipes `darwin-rebuild`'s combined output into `nom` in its default mode, which parses plain Nix output. The result is the same rebuild command with nix-output-monitor's richer progress UI.",
-          lines: [7, 18],
+          lines: [4, 13],
         },
         {
           title: "The CLI toolbelt",
@@ -554,19 +561,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["home-manager", "index"],
     walkthrough: {
       intro:
-        "The entry point for the *user* layer. It imports every per-tool module (atuin, direnv, gh, git, nh, starship, vscode, …) and sets the basic `home` identity. Adding a new tool means writing a sibling `.nix` and importing it here.",
+        "The entry point for the *user* layer. It imports every per-tool module (atuin, direnv, gh, git, nh, starship, vscode, …) and pins `home.stateVersion`. Adding a new tool means writing a sibling `.nix` and importing it here.",
       sections: [
         {
           title: "Tool modules",
           prose:
-            "Each tool gets its own file directly under `home/`. Composing them as a flat list keeps every concern shallow — opening `git.nix` shows the full git story, opening `claude.nix` shows the full Claude Code story.",
-          lines: [8, 27],
+            "Each tool gets its own file or directory directly under `home/`. Composing them as a flat list keeps every concern shallow — opening `git.nix` shows the full git story, opening `claude.nix` shows the Claude Code settings, with its rm guard and sandbox in their own siblings.",
+          lines: [4, 24],
         },
         {
-          title: "Identity",
+          title: "State version",
           prose:
-            "`home.username` and `home.homeDirectory` are derived from `config.naitokosuke.*` — the typed personal-constants module — instead of being hardcoded, with `lib.mkForce` so the home path always wins over inferences. `home.stateVersion` is pinned at the version this config was first written for — never bump casually.",
-          lines: [29, 32],
+            "`home.username` and `home.homeDirectory` aren't set here: home-manager derives them from `users.users`, which `hosts/common/home-manager.nix` fills from `config.naitokosuke`. `home.stateVersion` is pinned at the version this config was first written for — never bump casually.",
+          lines: [26, 26],
         },
       ],
     },
@@ -582,7 +589,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/claude-rm-guard/default.nix": {
-    about: "PreToolUse hook that blocks irreversible deletions in shell commands and points to gomi.",
+    about:
+      "PreToolUse hook that blocks irreversible deletions in shell commands and points to gomi.",
     tags: ["ai", "claude"],
     walkthrough: {
       intro:
@@ -597,7 +605,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Denying, and failing closed",
           prose:
-            "A block is returned as a JSON `permissionDecision: \"deny\"`, which Claude Code shows as a denied call rather than a hook error; exit code 2 is the fallback if the JSON cannot be written. Any other non-zero exit would be a non-blocking error that lets the command run, so an `ERR` trap turns unexpected failures into a deny as well.",
+            'A block is returned as a JSON `permissionDecision: "deny"`, which Claude Code shows as a denied call rather than a hook error; exit code 2 is the fallback if the JSON cannot be written. Any other non-zero exit would be a non-blocking error that lets the command run, so an `ERR` trap turns unexpected failures into a deny as well.',
           lines: [25, 45],
         },
         {
@@ -611,7 +619,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/claude-sandbox.nix": {
-    about: "Runs every Claude Code session under a Seatbelt profile that limits where it can write.",
+    about:
+      "Runs every Claude Code session under a Seatbelt profile that limits where it can write.",
     tags: ["ai", "claude"],
     walkthrough: {
       intro:
@@ -626,8 +635,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Wrapping claude",
           prose:
-            "`programs.claude-code.package` is a script that resolves the parameters — the git common dir lets commits from a worktree reach the main checkout's `.git`, and the main checkout path is regex-escaped for the sibling rule — and execs the real binary through `sandbox-exec`. home-manager's own wrapper — plugin dir, MCP servers — sits on top, so it ends up inside the sandbox too.",
-          lines: [59, 86],
+            "`programs.claude-code.package` is a script that resolves the parameters — the git common dir lets commits from a worktree reach the main checkout's `.git`, and the main checkout path is regex-escaped for the sibling rule — and execs the real binary through `sandbox-exec`. home-manager's own wrapper — plugin dir, MCP servers — sits on top, so it ends up inside the sandbox too. The script carries Claude Code's version, because home-manager picks its plugin mechanism from the package version and falls back to the legacy `--plugin-dir` wrapper without one.",
+          lines: [59, 89],
         },
       ],
     },
@@ -675,11 +684,11 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/direnv.nix": {
-    about: "direnv + nix-direnv, with a CGO_ENABLED override for a Darwin build failure.",
+    about: "direnv + nix-direnv, with Nushell integration.",
     tags: ["dev-env"],
     walkthrough: {
       intro:
-        "`direnv` + `nix-direnv` is how per-project shells materialise — drop a `.envrc` into a project, run `direnv allow`, and the right `nix shell` or `devenv` env loads on `cd`, in Nushell too. The package is overridden with `CGO_ENABLED = 1` to work around a build failure on aarch64-darwin (NixOS/nixpkgs#504092); separately, `flake.nix` switches off direnv's test suite, which hangs in the Darwin sandbox.",
+        "`direnv` + `nix-direnv` is how per-project shells materialise — drop a `.envrc` into a project, run `direnv allow`, and the right `nix shell` or `devenv` env loads on `cd`, in Nushell too. nix-direnv caches the evaluated environment and roots it against garbage collection, so entering a project is instant after the first load.",
     },
   },
 
@@ -742,7 +751,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Global ignores",
           prose:
-            "Beyond `.DS_Store`, the list covers personal scratch files (`*.memo.local.md`, `___naito___`), `.claude/settings.local.json`, the `___config___` dummy file that VS Code's file nesting hangs config files under, and `.agents/` for frog's friction logs — kept as a directory pattern so a repository that wants them tracked can re-include it.",
+            "Beyond `.DS_Store` and CodeTour's `.tours`, the list covers personal scratch files (`*.memo.local.md`, `___naito___`), `.claude/settings.local.json`, the `___config___` dummy file that VS Code's file nesting hangs config files under, and `.agents/` for frog's friction logs — kept as a directory pattern so a repository that wants them tracked can re-include it.",
           lines: [9, 22],
         },
         {
@@ -766,19 +775,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["cli", "config"],
     walkthrough: {
       intro:
-        "The user half of gomi, the trash-can alternative to `rm`; the package and the weekly prune agent live in `hosts/common/gomi.nix`. The YAML config is generated from a Nix attrset via `pkgs.formats.yaml`, so the source of truth stays in Nix.",
+        "The user half of gomi, the trash-can alternative to `rm`; the package is in `hosts/common/packages.nix` and the weekly prune agent in `hosts/common/gomi.nix`. The YAML config is generated from a Nix attrset via `pkgs.formats.yaml`, so the source of truth stays in Nix.",
       sections: [
         {
           title: "Trash",
           prose:
             "Trashed files go to `~/.gomi`, and `forbidden_paths` refuses to trash system directories, `/`, or other trash locations. Restores ask for confirmation, and permanent deletion is disabled.",
-          lines: [18, 46],
+          lines: [19, 47],
         },
         {
           title: "History and logging",
           prose:
             "The restore list covers the past year and skips `.DS_Store`. Debug logging is on, rotated at 10 MB with three files kept.",
-          lines: [91, 110],
+          lines: [92, 111],
         },
       ],
     },
@@ -892,7 +901,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "JSONC → JSON with jsonnet",
           prose:
-            "JSONC — `//` and `/* */` comments, trailing commas — is valid Jsonnet input, and jsonnet emits plain JSON. So the conversion is a real parse: malformed input fails the build instead of being silently corrupted, as the previous regex-based stripping could (issue #364).",
+            "JSONC — `//` and `/* */` comments, trailing commas — is valid Jsonnet input, and jsonnet emits plain JSON. So the conversion is a real parse: malformed input fails the build instead of being silently corrupted (issue #364).",
           lines: [9, 16],
         },
       ],
@@ -909,11 +918,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/shell/default.nix": {
-    about: "Aggregator that pulls in Nushell (interactive) and Zsh (login).",
+    about: "Pulls in Nushell (interactive) and Zsh (login), and sets the session PATH.",
     tags: ["shell", "index"],
     walkthrough: {
       intro:
-        "The shell story is dual: Nushell is the interactive shell inside Ghostty (structured-data, modern), while Zsh remains the *login* shell so VS Code extensions, SSH, and Claude Code see a familiar POSIX environment. This file just imports both.",
+        "The shell story is dual: Nushell is the interactive shell inside Ghostty (structured-data, modern), while Zsh remains the *login* shell so VS Code extensions, SSH, and Claude Code see a familiar POSIX environment. This file imports both.",
+      sections: [
+        {
+          title: "Session PATH",
+          prose:
+            "`home.sessionPath` is a session-wide option, so it's set here rather than in a shell-specific module (issue #366): `~/.nix-profile/bin` first, then `common.pathEntries` reversed, since that list runs from lowest to highest priority while `sessionPath` runs the other way. Zsh picks it up in `.zprofile`; Nushell builds its own `$PATH` from the same list in `nushell.nix`.",
+          lines: [20, 26],
+        },
+      ],
     },
   },
 
@@ -950,8 +967,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Completions and helpers",
           prose:
-            "Completions for git, gh, nix, pnpm, and rg come from the pinned `nu_scripts` input. `mkcd` makes a directory and enters it, and a new terminal starts in `~/src/github.com/<user>` unless it was opened by VS Code.",
-          lines: [49, 67],
+            "Completions for git, gh, nix, pnpm, and rg come from the pinned `nu_scripts` input. `mkcd` makes a directory and enters it, and `cpwd` copies the current directory to the clipboard — a command rather than an alias, because Nushell aliases can't contain pipelines. A new terminal starts in `~/src/github.com/<user>` unless it was opened by VS Code.",
+          lines: [49, 74],
         },
       ],
     },
@@ -962,7 +979,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["shell"],
     walkthrough: {
       intro:
-        "Zsh handles login-shell responsibilities — anything that spawns a non-interactive shell to read `$PATH` and environment variables sees Zsh, not Nushell. `$PATH` comes from `home.sessionPath`: `~/.nix-profile/bin` first, then `common.pathEntries` reversed, since that list runs from lowest to highest priority while `sessionPath` runs the other way.",
+        "Zsh handles login-shell responsibilities — anything that spawns a non-interactive shell to read `$PATH` and environment variables sees Zsh, not Nushell. `$PATH` comes from `home.sessionPath` in `shell/default.nix`, so this module only adds the shared environment variables and aliases from `common.nix`, plus `cl` and `cpwd` (`pwd | pbcopy`, which copies the current directory to the clipboard).",
     },
   },
 
