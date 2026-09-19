@@ -3,6 +3,7 @@
 {
   imports = [
     ./atuin.nix
+    ./claude-rm-guard
     ./claude-sandbox.nix
     ./claude.nix
     ./direnv.nix
