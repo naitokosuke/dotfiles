@@ -1,10 +1,6 @@
 # Version tracker for CLI tools not available in nixpkgs (issue #342).
 # Regenerate pkgs/_sources/generated.nix after editing:
 #   nix run nixpkgs#nvfetcher -- -o pkgs/_sources
-[ax-darwin-arm64]
-src.github = "yusukebe/ax"
-fetch.url = "https://github.com/yusukebe/ax/releases/download/$ver/ax-darwin-arm64"
-
 [gwq-darwin-arm64]
 src.github = "d-kuro/gwq"
 fetch.url = "https://github.com/d-kuro/gwq/releases/download/$ver/gwq_Darwin_arm64.tar.gz"
@@ -15,17 +11,6 @@ fetch.url = "https://github.com/d-kuro/gwq/releases/download/$ver/gwq_Darwin_arm
 src.github = "yahsan2/gh-sub-issue"
 src.prefix = "v"
 fetch.url = "https://github.com/yahsan2/gh-sub-issue/releases/download/v$ver/gh-sub-issue_$ver_darwin-arm64"
-
-[vize-darwin-arm64]
-src.github = "ubugeeei-prod/vize"
-fetch.url = "https://github.com/ubugeeei-prod/vize/releases/download/$ver/vize-aarch64-apple-darwin.tar.gz"
-
-# The asset name embeds the version without the "v" tag prefix, so strip it
-# here instead of in the derivation.
-[octorus-darwin-arm64]
-src.github = "ushironoko/octorus"
-src.prefix = "v"
-fetch.url = "https://github.com/ushironoko/octorus/releases/download/v$ver/octorus-$ver-aarch64-apple-darwin.tar.gz"
 
 # `vp` is only the Rust launcher; the JavaScript toolchain it delegates to is
 # built from pkgs/vite-plus-runtime (issue #413). The release assets carry the

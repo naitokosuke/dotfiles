@@ -15,7 +15,6 @@ in
 {
   environment.systemPackages = with pkgs; [
     agent-browser
-    ax
     bun
     # Moved from an undeclared brew formula when homebrew went fully
     # declarative (issue #363)
@@ -36,7 +35,6 @@ in
     nixd
     nix-output-monitor
     nodejs_26
-    octorus
     oxfmt
     playwright-cli
     pnpm
@@ -47,6 +45,5 @@ in
     uv
     vim
     vite-plus
-    vize
   ];
 }

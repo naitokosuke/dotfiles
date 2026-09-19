@@ -30,7 +30,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Packages outside nixpkgs",
           prose:
             "Tools nixpkgs doesn't ship are packaged under `pkgs/` and version-tracked by nvfetcher, with a daily workflow opening the update PR. vite-plus is the one package in two halves — the `vp` launcher and the JavaScript toolchain it delegates to — which must stay on the same version.",
-          lines: [66, 85],
+          lines: [66, 84],
         },
       ],
     },
@@ -64,7 +64,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Custom packages output",
           prose:
-            "`packages.<system>` exposes the same `./pkgs` set that the overlay injects, so `nix build .#ax` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
+            "`packages.<system>` exposes the same `./pkgs` set that the overlay injects, so `nix build .#gwq` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
           lines: [142, 142],
         },
         {
@@ -85,34 +85,28 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         "The version tracker for CLI tools that nixpkgs doesn't ship. Each entry names an upstream to watch and an artifact to fetch; running `nix run nixpkgs#nvfetcher -- -o pkgs/_sources` resolves the latest release and regenerates `pkgs/_sources/generated.nix` with pinned URLs and hashes. No more hand-editing versions or copy-pasting sha256 values.",
       sections: [
         {
-          title: "The ax entry",
+          title: "Release binaries",
           prose:
-            "`src.github` watches `yusukebe/ax` releases; `fetch.url` downloads the `ax-darwin-arm64` binary for that tag (`$ver` is substituted). The entry is named after the exact asset it pins, so adding another platform later is a new entry, not a rewrite.",
-          lines: [4, 6],
-        },
-        {
-          title: "More release binaries",
-          prose:
-            "`gwq`, `gh-sub-issue`, `vize`, and `octorus` follow the same pattern — tarballs, except for `gh-sub-issue`'s bare binary. Two of them embed the version in the asset name without the tag's `v` prefix, so `src.prefix = \"v\"` strips it at the tracker level and the URL re-adds it where needed.",
-          lines: [8, 28],
+            "`src.github` watches `d-kuro/gwq` releases; `fetch.url` downloads the `gwq_Darwin_arm64.tar.gz` asset for that tag (`$ver` is substituted). Each entry is named after the exact asset it pins, so adding another platform later is a new entry, not a rewrite. `gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag's `v` prefix, so `src.prefix = \"v\"` strips it at the tracker level and the URL re-adds it where needed.",
+          lines: [4, 13],
         },
         {
           title: "vite-plus from npm",
           prose:
             "The GitHub release carries only the `vp` launcher, while the JavaScript toolchain it delegates to is built separately from `pkgs/vite-plus-runtime`. Both halves are published to npm under one version, so the entry watches GitHub tags but fetches the launcher's npm tarball, with the prefix stripped so `$ver` is exactly that npm version.",
-          lines: [30, 38],
+          lines: [15, 23],
         },
         {
           title: "playwright-cli from source",
           prose:
             "`@playwright/cli` has no release binaries, so `fetch.github` pins the source tree at the tag instead, and `pkgs/playwright-cli.nix` builds it with `buildNpmPackage`.",
-          lines: [40, 45],
+          lines: [25, 30],
         },
         {
           title: "frog",
           prose:
             "frog's tags carry a project-name prefix (`frog@`) that `src.prefix` strips, and its release asset is a gzipped single binary.",
-          lines: [47, 52],
+          lines: [32, 37],
         },
       ],
     },
@@ -133,29 +127,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     walkthrough: {
       intro:
         "The index of the custom package set. It `callPackage`s the colocated `_sources/generated.nix` to materialise the pins, then hands them to each derivation. The resulting attrset is consumed twice: injected into `pkgs` via an overlay in `flake.nix`, and exposed as the flake's `packages` output for standalone `nix build .#<name>`.",
-    },
-  },
-
-  "pkgs/ax.nix": {
-    about: "ax (the AI-era curl) — installs the prebuilt darwin-arm64 release binary.",
-    tags: ["packages", "cli"],
-    walkthrough: {
-      intro:
-        "`ax` is a TypeScript CLI distributed as Bun-compiled binaries, so building from source under Nix would be painful for no gain. Instead this derivation installs the prebuilt `ax-darwin-arm64` asset that nvfetcher pinned — the version and hash both come from `sources`, so the file itself never changes on a version bump.",
-      sections: [
-        {
-          title: "Fetch and install",
-          prose:
-            '`stdenvNoCC` because nothing is compiled. The `src` is a single executable (not an archive), so `dontUnpack` skips the unpack phase and `install -Dm755` places it as `$out/bin/ax`. `lib.removePrefix "v"` turns the upstream tag into a tidy Nix version.',
-          lines: [7, 18],
-        },
-        {
-          title: "Metadata",
-          prose:
-            "`sourceProvenance = binaryNativeCode` honestly marks this as a prebuilt binary, and `platforms` is pinned to `aarch64-darwin` — the only asset we track, and the only system this flake targets.",
-          lines: [20, 29],
-        },
-      ],
     },
   },
 
@@ -187,7 +158,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["packages", "github"],
     walkthrough: {
       intro:
-        "A gh extension for creating and listing GitHub sub-issues. `home/gh.nix` registers it through `programs.gh.extensions`, which links this package's `bin/` under `~/.local/share/gh/extensions/<pname>` — so `pname` and the binary name both have to be `gh-sub-issue`. The release asset is a bare executable, installed the same way as `ax`.",
+        "A gh extension for creating and listing GitHub sub-issues. `home/gh.nix` registers it through `programs.gh.extensions`, which links this package's `bin/` under `~/.local/share/gh/extensions/<pname>` — so `pname` and the binary name both have to be `gh-sub-issue`. The release asset is a bare executable, so there is nothing to unpack.",
       sections: [
         {
           title: "Fetch and install",
@@ -204,53 +175,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["packages", "git"],
     walkthrough: {
       intro:
-        "Same shape as `vize`: upstream publishes prebuilt binaries, so the derivation installs the `gwq_Darwin_arm64.tar.gz` asset that nvfetcher pinned. The configuration lives in `home/gwq.nix`.",
+        "Upstream publishes prebuilt binaries, so the derivation installs the `gwq_Darwin_arm64.tar.gz` asset that nvfetcher pinned. The configuration lives in `home/gwq.nix`.",
       sections: [
         {
           title: "Fetch and install",
           prose:
             'The tarball is flat — the `gwq` binary sits at its root — so `sourceRoot = "."` keeps the unpacker in place, and `versionCheckHook` confirms the binary reports the pinned version.',
           lines: [8, 23],
-        },
-      ],
-    },
-  },
-
-  "pkgs/vize.nix": {
-    about: "vize (Vue.js toolchain in Rust) — installs the prebuilt darwin-arm64 tarball.",
-    tags: ["packages", "cli"],
-    walkthrough: {
-      intro:
-        "Same story as `ax`: upstream ships prebuilt binaries, so the derivation just installs the `vize-aarch64-apple-darwin.tar.gz` asset that nvfetcher pinned. This replaced the standalone `vize-nix` flake repo — one less repository and update pipeline to maintain.",
-      sections: [
-        {
-          title: "Fetch and install",
-          prose:
-            'The tarball is flat — no top-level directory, just the `vize` binary — so `sourceRoot = "."` keeps the unpacker in place and `install -Dm755` does the rest.',
-          lines: [8, 20],
-        },
-        {
-          title: "Version self-check",
-          prose:
-            "`versionCheckHook` runs `vize --version` after install and fails the build if the output doesn't match the derivation version — a cheap guard against upstream renaming assets or shipping a mislabeled binary.",
-          lines: [22, 23],
-        },
-      ],
-    },
-  },
-
-  "pkgs/octorus.nix": {
-    about: "octorus (AI-powered PR review tool) — installs the prebuilt darwin-arm64 tarball.",
-    tags: ["packages", "cli"],
-    walkthrough: {
-      intro:
-        "This replaced the standalone `octorus-nix` flake repo — and simplified it: octorus-nix compiled the Rust workspace from source on every version bump, but upstream publishes prebuilt binaries, so this derivation just unpacks the pinned tarball. No more rustc runs during `darwin-rebuild switch`.",
-      sections: [
-        {
-          title: "Fetch and install",
-          prose:
-            "The tarball unpacks into a versioned directory containing the `or` binary (yes, the CLI is called `or`, not `octorus` — hence `mainProgram`). stdenv auto-detects the single top-level directory, so no `sourceRoot` juggling is needed.",
-          lines: [7, 16],
         },
       ],
     },
@@ -564,7 +495,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["cli", "packages"],
     walkthrough: {
       intro:
-        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked overlay in `./pkgs` (`ax`, `frog`, `gwq`, `octorus`, `vite-plus`, `vize`, …), or from a flake input.",
+        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked overlay in `./pkgs` (`frog`, `gwq`, `playwright-cli`, `vite-plus`, …), or from a flake input.",
       sections: [
         {
           title: "darwin-rebuild-nom wrapper",
@@ -575,8 +506,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `ax`, `frog`, `gwq`, `octorus`, `playwright-cli`, `vite-plus` (`vp`), and `vize` from the `./pkgs` overlay.",
-          lines: [16, 51],
+            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `frog`, `gwq`, `playwright-cli`, and `vite-plus` (`vp`) from the `./pkgs` overlay.",
+          lines: [16, 48],
         },
       ],
     },
@@ -891,28 +822,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           prose:
             "`darwinFlake` is this checkout under the ghq root, so `nh darwin switch` picks `darwinConfigurations.<hostname>` without a `--flake` argument. `home.sessionVariables` only reaches zsh, so `NH_DARWIN_FLAKE` is set again for Nushell.",
           lines: [12, 22],
-        },
-      ],
-    },
-  },
-
-  "home/octorus.nix": {
-    about: "Octorus (GitHub review TUI) config — editor, keybindings, AI review loop.",
-    tags: ["github", "review"],
-    walkthrough: {
-      intro:
-        "Octorus is a TUI for GitHub code review. Like `gwq`, its TOML config is generated from a Nix attrset, and the prompts for its AI review loop are written out as Markdown files next to it — so the whole setup lives in this one file.",
-      sections: [
-        {
-          title: "Config",
-          prose:
-            "The editor is `code`, diffs use the `base16-ocean.dark` theme, and single keys approve, request changes, comment, or suggest. In the AI loop, Claude plays both reviewer and reviewee, for up to 10 iterations with `timeout_secs = 600`.",
-          lines: [7, 22],
-        },
-        {
-          title: "Prompts",
-          prose:
-            "`reviewer.md`, `reviewee.md`, and `rereview.md` are templates filled with the PR, diff, and review state. The reviewee may commit locally but must never push, `git reset --hard`, or `git clean -fd`.",
         },
       ],
     },

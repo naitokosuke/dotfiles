@@ -6,14 +6,6 @@
   dockerTools,
 }:
 {
-  ax-darwin-arm64 = {
-    pname = "ax-darwin-arm64";
-    version = "v0.1.25";
-    src = fetchurl {
-      url = "https://github.com/yusukebe/ax/releases/download/v0.1.25/ax-darwin-arm64";
-      sha256 = "sha256-lGM/nWHHQ8/89R5TOCidl0whQo77cL0plebG7BPgYsE=";
-    };
-  };
   frog-darwin-arm64 = {
     pname = "frog-darwin-arm64";
     version = "1.1.0";
@@ -38,14 +30,6 @@
       sha256 = "sha256-G4tYAEvOL/G4WxJG5rOxTsqJoKlYeWlu5sdc9I571/s=";
     };
   };
-  octorus-darwin-arm64 = {
-    pname = "octorus-darwin-arm64";
-    version = "0.7.2";
-    src = fetchurl {
-      url = "https://github.com/ushironoko/octorus/releases/download/v0.7.2/octorus-0.7.2-aarch64-apple-darwin.tar.gz";
-      sha256 = "sha256-Uv5MKlwgZqG1XaS75yZ5QkVJ8nqlwjWndN9LAv5ZIAI=";
-    };
-  };
   playwright-cli = {
     pname = "playwright-cli";
     version = "v0.1.20";
@@ -63,14 +47,6 @@
     src = fetchurl {
       url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-0.3.3.tgz";
       sha256 = "sha256-opYlp3O8j+9N5ENKZ6JPNISbPCwBWeqHqFTIhT7JR1Q=";
-    };
-  };
-  vize-darwin-arm64 = {
-    pname = "vize-darwin-arm64";
-    version = "v0.424.10";
-    src = fetchurl {
-      url = "https://github.com/ubugeeei-prod/vize/releases/download/v0.424.10/vize-aarch64-apple-darwin.tar.gz";
-      sha256 = "sha256-XmOVwb+h32oo5V7ZaK6TSM84kXUyq1jvc2Bkau+wlG4=";
     };
   };
 }
