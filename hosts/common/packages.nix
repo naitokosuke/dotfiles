@@ -14,6 +14,7 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
+    agent-browser
     ax
     bun
     # Moved from an undeclared brew formula when homebrew went fully

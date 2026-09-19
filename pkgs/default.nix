@@ -6,7 +6,6 @@ let
 in
 {
   ax = pkgs.callPackage ./ax.nix { inherit sources; };
-  chrome-devtools-mcp = pkgs.callPackage ./chrome-devtools-mcp.nix { inherit sources; };
   frog = pkgs.callPackage ./frog.nix { inherit sources; };
   gh-sub-issue = pkgs.callPackage ./gh-sub-issue.nix { inherit sources; };
   gwq = pkgs.callPackage ./gwq.nix { inherit sources; };

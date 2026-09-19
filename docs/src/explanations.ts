@@ -109,10 +109,10 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           lines: [40, 45],
         },
         {
-          title: "frog and chrome-devtools-mcp",
+          title: "frog",
           prose:
-            "Both have tags with a project-name prefix (`frog@`, `chrome-devtools-mcp-v`) that `src.prefix` strips. frog ships a gzipped single binary; chrome-devtools-mcp's npm tarball already bundles its dependencies and built JS, so it's consumed as-is.",
-          lines: [47, 61],
+            "frog's tags carry a project-name prefix (`frog@`) that `src.prefix` strips, and its release asset is a gzipped single binary.",
+          lines: [47, 52],
         },
       ],
     },
@@ -154,29 +154,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           prose:
             "`sourceProvenance = binaryNativeCode` honestly marks this as a prebuilt binary, and `platforms` is pinned to `aarch64-darwin` — the only asset we track, and the only system this flake targets.",
           lines: [20, 29],
-        },
-      ],
-    },
-  },
-
-  "pkgs/chrome-devtools-mcp.nix": {
-    about: "chrome-devtools-mcp — the bundled npm tarball, wrapped with Node.",
-    tags: ["packages", "mcp"],
-    walkthrough: {
-      intro:
-        "The Chrome DevTools MCP server that `home/mcp.nix` hands to Claude Code. The published npm tarball already bundles every dependency and ships built JavaScript, so nothing is installed or compiled: the package is copied into the store and wrapped with Node. That keeps the server pinned by nvfetcher, instead of an `npx -y chrome-devtools-mcp@latest` fetching whatever is newest at launch.",
-      sections: [
-        {
-          title: "Install",
-          prose:
-            'npm tarballs unpack into a top-level `package/` directory, hence `sourceRoot = "package"`. Its contents go to `$out/lib/chrome-devtools-mcp`, and `makeBinaryWrapper` creates `$out/bin/chrome-devtools-mcp`, which runs the entry script with Nix\'s `node`.',
-          lines: [19, 31],
-        },
-        {
-          title: "Version check",
-          prose:
-            "The install check runs the wrapper and requires its `--version` output to match the pinned version exactly — proof that the wrapper, Node, and the bundled JavaScript all line up.",
-          lines: [33, 39],
         },
       ],
     },
@@ -598,8 +575,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `ax`, `frog`, `gwq`, `octorus`, `playwright-cli`, `vite-plus` (`vp`), and `vize` from the `./pkgs` overlay.",
-          lines: [16, 50],
+            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `ax`, `frog`, `gwq`, `octorus`, `playwright-cli`, `vite-plus` (`vp`), and `vize` from the `./pkgs` overlay.",
+          lines: [16, 51],
         },
       ],
     },
@@ -892,7 +869,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["ai", "mcp"],
     walkthrough: {
       intro:
-        "MCP (Model Context Protocol) lets Claude Code talk to external tools. `natsukium/mcp-servers-nix` provides the registry through its home-manager module (injected via `sharedModules`), `programs.mcp` collects the servers, and `enableMcpIntegration` hands them to Claude Code. Chrome DevTools isn't covered by the registry's built-in modules, so it slots in via the `settings.servers` freeform escape hatch — pointing at the Nix-packaged `pkgs.chrome-devtools-mcp` rather than an `npx -y …@latest` fetched at launch. Adrafinil's `keep_awake` server sits next to it and runs the CLI inside the Homebrew-installed app bundle. It lets an agent keep the Mac awake for work that outlives its turn, which the hooks in `home/claude.nix` do not cover.",
+        "MCP (Model Context Protocol) lets Claude Code talk to external tools. `natsukium/mcp-servers-nix` provides the registry through its home-manager module (injected via `sharedModules`), `programs.mcp` collects the servers, and `enableMcpIntegration` hands them to Claude Code. The one server, Adrafinil's `keep_awake`, isn't covered by the registry's built-in modules, so it slots in via the `settings.servers` freeform escape hatch and runs the CLI inside the Homebrew-installed app bundle. It lets an agent keep the Mac awake for work that outlives its turn, which the hooks in `home/claude.nix` do not cover.",
     },
   },
 

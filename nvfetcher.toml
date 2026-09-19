@@ -50,12 +50,3 @@ fetch.github = "microsoft/playwright-cli"
 src.github = "wevm/frog"
 src.prefix = "frog@"
 fetch.url = "https://github.com/wevm/frog/releases/download/frog@$ver/frog-darwin-arm64.gz"
-
-# The published npm tarball bundles all dependencies (rollup) and ships the
-# built JS, so it is consumed directly — no npm install, no TypeScript build.
-# Release tags carry a "chrome-devtools-mcp-v" prefix, stripped here so $ver
-# matches the npm version.
-[chrome-devtools-mcp]
-src.github = "ChromeDevTools/chrome-devtools-mcp"
-src.prefix = "chrome-devtools-mcp-v"
-fetch.url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-$ver.tgz"
