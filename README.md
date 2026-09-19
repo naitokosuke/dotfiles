@@ -40,7 +40,7 @@ An interactive, VS Code-flavoured walkthrough of this repository is published at
 .
 ├── flake.nix          # Entry point: flake inputs and darwinConfigurations
 ├── nvfetcher.toml     # Version tracker for CLI tools not in nixpkgs (nvfetcher)
-├── pkgs/              # Custom package derivations (ax, octorus, vite-plus, vize, …)
+├── pkgs/              # Custom package derivations (gwq, playwright-cli, vite-plus, …)
 │   └── _sources/      # nvfetcher-generated pins (version + URL + hash) — never edit by hand
 ├── modules/
 │   └── naitokosuke/   # Shared module: personal constants (username, email, …)
@@ -67,8 +67,7 @@ Each `default.nix` aggregates the modules in its directory — see them for the 
 
 Managed via nixpkgs. See [`hosts/common/packages.nix`](hosts/common/packages.nix).
 
-Tools not available in nixpkgs (e.g. [`ax`](https://github.com/yusukebe/ax),
-[`vize`](https://github.com/ubugeeei-prod/vize), [`octorus`](https://github.com/ushironoko/octorus),
+Tools not available in nixpkgs (e.g. [`gwq`](https://github.com/d-kuro/gwq),
 [`vite-plus`](https://github.com/voidzero-dev/vite-plus) (`vp`),
 [`playwright-cli`](https://github.com/microsoft/playwright-cli))
 are packaged in [`pkgs/`](pkgs/),
