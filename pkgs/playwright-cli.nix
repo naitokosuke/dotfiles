@@ -29,7 +29,7 @@ buildNpmPackage {
 
   # Browsers stay runtime-managed in Playwright's own cache. Pinning
   # nixpkgs' playwright-driver.browsers would mismatch the vendored
-  # Playwright (1.62.0-alpha vs nixpkgs' 1.61.x).
+  # Playwright, which tracks alpha releases ahead of nixpkgs.
 
   doInstallCheck = true;
   installCheckPhase = ''
