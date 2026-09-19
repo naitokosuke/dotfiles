@@ -1,5 +1,20 @@
 { ... }:
 
+let
+  # Free space on the startup disk, shown as "<free> / <size> free". Starship
+  # has no built-in module for it. The APFS volumes share one container, so /
+  # reports the same free space as the Data volume.
+  #
+  # A custom module can't restyle itself from its own output, so each colour
+  # is a separate module, shown only while the used share falls in its range.
+  diskFree = style: min: max: {
+    command = "df -h / | awk 'NR == 2 { print $4 \" / \" $2 }'";
+    when = "p=$(df -k / | awk 'NR == 2 { print int(($2 - $4) * 100 / $2) }'); [ $p -ge ${toString min} ] && [ $p -lt ${toString max} ]";
+    shell = [ "sh" ];
+    inherit style;
+    format = "with [$output free]($style) ";
+  };
+in
 {
   programs.starship = {
     enable = true;
@@ -13,7 +28,7 @@
       add_newline = true;
 
       # Prompt format
-      format = "$username$hostname$directory$git_branch$git_status$cmd_duration$line_break$character";
+      format = "$username$hostname\${custom.disk_free}\${custom.disk_free_warning}\${custom.disk_free_critical}$directory$git_branch$git_status$cmd_duration$line_break$character";
 
       # Character module (prompt indicator)
       character = {
@@ -33,6 +48,13 @@
         ssh_only = false;
         style = "yellow";
         format = "at [$hostname]($style) ";
+      };
+
+      # Free disk space: yellow from 90% used, red from 95%
+      custom = {
+        disk_free = diskFree "cyan" 0 90;
+        disk_free_warning = diskFree "yellow" 90 95;
+        disk_free_critical = diskFree "red bold" 95 101;
       };
 
       # Directory

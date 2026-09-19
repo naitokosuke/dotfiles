@@ -854,8 +854,20 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Format",
           prose:
-            "User, host, directory, git branch and status, and command duration, then a line break and the `❯` character — green on success, red on failure. The user and host show even outside SSH, and the command duration only for commands that took two seconds or more.",
-          lines: [16, 16],
+            "User, host, free disk space, directory, git branch and status, and command duration, then a line break and the `❯` character — green on success, red on failure. The user and host show even outside SSH, and the command duration only for commands that took two seconds or more.",
+          lines: [31, 31],
+        },
+        {
+          title: "Free disk space",
+          prose:
+            "Starship has no built-in module for disk space, so `diskFree` builds a `custom` module that runs `df -h /` and prints the available space over the disk size, as in `with 120Gi / 500Gi free`. The macOS system and data volumes share one APFS container, so `/` reports the same free space as the data volume.",
+          lines: [3, 17],
+        },
+        {
+          title: "Colour by usage",
+          prose:
+            "A custom module can't restyle itself from its own output, so there are three of them, one per colour: cyan below 90% used, yellow from 90%, and red from 95% — the same levels as Powerlevel10k's `disk_usage`. Each one's `when` computes the used share and shows the module only inside its own range, so exactly one appears.",
+          lines: [53, 58],
         },
       ],
     },
