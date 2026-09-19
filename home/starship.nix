@@ -1,7 +1,7 @@
 { ... }:
 
 let
-  # Free space on the startup disk, shown as "<free> / <size> free". Starship
+  # Free space on the startup disk, shown as "󰋊 <free> / <size>". Starship
   # has no built-in module for it. The APFS volumes share one container, so /
   # reports the same free space as the Data volume.
   #
@@ -12,7 +12,9 @@ let
     when = "p=$(df -k / | awk 'NR == 2 { print int(($2 - $4) * 100 / $2) }'); [ $p -ge ${toString min} ] && [ $p -lt ${toString max} ]";
     shell = [ "sh" ];
     inherit style;
-    format = "with [$output free]($style) ";
+    # Nerd Font hard disk glyph (nf-md-harddisk)
+    symbol = "󰋊 ";
+    format = "with [$symbol$output]($style) ";
   };
 in
 {
