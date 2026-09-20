@@ -39,8 +39,7 @@ let
             // lib.optionalAttrs (matcher != null) { inherit matcher; }
           )
         ];
-      # Per-turn hold keyed on the session id (stdin `session_id` wins; the
-      # env var is the fallback).
+      # stdin `session_id` wins over the env var, which is only the fallback.
       turn = op: "${cli} ${op} $CLAUDE_CODE_SESSION_ID --tool claude-code";
       # Keyed on the sub-agent's `agent_id` from stdin, so a backgrounded
       # sub-agent stays held after the parent turn's Stop.
@@ -68,9 +67,6 @@ let
 in
 
 {
-  # settings.json is generated declaratively by programs.claude-code as a
-  # read-only store symlink. Nix is the single source of truth; runtime edits
-  # are not persisted back.
   programs.claude-code.settings = {
     installMethod = "unknown";
     autoUpdates = true;
@@ -108,7 +104,6 @@ in
         "Bash(python:*)"
         "Bash(python3:*)"
 
-        # Credentials and secrets (gitignore semantics, recursive)
         "Read(.env)"
         "Read(.env.*)"
         "Read(./secrets/**)"
@@ -123,7 +118,7 @@ in
         "Bash(rm -rf ~:*)"
         "Bash(rm -rf ~/:*)"
 
-        # Force-push protection (regular push stays in `ask`/allow)
+        # Regular push stays in `ask`/allow
         "Bash(git push --force:*)"
         "Bash(git push -f:*)"
         "Bash(git push * --force:*)"
@@ -150,9 +145,6 @@ in
     };
   };
 
-  # Claude Code rules, CLAUDE.md and skills - out-of-store symlinks into the
-  # rule-rule-rule / skill-skill-skill repositories.
-  #
   # Skills are linked one by one instead of linking ~/.claude/skills itself:
   # programs.claude-code installs its generated MCP plugin into
   # ~/.claude/skills/claude-code-home-manager, which fails with

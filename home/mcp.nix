@@ -1,9 +1,3 @@
-# MCP (Model Context Protocol) server configuration
-#
-# Uses natsukium/mcp-servers-nix (via home-manager sharedModules) as the
-# central registry, and lets programs.claude-code consume servers declaratively.
-#
-# https://github.com/natsukium/mcp-servers-nix
 { ... }:
 
 {

@@ -1,12 +1,3 @@
-# Common shell configuration shared between Nushell and Zsh
-#
-# This file centralizes settings that should be consistent across shells:
-# - PATH configuration
-# - Environment variables
-# - Homebrew forbidden formulae list
-# - Common aliases
-#
-# Import this in shell-specific modules to avoid duplication.
 { username }:
 
 {
@@ -31,19 +22,16 @@
     "yarn"
   ];
 
-  # Common environment variables
   envVars = {
     EDITOR = "vim";
   };
 
-  # Common shell aliases (POSIX-compatible syntax)
+  # POSIX-compatible syntax only: shared by Nushell and Zsh
   aliases = {
     l = "ls";
     la = "ls -la";
     ll = "ls -l";
     ":q" = "exit";
-
-    # for antfu/ni
     nid = "ni -D";
   };
 

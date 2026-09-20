@@ -17,8 +17,6 @@
     nix-homebrew.inputs.brew-src.follows = "brew-src";
 
     # Homebrew itself, pinned ahead of nix-homebrew's own brew-src (issue #432).
-    # hosts/common/homebrew.nix sets `nix-homebrew.package` from this input so
-    # the package name follows the ref below.
     brew-src = {
       url = "github:Homebrew/brew/7.0.1";
       flake = false;
@@ -50,10 +48,6 @@
     vscode-settings.url = "github:naitokosuke/vscode-settings";
     vscode-settings.flake = false;
 
-    # Claude Code skills - non-flake input; home/claude.nix readDirs the
-    # locked snapshot to discover skill names in pure eval.
-    # Resync after adding/removing a skill: push it, then
-    #   nix flake update skill-skill-skill
     skill-skill-skill = {
       url = "github:naitokosuke/skill-skill-skill";
       flake = false;
@@ -110,7 +104,6 @@
                 nixpkgs.config.allowUnfree = true;
                 nixpkgs.hostPlatform = system;
                 nixpkgs.overlays = [
-                  # Custom packages tracked by nvfetcher (./pkgs, issue #342)
                   (final: _: import ./pkgs { pkgs = final; })
                   llm-agents.overlays.shared-nixpkgs
                 ];

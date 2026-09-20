@@ -1,9 +1,3 @@
-/**
- * Interactive dot-grid behind the Welcome screen.
- * - `requestAnimationFrame` / `ResizeObserver` / `pointermove`
- * - Honours `prefers-reduced-motion` and `prefers-color-scheme`.
- * - Presentation-only — excluded from the a11y tree.
- */
 type Disposer = () => void;
 
 interface Palette {

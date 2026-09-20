@@ -1,10 +1,6 @@
-# rm guard for Claude Code
-#
-# A PreToolUse hook that blocks irreversible deletions (`rm`, `find -delete`,
-# `git clean`, ...) in shell commands and tells the agent to use `gomi`
-# instead (issue #463). Commands are parsed with shfmt rather than matched
-# with regexes, so `$(...)`, pipelines, wrappers such as `sudo` / `xargs` and
-# nested `sh -c` scripts are all seen. Anything that cannot be checked is
+# Commands are parsed with shfmt rather than matched with regexes, so
+# `$(...)`, pipelines, wrappers such as `sudo` / `xargs` and nested `sh -c`
+# scripts are all seen (issue #463). Anything that cannot be checked is
 # blocked. The Seatbelt sandbox in ../claude-sandbox.nix covers what slips
 # past (e.g. `fs.rmSync` inside a script).
 {

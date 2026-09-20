@@ -43,7 +43,6 @@ in
       "productdevbook/homebrew-tap" = inputs.homebrew-productdevbook;
       "stablyai/homebrew-orca" = inputs.homebrew-orca;
     };
-    # Taps are read-only and pinned by flake.lock; `brew tap` is disabled.
     mutableTaps = false;
   };
 

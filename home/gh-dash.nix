@@ -1,9 +1,3 @@
-# gh-dash configuration
-#
-# gh-dash is a TUI dashboard for GitHub PRs, issues and notifications.
-# The module installs the package and registers it as a gh extension,
-# so it is available both as `gh-dash` and `gh dash`.
-# https://github.com/dlvhdr/gh-dash
 {
   programs.gh-dash = {
     enable = true;

@@ -1,12 +1,5 @@
-# nh configuration
-#
-# nh is a Nix CLI helper that wraps rebuilds with nix-output-monitor
-# progress and a closure diff (nvd) before activation.
-# https://github.com/nix-community/nh
-#
-# Try it with `nh darwin switch` (picks darwinConfigurations.<hostname>).
-# Store GC runs as a root `nh clean all` daemon in hosts/common/nix.nix;
-# `programs.nh.clean` is left off since on Darwin it only cleans user profiles.
+# `programs.nh.clean` is left off since on Darwin it only cleans user profiles;
+# store GC runs as a root `nh clean all` daemon in hosts/common/nix.nix.
 { config, ... }:
 
 let

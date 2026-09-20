@@ -1,14 +1,4 @@
 <script setup lang="ts">
-/**
- * Generic single tab — a horizontal pill containing a leading
- * (link) area and an optional trailing close button. Active state
- * is reflected via the `active` prop; the close emission lets the
- * caller manage open-tab state.
- *
- * Slots:
- *   - default: the tab body (icon, name, …) — wrapped in a flex row
- *   - `close-icon`: glyph shown inside the close button
- */
 defineProps<{
   active?: boolean;
   closeLabel?: string;

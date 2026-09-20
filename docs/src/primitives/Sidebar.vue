@@ -1,27 +1,7 @@
 <script setup lang="ts">
-/**
- * Generic Sidebar primitive — no business logic.
- *
- * Positioning + sliding behaviour for a vertical side panel. On
- * desktop it is a static column flanked by a 1px border; on
- * narrow viewports it becomes a bottom-sheet drawer that the
- * parent toggles via the `open` prop.
- *
- * The component does not own its width — layout-level
- * containers set `--sidebar-w` on an ancestor and place this
- * primitive into a grid cell sized to that variable.
- *
- * Slots:
- *   - `handle` — drag-handle shown above the head on mobile.
- *   - `head`   — small uppercased header bar.
- *   - default  — main scrollable body content.
- */
 defineProps<{
-  /** Which edge of the viewport the sidebar lives on. */
   side?: "left" | "right";
-  /** Hide the sidebar entirely (also collapses its layout slot). */
   collapsed?: boolean;
-  /** Mobile drawer open state. Ignored on desktop. */
   open?: boolean;
 }>();
 </script>

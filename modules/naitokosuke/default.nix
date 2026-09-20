@@ -1,9 +1,3 @@
-# Personal constants for naitokosuke's dotfiles.
-#
-# Centralizes literals like the primary username, email, and home directory so
-# they can be referenced as `config.naitokosuke.*` instead of being hardcoded
-# across the tree. Loaded into both nix-darwin and home-manager (via
-# `home-manager.sharedModules`) so both module trees can read the same values.
 { config, lib, ... }:
 
 let

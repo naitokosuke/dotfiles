@@ -1,20 +1,9 @@
 <script setup lang="ts">
 /**
- * Top-level app shell. A single layout tree that adapts purely
- * through CSS: on desktop it is an editor with a resizable
- * Explorer pinned to the right edge; on narrow viewports the
- * grid reflows to a title bar / editor / bottom-nav stack and the
- * Explorer becomes a bottom-sheet drawer.
- *
  * Rendering one tree (rather than swapping between a desktop and a
  * mobile component) keeps the page `<slot />` mounted across the
  * breakpoint — swapping the wrapper used to tear the page content
  * down and never remount it, leaving mobile viewports blank.
- *
- * Owns cross-cutting side effects too: tab sync on URL change,
- * sidebar ancestor expansion, mobile sheet close, and the global
- * keyboard shortcuts. The Void `pages/layout.vue` is a thin
- * passthrough into this component.
  */
 import { useRouter } from "@void/vue";
 import { computed, onBeforeUnmount, onMounted, watch } from "vue";
@@ -110,7 +99,6 @@ onBeforeUnmount(() => {
     </main>
     <SidebarExplorer :active-path="activeFilePath" />
 
-    <!-- Desktop: drag-to-resize splitter at the editor/sidebar seam. -->
     <SidebarResizer
       class="desktop-only"
       :width="sidebar.width"
@@ -123,7 +111,6 @@ onBeforeUnmount(() => {
       @reset="resetWidth"
     />
 
-    <!-- Mobile: backdrop behind the Explorer bottom-sheet + bottom nav. -->
     <button
       class="sidebar-backdrop"
       type="button"
@@ -170,12 +157,10 @@ onBeforeUnmount(() => {
     }
   }
 
-  /* Position the (position-agnostic) splitter primitive at the
-     editor/sidebar seam, and assign the sidebar primitive its
-     grid area. Wrapped in `&` to keep the chain anchored to the
-     workspace's own data-v attribute (otherwise Vue scoped CSS
-     would emit a `.workspace [data-v-xxx] .selector` with an
-     extra descendant combinator that never matches). */
+  /* Wrapped in `&` to keep the chain anchored to the workspace's own
+     data-v attribute (otherwise Vue scoped CSS would emit a
+     `.workspace [data-v-xxx] .selector` with an extra descendant
+     combinator that never matches). */
   & :deep(.sidebar) {
     grid-area: sidebar;
   }
@@ -203,20 +188,14 @@ onBeforeUnmount(() => {
     }
   }
 
-  /* The bottom-sheet backdrop and bottom nav are mobile-only; keep
-     them out of the way on wider viewports. */
   .sidebar-backdrop {
     display: none;
   }
 
-  /* Tablet — keep the editor layout but give the sidebar less room. */
   @media (--tablet) {
     --sidebar-w: 240px;
   }
 
-  /* Phone — reflow to a vertical stack with a bottom nav; the
-     Explorer becomes a bottom-sheet drawer (positioned by the
-     Sidebar primitive itself, so it leaves the grid flow). */
   @media (--phone) {
     --titlebar-h: 52px;
     --bottomnav-h: 64px;
@@ -228,10 +207,9 @@ onBeforeUnmount(() => {
       "editor"
       "bottom";
 
-    /* Drop the editor tab strip on phones — multi-document tabs are
-       a desktop metaphor; mobile navigates via the bottom nav and
-       the file sheet, and each page carries its own breadcrumb. The
-       content then fills the whole editor column. */
+    /* Multi-document tabs are a desktop metaphor; mobile navigates via
+       the bottom nav and the file sheet, and each page carries its own
+       breadcrumb. */
     .editor {
       grid-template-rows: 1fr;
       grid-template-areas: "content";

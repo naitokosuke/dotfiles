@@ -1,12 +1,4 @@
 <script setup lang="ts">
-/**
- * Generic code block — a fixed-width column of line numbers next
- * to a `<code>` element whose contents are dropped in via the
- * `html` prop. The primitive does not perform syntax highlighting
- * itself; callers pre-render whatever HTML they want (the bundled
- * `.t-*` token classes are styled so a tokenizer that emits them
- * works out of the box, but any other markup works just as well).
- */
 import { computed } from "vue";
 
 const props = defineProps<{

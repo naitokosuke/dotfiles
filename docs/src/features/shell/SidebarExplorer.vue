@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * Right-edge Explorer sidebar. Composes the generic
- * `primitives/Sidebar` shell with this workspace's actual content
- * (the file tree, the close-button for the mobile sheet) and
- * wires it to the `useSidebar` state composable.
- */
 import Sidebar from "../../primitives/Sidebar.vue";
 import { icons } from "../../icons.ts";
 import SidebarTree from "./SidebarTree.vue";

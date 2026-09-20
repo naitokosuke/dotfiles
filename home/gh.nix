@@ -7,7 +7,6 @@
   programs.gh = {
     enable = true;
     extensions = [
-      # Official prebuilt binary from ./pkgs, tracked by nvfetcher
       pkgs.gh-sub-issue
     ];
     settings = {

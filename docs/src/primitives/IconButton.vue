@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * Generic icon-only button. Renders as `<a>` when `href` is
- * provided (external link or internal navigation), otherwise as
- * `<button type="button">`. The icon itself goes in the default
- * slot.
- */
 defineProps<{
   href?: string;
   target?: "_blank";

@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * Interactive dot-grid background. A `<canvas>` filled with a
- * regular grid of dots that ripple toward the pointer. No domain
- * knowledge — drop it on any page that needs a soft animated
- * backdrop.
- */
 import { onBeforeUnmount, onMounted, useTemplateRef } from "vue";
 import { mountDotGrid } from "./dot-grid.ts";
 

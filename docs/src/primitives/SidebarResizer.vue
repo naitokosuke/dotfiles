@@ -1,33 +1,11 @@
 <script setup lang="ts">
-/**
- * Drag-to-resize splitter. Pure UI — knows nothing about *this*
- * app's sidebar; it just emits events as the user drags. Wire
- * them to whatever state owns the width.
- *
- * Position the splitter from the parent's stylesheet (e.g. a
- * `:deep(.sidebar-resizer)` rule that sets `position: absolute`,
- * `top`, `bottom`, and `right: calc(var(--your-w) - 3px)`).
- *
- * Behaviour:
- *   * Pointer-capture follows the cursor outside the 6px strip.
- *   * Mid-drag, intended width below `snapAt` emits
- *     `update:collapsed=true`; above it emits `update:width`.
- *   * On release the splitter emits `settle` with the final
- *     width so the caller can clamp + persist.
- *   * A click (no movement) toggles `update:collapsed`.
- *   * Double-click emits `reset`.
- */
 import { useTemplateRef } from "vue";
 
 const props = withDefaults(
   defineProps<{
-    /** Current width in pixels. */
     width: number;
-    /** Whether the panel is currently collapsed. */
     collapsed?: boolean;
-    /** Width below which the panel snaps closed. */
     snapAt?: number;
-    /** Width restored when no stored value is available. */
     defaultWidth?: number;
   }>(),
   {
@@ -135,9 +113,7 @@ function onDoubleClick(): void {
 
 <style scoped>
 .sidebar-resizer {
-  /* `position: relative` gives `::before` a containing block.
-     Layouts typically override this with `position: absolute`
-     to pin the splitter to the panel seam. */
+  /* `position: relative` gives `::before` a containing block. */
   position: relative;
   width: 6px;
   cursor: col-resize;
