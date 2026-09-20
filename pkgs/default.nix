@@ -1,5 +1,4 @@
 # Custom packages for tools not available in nixpkgs (issue #342).
-# Versions and hashes are tracked by nvfetcher — see nvfetcher.toml.
 { pkgs }:
 let
   sources = pkgs.callPackage ./_sources/generated.nix { };

@@ -9,7 +9,6 @@
     # Ghostty is installed via Homebrew Cask, so don't install via Nix
     package = null;
     settings = {
-      # Use Nushell as the shell
       command = "${pkgs.nushell}/bin/nu --login";
 
       theme = "Catppuccin Mocha";
@@ -18,7 +17,6 @@
         "-dlig"
       ];
 
-      # Shift+Enter to insert newline
       # Ghostty implements fixterms, which sends escape sequence [27;2;13~ for Shift+Enter.
       # This breaks multi-line input in Claude Code CLI (which expects a newline character).
       # Rebind Shift+Enter to send \n directly, matching iTerm2's behavior.

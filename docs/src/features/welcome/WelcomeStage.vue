@@ -87,10 +87,6 @@ const entries: ReadonlyArray<Entry> = [
     pointer-events: none;
   }
 
-  /* Welcome-side framing for the Nix logo primitive: pin it to the
-     bottom-right corner so only the inner quadrant is visible, tint
-     it via `color` (the primitive fills its paths with `currentColor`),
-     rotate the inner `.rotor` group slowly. */
   .welcome-logo {
     --nix-size: clamp(560px, 92dvw, 1120px);
     position: absolute;

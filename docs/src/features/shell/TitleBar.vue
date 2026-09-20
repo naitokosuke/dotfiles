@@ -109,9 +109,6 @@ const isCollapsed = computed(() => sidebar.collapsed);
     }
   }
 
-  /* Phone — drop the desktop window chrome (traffic-light dots,
-     sidebar/social buttons) and turn the bar into a plain mobile
-     app bar with the repo name left-aligned. */
   @media (--phone) {
     grid-template-columns: 1fr auto;
     padding-inline: 16px;

@@ -7,10 +7,7 @@
 }:
 
 {
-  # Disable nix-darwin's /etc/zshrc management.
   # Zsh configuration is handled entirely by home-manager.
-  # Nushell is the primary interactive shell; Zsh serves as login shell
-  # for IDE integrations and SSH sessions.
   programs.zsh.enable = false;
 
   nix.package = pkgs.lix;

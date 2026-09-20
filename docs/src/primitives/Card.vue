@@ -1,10 +1,7 @@
 <script setup lang="ts">
 /**
- * Generic card surface. The hover lift only applies when the
- * card is `interactive` — that way a plain informational card
- * doesn't visually invite a click it can't service. SPA-link
- * wrapping is the caller's responsibility (wrap with `<Link>`
- * from `@void/vue` or your own router primitive).
+ * The hover lift only applies when the card is `interactive`, so a plain
+ * informational card doesn't visually invite a click it can't service.
  */
 defineProps<{
   interactive?: boolean;

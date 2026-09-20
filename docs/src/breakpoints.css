@@ -1,4 +1,2 @@
-/* Shared responsive breakpoints as Lightning CSS custom media queries.
-   `@import` this at the top of any SFC <style> that needs them. */
 @custom-media --phone (max-width: 640px);
 @custom-media --tablet (max-width: 860px);

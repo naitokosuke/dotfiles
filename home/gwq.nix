@@ -1,7 +1,3 @@
-# gwq configuration
-#
-# gwq is a git worktree management tool, designed as the worktree counterpart to ghq.
-# https://github.com/d-kuro/gwq
 {
   config,
   pkgs,

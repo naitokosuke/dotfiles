@@ -25,7 +25,6 @@ function onToggle(): void {
 }
 
 function onFileClick(): void {
-  // Close the mobile sheet after a file is picked.
   sidebar.menuOpen = false;
 }
 </script>

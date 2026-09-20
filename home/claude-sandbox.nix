@@ -1,5 +1,3 @@
-# Claude Code sandbox
-#
 # Every `claude` session runs under a Seatbelt profile that denies file
 # writes outside an allowlist, so a deletion that slips past the Bash hooks
 # (e.g. `fs.rmSync` from a script) still cannot touch anything outside the

@@ -1,10 +1,3 @@
-/* ============================================================
-   dotfiles · naitokosuke
-   Global tokens + base reset only.
-   Everything component-specific lives in the SFC <style scoped>
-   block of the matching .vue file under features/ or pages/.
-   ============================================================ */
-
 :root {
   --font-ui:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;

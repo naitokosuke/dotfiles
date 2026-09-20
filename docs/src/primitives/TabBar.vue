@@ -1,14 +1,4 @@
-<script setup lang="ts">
-/**
- * Generic tab strip. A horizontally scrolling `<header>` that
- * lays its slot children (`<Tab>` primitives, typically) in a
- * row and fills any remaining space with an under-line spacer.
- *
- * The bar knows nothing about which tabs to show or what
- * happens when they're clicked — the caller passes the tabs
- * through the default slot.
- */
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <header class="tabs">

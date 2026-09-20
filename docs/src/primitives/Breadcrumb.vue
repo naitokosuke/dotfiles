@@ -1,15 +1,4 @@
 <script setup lang="ts">
-/**
- * Generic breadcrumb — a horizontal trail of labels joined by a
- * separator. The component owns the layout; callers fill in the
- * separator and (optionally) per-item leading icons via slots.
- *
- * Slots:
- *   - `separator(index)`: the divider between two parts; defaults
- *     to a thin `›`.
- *   - `icon(index, item, last)`: leading icon for a part; emit
- *     nothing for parts that should be label-only.
- */
 defineProps<{
   items: ReadonlyArray<string>;
 }>();

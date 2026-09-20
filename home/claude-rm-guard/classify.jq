@@ -51,7 +51,6 @@ def git_subcommand:
   else .
   end;
 
-# Arguments after a POSIX-ish shell name.
 def shell_args($c; $stdin):
   if length == 0 then
     if $c then empty

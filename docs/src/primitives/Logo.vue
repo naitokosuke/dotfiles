@@ -1,16 +1,9 @@
 <script setup lang="ts">
 /**
- * Generic brand logo. The variant prop selects which SVG mark to
- * render. Size, position, color, and animation are all the
- * caller's responsibility — the primitive only commits to filling
- * each path with `currentColor` so the calling style sheet can
- * tint the mark with a CSS `color`.
- *
- * Variants:
- *   - `"nix"` — official Nix snowflake. Path data verbatim from
- *     https://github.com/NixOS/nixos-artwork/blob/master/logo/
- *     nix-snowflake-colours.svg (CC BY 4.0, attribution preserved
- *     wherever the logo is rendered).
+ * `"nix"` path data is verbatim from
+ * https://github.com/NixOS/nixos-artwork/blob/master/logo/
+ * nix-snowflake-colours.svg (CC BY 4.0, attribution preserved
+ * wherever the logo is rendered).
  */
 type Variant = "nix";
 
