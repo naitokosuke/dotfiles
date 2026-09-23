@@ -567,13 +567,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Tool modules",
           prose:
             "Each tool gets its own file or directory directly under `home/`. Composing them as a flat list keeps every concern shallow — opening `git.nix` shows the full git story, opening `claude.nix` shows the Claude Code settings, with its rm guard and sandbox in their own siblings.",
-          lines: [4, 24],
+          lines: [4, 25],
         },
         {
           title: "State version",
           prose:
             "`home.username` and `home.homeDirectory` aren't set here: home-manager derives them from `users.users`, which `hosts/common/home-manager.nix` fills from `config.naitokosuke`. `home.stateVersion` is pinned at the version this config was first written for — never bump casually.",
-          lines: [26, 26],
+          lines: [27, 27],
         },
       ],
     },
@@ -831,6 +831,23 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           prose:
             "`darwinFlake` is this checkout under the ghq root, so `nh darwin switch` picks `darwinConfigurations.<hostname>` without a `--flake` argument. `home.sessionVariables` only reaches zsh, so `NH_DARWIN_FLAKE` is set again for Nushell.",
           lines: [12, 22],
+        },
+      ],
+    },
+  },
+
+  "home/playwright.nix": {
+    about: "Playwright's browser cache, moved off the directory macOS purges.",
+    tags: ["javascript", "test"],
+    walkthrough: {
+      intro:
+        "Playwright downloads Chromium, its headless shell and ffmpeg — around 550 MB — into a machine-wide cache it manages itself, and on macOS that cache lands in `~/Library/Caches/ms-playwright`. macOS counts everything under `~/Library/Caches` as purgeable space and reclaims it silently under disk pressure, browsers included. Nothing notices: they aren't npm packages, so no lockfile describes them and `pnpm install` still reports itself up to date — the first symptom is a browser test failing with `Executable doesn't exist at …` in a project nothing has changed in, and recovery is a ~280 MB `playwright install` (issue #476).",
+      sections: [
+        {
+          title: "One variable, nothing else moves",
+          prose:
+            "Playwright resolves its registry directory from `PLAYWRIGHT_BROWSERS_PATH` at runtime, so pointing that at `~/.cache/ms-playwright` — Playwright's own default on Linux, and ordinary data as far as macOS is concerned — is the whole fix. Browsers stay runtime-managed by Playwright, the same decision recorded in `pkgs/playwright-cli.nix`, and the cache stays keyed by browser build id, so every project on a matching build shares one copy. `home.sessionVariables` only reaches zsh, so the variable is set again for Nushell.",
+          lines: [19, 26],
         },
       ],
     },
