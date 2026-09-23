@@ -37,6 +37,12 @@ jobs:
           version=$(jq -r '.["vite-plus-darwin-arm64"].version' pkgs/_sources/generated.json)
           cd pkgs/vite-plus-runtime
           npm pkg set "dependencies.vite-plus=$version"
+          # vite-plus lists oxlint, oxfmt and vitest as peers of itself, so a
+          # bump rearranges a graph npm cannot migrate in place: it holds on to
+          # the tree the committed lockfile describes and gives up with
+          # ERESOLVE. The lockfile is regenerated wholesale for the pinned
+          # version either way, so the old one goes first.
+          rm -f package-lock.json
           npm install --package-lock-only --ignore-scripts
 
       - name: Create pull request
