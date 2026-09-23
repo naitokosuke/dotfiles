@@ -78,7 +78,12 @@ lib.throwIf (lockedVersion != version)
     Regenerate the lockfile to match:
       cd pkgs/vite-plus-runtime
       npm pkg set dependencies.vite-plus=${version}
+      rm -f package-lock.json
       npm install --package-lock-only --ignore-scripts
+
+    The old lockfile has to go first: vite-plus lists oxlint, oxfmt and vitest
+    as peers of itself, and npm gives up with ERESOLVE rather than migrate that
+    tree across a bump.
   ''
   (
     stdenvNoCC.mkDerivation {
