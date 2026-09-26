@@ -399,31 +399,31 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Sudo prompts go to a dialog",
           prose:
             "Homebrew resets sudo's timestamp on every invocation, and some cask uninstall steps shell out to sudo repeatedly, so a cask upgrade during activation would ask for a password over and over on the very terminal `nom` is repainting. `SUDO_ASKPASS` points at a small `osascript` dialog instead — Homebrew adds `-A` to sudo whenever it's set, so the prompt appears as a GUI dialog that says what it's for (issue #416).",
-          lines: [11, 23],
+          lines: [23, 35],
         },
         {
           title: "Homebrew ahead of nix-homebrew",
           prose:
-            "`nix-homebrew` installs and pins the Homebrew binary itself via Nix. That binary comes from the `brew-src` input in `flake.nix`, pinned at 7.0.1 ahead of the version nix-homebrew locks (issue #432). nix-homebrew labels its package with the ref from its own `flake.lock`, so the store path would otherwise name that ref rather than the one pinned here; `package` rebuilds the name and version from this repository's `flake.lock` (`brewVersion` at the top of the file) so they match the ref pinned in `flake.nix`.",
-          lines: [27, 36],
+            "`nix-homebrew` installs and pins the Homebrew binary itself via Nix. That binary comes from the `brew-src` input in `flake.nix`, pinned at 7.0.1 ahead of the version nix-homebrew locks (issue #432). nix-homebrew labels its package with the ref from its own `flake.lock`, so the store path would otherwise name that ref rather than the one pinned here; `package` rebuilds the name and version from this repository's `flake.lock` (`brewVersion` at the top of the file) so they match the ref pinned in `flake.nix`. A flake input reaches a module as a source tree, and the tag it is pinned to is not part of that interface — hence reading the lock as data, via `inputs.self` rather than a relative path, with a `throw` that explains itself if `brew-src` is ever pinned to something other than a tag.",
+          lines: [39, 48],
         },
         {
           title: "Pinned, read-only taps",
           prose:
             "`taps` pulls every tap from a flake input, so even Homebrew's tap repos are pinned. `mutableTaps = false` makes them read-only — `brew tap` is disabled, and a new tap has to arrive as a flake input.",
-          lines: [37, 48],
+          lines: [49, 60],
         },
         {
           title: "Taps and activation policy",
           prose:
             'The Brewfile mirrors the pinned tap list so `brew bundle` cleanup does not untap them. `HOMEBREW_NO_INSTALL_FROM_API` forces cask definitions to come from those pinned taps rather than Homebrew\'s API, and `cleanup = "uninstall"` converges the machine onto exactly the cask list below — new versions arrive via `nix flake update`.',
-          lines: [50, 70],
+          lines: [62, 82],
         },
         {
           title: "Casks",
           prose:
             "Everything in `casks` is materialised on `darwin-rebuild`. `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
-          lines: [72, 96],
+          lines: [84, 108],
         },
       ],
     },
