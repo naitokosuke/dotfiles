@@ -11,17 +11,17 @@
 }:
 
 let
-  common = import ./common.nix { inherit (config.naitokosuke) username; };
+  inherit (config.naitokosuke) shell;
 in
 {
   programs.zsh = {
     enable = true;
 
-    sessionVariables = common.envVars // {
-      HOMEBREW_FORBIDDEN_FORMULAE = lib.concatStringsSep " " common.homebrewForbiddenFormulae;
+    sessionVariables = shell.envVars // {
+      HOMEBREW_FORBIDDEN_FORMULAE = lib.concatStringsSep " " shell.homebrewForbiddenFormulae;
     };
 
-    shellAliases = common.aliases // {
+    shellAliases = shell.aliases // {
       cl = "clear";
       cpwd = "pwd | pbcopy";
     };

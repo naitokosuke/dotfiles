@@ -6,7 +6,7 @@
 }:
 
 let
-  common = import ./common.nix { inherit (config.naitokosuke) username; };
+  inherit (config.naitokosuke) shell;
 in
 {
   programs.nushell = {
@@ -14,23 +14,24 @@ in
 
     settings.show_banner = false;
 
-    shellAliases = common.aliases // {
+    shellAliases = shell.aliases // {
       cl = "^clear"; # `^` runs the external command, not Nushell's builtin
     };
 
-    environmentVariables = common.envVars // {
-      HOMEBREW_FORBIDDEN_FORMULAE = lib.concatStringsSep " " common.homebrewForbiddenFormulae;
+    environmentVariables = shell.envVars // {
+      HOMEBREW_FORBIDDEN_FORMULAE = lib.concatStringsSep " " shell.homebrewForbiddenFormulae;
     };
 
-    # env.nu runs before config.nu
+    # env.nu runs before config.nu. Ghostty starts `nu --login` directly rather
+    # than through a login Zsh, so home.sessionPath never reaches Nushell and
+    # this is where the same entries arrive in this shell.
     extraEnv = ''
       $env.PATH = ($env.PATH | split row (char esep))
 
       # `path add` prepends, so these end up in reverse order
       use std/util "path add"
 
-      ${lib.concatMapStringsSep "\n" (p: "path add \"${p}\"") common.pathEntries}
-      path add ($env.HOME | path join ".nix-profile" "bin")
+      ${lib.concatMapStringsSep "\n" (p: "path add \"${p}\"") shell.pathEntries}
     '';
 
     extraConfig = ''
