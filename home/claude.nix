@@ -2,10 +2,23 @@
   config,
   lib,
   inputs,
+  osConfig,
   ...
 }:
 
 let
+  # The hooks below run binaries that Homebrew casks install, so they cannot
+  # come from the store. They can still be tied to the declaration that
+  # provides them: drop a cask from hosts/common/homebrew.nix and evaluation
+  # fails here, instead of the hook silently doing nothing at runtime.
+  # nix-darwin normalises homebrew.casks into submodules, so the names are read
+  # off `name` rather than the list itself.
+  requireCask =
+    cask: reference:
+    lib.throwIfNot (lib.any (declared: declared.name == cask) osConfig.homebrew.casks)
+      "home/claude.nix runs `${reference}`, which the ${cask} cask provides, but that cask is not in hosts/common/homebrew.nix."
+      reference;
+
   # Adrafinil (cask in hosts/common/homebrew.nix) keeps the Mac awake only
   # while an agent turn is running. Its one-click installer writes these hooks
   # into ~/.claude/settings.json, which is a read-only store symlink here, so
@@ -20,7 +33,7 @@ let
   # asynchronously at launch.
   adrafinil =
     let
-      cli = "/Applications/Adrafinil.app/Contents/Helpers/adrafinil";
+      cli = requireCask "adrafinil" "/Applications/Adrafinil.app/Contents/Helpers/adrafinil";
       hook =
         {
           command,
@@ -136,7 +149,13 @@ in
           hooks = [
             {
               type = "command";
-              command = ''code "$(ls -t ~/.claude/plans/*.md | head -1)"'';
+              # Opens the newest plan in VS Code. `code` comes from the
+              # visual-studio-code cask via /opt/homebrew/bin (see
+              # home/shell/common.nix for that PATH entry). With no plan file
+              # the glob would be passed through literally, so the match is
+              # tested before opening anything — the hook is best-effort, and a
+              # failure here is quiet enough to stay unnoticed.
+              command = ''plan=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n "$plan" ] && ${requireCask "visual-studio-code" "code"} "$plan" || true'';
               timeout = 5;
             }
           ];
