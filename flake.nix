@@ -78,8 +78,27 @@
     }:
     let
       system = "aarch64-darwin";
+
+      # One definition of the package set for both roots that evaluate it: the
+      # darwin configurations below, and the flake's own `packages` output. A
+      # custom package that grows a dependency on another custom package or on
+      # an unfree one then builds the same way through `nix build .#<pkg>` as
+      # it does through `darwin-rebuild switch`.
+      customPackages = final: import ./pkgs { pkgs = final; };
+
+      nixpkgsConfig = {
+        allowUnfree = true;
+      };
+
+      overlays = [
+        (final: _: customPackages final)
+        llm-agents.overlays.shared-nixpkgs
+      ];
+
       pkgs = import nixpkgs {
         localSystem = system;
+        config = nixpkgsConfig;
+        inherit overlays;
       };
 
       hosts = [
@@ -101,12 +120,9 @@
                 networking.hostName = hostName;
                 networking.computerName = hostName;
                 system.primaryUser = config.naitokosuke.username;
-                nixpkgs.config.allowUnfree = true;
+                nixpkgs.config = nixpkgsConfig;
                 nixpkgs.hostPlatform = system;
-                nixpkgs.overlays = [
-                  (final: _: import ./pkgs { pkgs = final; })
-                  llm-agents.overlays.shared-nixpkgs
-                ];
+                nixpkgs.overlays = overlays;
               }
             )
             home-manager.darwinModules.home-manager
@@ -119,7 +135,7 @@
     {
       darwinConfigurations = nixpkgs.lib.genAttrs hosts mkDarwinConfig;
 
-      packages.${system} = import ./pkgs { inherit pkgs; };
+      packages.${system} = customPackages pkgs;
 
       formatter.${system} = treefmt-nix.lib.mkWrapper pkgs {
         projectRootFile = "flake.nix";
