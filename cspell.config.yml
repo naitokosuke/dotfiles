@@ -1,6 +1,7 @@
 version: "0.2"
 language: en
 words:
+  - agenix
   - airules
   - antfu
   - autohide
@@ -31,6 +32,7 @@ words:
   - SAVEHIST
   - screencapture
   - setopt
+  - sops
   - superfile
   - swipescrolldirection
   - tilesize
