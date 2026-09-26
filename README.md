@@ -34,6 +34,59 @@ An interactive, VS Code-flavoured walkthrough of this repository is published at
    sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake .#Mac-big
    ```
 
+## First-Time Setup on a New Machine
+
+Activation builds everything this repository declares, and nothing below. Until these steps are
+done the machine looks healthy: the very first `git commit` is what fails, because
+[`home/git.nix`](home/git.nix) signs every commit and tag with `~/.ssh/id_ed25519.pub` and nothing
+here creates that key.
+
+Run them after the Installation switch above — `gh`, `ghq` and `playwright-cli` come from the
+configuration — and in this order.
+
+* Generate the key pair that [`home/ssh.nix`](home/ssh.nix) uses as the GitHub identity and
+  `home/git.nix` signs with. Keep the default path (`~/.ssh/id_ed25519`); `UseKeychain` stores the
+  passphrase in the macOS Keychain on first use.
+  ```bash
+  ssh-keygen -t ed25519 -C "kosuke.naito.engineer@gmail.com"
+  ```
+
+* Log in to GitHub and register the public key twice — as an authentication key to push, and as a
+  signing key so GitHub reports the signatures as verified rather than the commits as unsigned.
+  Adding keys needs scopes beyond the default login.
+  ```bash
+  gh auth login
+  gh auth refresh -h github.com -s admin:public_key -s admin:ssh_signing_key
+  gh ssh-key add ~/.ssh/id_ed25519.pub --type authentication --title "$(hostname -s)"
+  gh ssh-key add ~/.ssh/id_ed25519.pub --type signing --title "$(hostname -s)"
+  ```
+
+* Clone the repositories [`home/claude.nix`](home/claude.nix) links into `~/.claude`. Those are
+  out-of-store symlinks into working trees under the ghq root, so activation succeeds either way
+  and the links simply dangle until the trees exist.
+  ```bash
+  ghq get naitokosuke/rule-rule-rule
+  ghq get naitokosuke/skill-skill-skill
+  ```
+
+* Install the Playwright browsers. They are runtime-managed on purpose, so no closure contains
+  them and a fresh machine has none — see [`home/playwright.nix`](home/playwright.nix) for where
+  they land.
+  ```bash
+  playwright-cli install-browser chromium
+  ```
+
+### Secrets
+
+Nothing in this repository is encrypted and no secrets framework (`sops-nix`, `agenix`) is in the
+flake. That is a decision rather than an omission: the SSH key above and the Keychain cover
+everything this setup needs, and machine-local or private SSH host definitions are deliberately
+kept out of the repository — `home/ssh.nix` includes them from `~/.ssh/config.d/` instead.
+
+A framework would not remove the manual step either. An age key derived from the SSH key inherits
+the ordering problem above: the key that decrypts the secrets is the same key the bootstrap has to
+create by hand first. Worth revisiting when there is a secret that actually wants to live in here.
+
 ## Configuration Structure
 
 ```

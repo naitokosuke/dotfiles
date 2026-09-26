@@ -27,10 +27,16 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           lines: [14, 35],
         },
         {
+          title: "What activation can't do",
+          prose:
+            "`darwin-rebuild switch` builds everything this repository declares and nothing outside it, so a machine set up from the Installation steps alone looks healthy right up to its first `git commit` — `home/git.nix` signs every commit with an SSH key that nothing here creates. This section is the manual remainder, in order: the key pair, registering it on GitHub twice (authentication *and* signing, which needs extra `gh` scopes), cloning the working trees `home/claude.nix` symlinks into `~/.claude`, and installing the Playwright browsers that are runtime-managed by design (issue #484). It also records why there is no `sops-nix` or `agenix` here: nothing currently wants to be encrypted, and an age key derived from the SSH key would inherit this section's own ordering problem rather than remove it.",
+          lines: [37, 88],
+        },
+        {
           title: "Packages outside nixpkgs",
           prose:
             "Tools nixpkgs doesn't ship are packaged under `pkgs/` and version-tracked by nvfetcher, with a daily workflow opening the update PR. vite-plus is the one package in two halves — the `vp` launcher and the JavaScript toolchain it delegates to — which must stay on the same version.",
-          lines: [67, 86],
+          lines: [120, 139],
         },
       ],
     },
