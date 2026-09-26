@@ -688,26 +688,26 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "settings.json",
           prose:
-            "Global preferences — theme, editor mode, notifications, Japanese spinner verbs. The binary comes from Nix via `llm-agents`, so `env` turns off Claude Code's own auto-updater and installation checks.",
-          lines: [83, 112],
+            'Global preferences — theme, editor mode, notifications, Japanese spinner verbs. The binary comes from the store, so nothing may update it in place: `env` turns off Claude Code\'s own auto-updater and installation checks, which is the mechanism the CLI actually reads (`DISABLE_AUTOUPDATER` from the process environment; the legacy `autoUpdates` preference is migrated out of `~/.claude.json` into exactly this block). The `installMethod = "unknown"` and `autoUpdates = true` lines that used to sit at the top were never read from `settings.json`, and the second one claimed the opposite of what the machine does — both dropped in issue #485.',
+          lines: [83, 122],
         },
         {
           title: "Permissions",
           prose:
             "`permissions.deny` blocks reading credentials (`.env*`, `secrets/`, `~/.ssh`, `~/.aws`, `~/.gnupg`), wiping `/` or `~`, force-pushing, and raw `curl` / `wget` in favour of WebFetch with an explicit domain — plus a tongue-in-cheek ban on `perl` and `python`.",
-          lines: [113, 144],
+          lines: [123, 154],
         },
         {
           title: "Plan hook",
           prose:
             'A `PreToolUse` hook on `ExitPlanMode` opens the newest plan file in VS Code, so a plan can be read in the editor before it\'s approved. The glob is resolved into a variable and tested first: with no plan files it would otherwise reach `ls` literally and end up running `code ""` on an empty argument. The Adrafinil handlers are merged in alongside it.',
-          lines: [145, 164],
+          lines: [155, 174],
         },
         {
           title: "Rules and skills",
           prose:
             "`mkOutOfStoreSymlink` links `~/.claude/rules` and `~/.claude/CLAUDE.md` into `rule-rule-rule`. Skills are linked one by one, because `programs.claude-code` installs its generated MCP plugin into `~/.claude/skills` and fails when that directory is itself a symlink. Pure evaluation can't read the live working tree, so skill names come from the locked `skill-skill-skill` input; the links still point at the working tree, so only adding or removing a skill needs `nix flake update skill-skill-skill`.",
-          lines: [167, 196],
+          lines: [177, 206],
         },
       ],
     },

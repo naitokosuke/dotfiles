@@ -81,8 +81,6 @@ in
 
 {
   programs.claude-code.settings = {
-    installMethod = "unknown";
-    autoUpdates = true;
     theme = "dark-daltonized";
     verbose = false;
     preferredNotifChannel = "auto";
@@ -101,6 +99,18 @@ in
     hasUsedBackslashReturn = true;
     autoCompactEnabled = true;
     diffTool = "auto";
+    # The binary comes from the store (see ./claude-sandbox.nix), so nothing may
+    # update it in place — a second, unmanaged copy installing itself next to the
+    # Nix-managed one is the failure this repository already hit twice with `vp`
+    # (#413, #434). This env block is the mechanism Claude Code actually reads:
+    # it checks `process.env.DISABLE_AUTOUPDATER`, and migrates the legacy
+    # `autoUpdates` preference out of ~/.claude.json to exactly here. The
+    # `installMethod` / `autoUpdates` keys this file used to set were never read
+    # from settings.json at all and were dropped in #485.
+    #
+    # The llm-agents wrapper exports both variables itself, so these two lines
+    # are a deliberate duplicate — they also cover a `claude` started without
+    # that wrapper.
     env = {
       DISABLE_AUTOUPDATER = "1";
       DISABLE_INSTALLATION_CHECKS = "1";
