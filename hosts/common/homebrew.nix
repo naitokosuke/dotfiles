@@ -1,12 +1,24 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   ...
 }:
 
 let
-  brewVersion = (builtins.fromJSON (builtins.readFile ../../flake.lock)).nodes.brew-src.original.ref;
+  # A flake input is exposed to modules as a source tree, so the tag it is
+  # pinned to is not part of that interface; the lock is read as data to
+  # recover it. Reached through the flake's own source rather than a relative
+  # walk up the tree, so the expression does not depend on where this module
+  # sits.
+  brewNode = (lib.importJSON (inputs.self + "/flake.lock")).nodes.brew-src.original;
+  brewVersion =
+    brewNode.ref or (throw ''
+      hosts/common/homebrew.nix expects the brew-src input to be pinned to a tag,
+      so the nix-homebrew package can be labelled with that version (#432).
+      flake.lock has it as: ${builtins.toJSON brewNode}
+    '');
 
   # Homebrew calls `sudo --reset-timestamp` on every invocation
   # (`Library/Homebrew/brew.sh`), and cask uninstall directives such as
