@@ -305,23 +305,35 @@ export const explanations: Readonly<Record<string, Explanation>> = {
 
   "modules/naitokosuke/default.nix": {
     about:
-      "Typed personal-constants module — username, full name, email, home and source directories.",
+      "Typed personal-constants module — identity, directories, and the settings both shells share.",
     tags: ["module", "config"],
     walkthrough: {
       intro:
-        "A small NixOS-module-style namespace that centralizes the personal literals the rest of the tree needs. It declares typed `naitokosuke.{username,fullName,email,homeDirectory,srcDirectory}` options and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
+        "A small NixOS-module-style namespace that centralizes the personal literals the rest of the tree needs. It declares typed `naitokosuke.{username,fullName,email,homeDirectory,srcDirectory}` options plus the `naitokosuke.shell.*` settings both shells render, and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
       sections: [
         {
           title: "Typed options",
           prose:
             "Each constant is an `mkOption` with `type = types.str` and a description, so the values are self-documenting and type-checked rather than bare strings copied around the repo.",
-          lines: [13, 34],
+          lines: [7, 27],
+        },
+        {
+          title: "Shared shell settings",
+          prose:
+            "`$PATH`, environment variables, aliases and the Homebrew-forbidden formulae have to be identical in Nushell and Zsh. They used to live in `home/shell/common.nix` as a plain function of `username` that three modules each imported — data that never appeared in `config`, could not be overridden per host, and was invisible to anything inspecting the evaluated configuration. They are options here instead, marked `visible = false` because they are internal to this repository rather than an interface (issue #483).",
+          lines: [29, 53],
         },
         {
           title: "Defaults",
           prose:
             "`config.naitokosuke` sets the defaults for this user. `srcDirectory` is derived from `homeDirectory` and is the one root that ghq, gwq, nh, and the Claude Code rule and skill links all build their paths from. Because they're module options, a per-host module can override any field without touching the call sites that consume them.",
-          lines: [36, 42],
+          lines: [56, 62],
+        },
+        {
+          title: "One PATH entry per reason",
+          prose:
+            "`HOMEBREW_FORBIDDEN_FORMULAE` (`bun`, `claude`, `node`, …) is exported by both shells so `brew install` can never shadow a Nix-managed binary. `pathEntries` runs lowest to highest priority, and holds only what has a reason to be there: `/opt/homebrew/bin` for cask binaries, and the three Nix directories — which home-manager is the *only* thing that puts on either shell's `$PATH`, since `hosts/common/nix.nix` disables nix-darwin's Zsh integration and Ghostty starts `nu --login` rather than a login Zsh. `/usr/local/bin`, `/opt/homebrew/sbin` and `~/.nix-profile/bin` were dropped in #483: the first two hold nothing this configuration depends on, and with `useUserPackages` nothing is ever installed into `~/.nix-profile`.",
+          lines: [64, 112],
         },
       ],
     },
@@ -956,25 +968,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Session PATH",
           prose:
-            "`home.sessionPath` is a session-wide option, so it's set here rather than in a shell-specific module (issue #366): `~/.nix-profile/bin` first, then `common.pathEntries` reversed, since that list runs from lowest to highest priority while `sessionPath` runs the other way. Zsh picks it up in `.zprofile`; Nushell builds its own `$PATH` from the same list in `nushell.nix`.",
-          lines: [20, 26],
-        },
-      ],
-    },
-  },
-
-  "home/shell/common.nix": {
-    about: "Shared shell config — PATH, env vars, aliases, Homebrew-forbidden formulae.",
-    tags: ["shell", "common"],
-    walkthrough: {
-      intro:
-        "Anything that should be identical in Nushell and Zsh — `$PATH` ordering, environment variables, aliases — lives here. It isn't a module but a plain function of `username` returning an attrset, which `nushell.nix` and `zsh.nix` each import and render in their own syntax. It also defines a `homebrewForbiddenFormulae` list (`bun`, `claude`, `node`, …), exported as `HOMEBREW_FORBIDDEN_FORMULAE`, so `brew install` can never shadow a Nix-managed binary on `$PATH`.",
-      sections: [
-        {
-          title: "PATH entries",
-          prose:
-            "Listed from lowest to highest priority: each shell prepends them in order, so the Nix profiles end up ahead of Homebrew and `/usr/local/bin`.",
-          lines: [50, 61],
+            "`home.sessionPath` is a session-wide option, so it's set here rather than in a shell-specific module (issue #366): `config.naitokosuke.shell.pathEntries` reversed, since that list runs from lowest to highest priority while `sessionPath` runs the other way. Zsh picks it up in `.zprofile`; Nushell builds its own `$PATH` from the same list in `nushell.nix`, because Ghostty starts it directly rather than through a login Zsh.",
+          lines: [13, 16],
         },
       ],
     },
@@ -990,14 +985,14 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Environment",
           prose:
-            "Aliases and environment variables come from `common.nix`. `env.nu` splits `$PATH` into a list, then `path add`s each common entry and `~/.nix-profile/bin` on top.",
-          lines: [25, 46],
+            "Aliases and environment variables come from `config.naitokosuke.shell`. `env.nu` splits `$PATH` into a list, then `path add`s each shared entry — this is the only mechanism that reaches Nushell, since Ghostty starts `nu --login` directly and `home.sessionPath` is written into Zsh's `.zprofile`.",
+          lines: [17, 35],
         },
         {
           title: "Completions and helpers",
           prose:
             "Completions for git, gh, nix, pnpm, and rg come from the pinned `nu_scripts` input. `mkcd` makes a directory and enters it, and `cpwd` copies the current directory to the clipboard — a command rather than an alias, because Nushell aliases can't contain pipelines. A new terminal starts in `~/src/github.com/<user>` unless it was opened by VS Code.",
-          lines: [49, 74],
+          lines: [37, 57],
         },
       ],
     },
@@ -1008,7 +1003,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["shell"],
     walkthrough: {
       intro:
-        "Zsh handles login-shell responsibilities — anything that spawns a non-interactive shell to read `$PATH` and environment variables sees Zsh, not Nushell. `$PATH` comes from `home.sessionPath` in `shell/default.nix`, so this module only adds the shared environment variables and aliases from `common.nix`, plus `cl` and `cpwd` (`pwd | pbcopy`, which copies the current directory to the clipboard).",
+        "Zsh handles login-shell responsibilities — anything that spawns a non-interactive shell to read `$PATH` and environment variables sees Zsh, not Nushell. `$PATH` comes from `home.sessionPath` in `shell/default.nix`, so this module only adds the shared environment variables and aliases from `config.naitokosuke.shell`, plus `cl` and `cpwd` (`pwd | pbcopy`, which copies the current directory to the clipboard).",
     },
   },
 
