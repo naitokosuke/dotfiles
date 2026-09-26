@@ -47,31 +47,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Inputs",
           prose:
             "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: `brew-src`, the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings`, `skill-skill-skill`, and `nu-scripts`. `brew-src` pins Homebrew itself at a release tag (7.0.1) ahead of the one nix-homebrew locks, and nix-homebrew's own `brew-src` follows it. `llm-agents` supplies Claude Code and `mcp-servers-nix` the MCP module.",
-          lines: [4, 73],
+          lines: [4, 67],
+        },
+        {
+          title: "One package set, two roots",
+          prose:
+            "The overlays and the Nixpkgs config are named once and used twice: by the `pkgs` the flake's own outputs are built from, and by the inline module every host loads. `customPackages` is the single entry into `./pkgs`, so the `packages` output and the overlay are visibly the same function rather than two similar-looking expressions — a custom package that grows a dependency on another custom package, or on an unfree one, cannot build one way through `nix build .#<pkg>` and another through `darwin-rebuild switch`.",
+          lines: [80, 102],
         },
         {
           title: "mkDarwinConfig",
           prose:
-            "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module pins `aarch64-darwin` and the Nixpkgs config: `allowUnfree`, plus overlays for the custom `./pkgs` set and `llm-agents`' shared-nixpkgs packages. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
-          lines: [96, 124],
+            "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module pins `aarch64-darwin` and applies the shared `nixpkgsConfig` and `overlays` defined above. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
+          lines: [109, 133],
         },
         {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [127, 127],
+          lines: [136, 136],
         },
         {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay injects, so `nix build .#gwq` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [129, 129],
+          lines: [138, 138],
         },
         {
           title: "Formatter",
           prose:
-            "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root.",
-          lines: [131, 134],
+            "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
+          lines: [140, 143],
         },
       ],
     },
