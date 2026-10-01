@@ -88,6 +88,7 @@ in
       "adrafinil"
       "arc"
       "blender"
+      "claude"
       "discord"
       "dockdoor"
       "ghostty"
