@@ -24,10 +24,10 @@
   };
   gwq-darwin-arm64 = {
     pname = "gwq-darwin-arm64";
-    version = "v0.1.1";
+    version = "v0.1.2";
     src = fetchurl {
-      url = "https://github.com/d-kuro/gwq/releases/download/v0.1.1/gwq_Darwin_arm64.tar.gz";
-      sha256 = "sha256-G4tYAEvOL/G4WxJG5rOxTsqJoKlYeWlu5sdc9I571/s=";
+      url = "https://github.com/d-kuro/gwq/releases/download/v0.1.2/gwq_Darwin_arm64.tar.gz";
+      sha256 = "sha256-/uvTIrjv9DZeL5CtY95tJlqLbYV5Mij2QlhXqXZZDsY=";
     };
   };
   playwright-cli = {
