@@ -104,6 +104,7 @@ in
       # swaps itself in place via electron-updater, so the flake.lock pin is
       # only the floor version installed on a fresh machine.
       "stablyai/orca/orca"
+      "thebrowsercompany-dia"
       "visual-studio-code"
     ];
   };
