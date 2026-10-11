@@ -1,0 +1,21 @@
+name: test-bot-pr-policy
+
+on:
+  push:
+    branches: [test-bot-pr-policy]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create pull request as github-actions[bot]
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create -R "$GITHUB_REPOSITORY" --base main --head test-bot-pr-policy --draft \
+            --title "test: bot PR creation under collaborators_only" \
+            --body "Temporary test. Will be closed without merging."
