@@ -30,8 +30,7 @@ let
   # says what it is asking for. See issue #416.
   #
   # `sudo -A` never offers pam_tid.so, though, so on a host with Touch ID the
-  # dialog would replace a fingerprint with a typed password. There the
-  # variable is left unset and Homebrew's sudo takes Touch ID (#504).
+  # dialog would replace a fingerprint with a typed password (#504).
   sudoAskpass = pkgs.writeShellScript "homebrew-sudo-askpass" ''
     exec /usr/bin/osascript \
       -e 'set reply to display dialog "Homebrew needs administrator rights to update casks during nix-darwin activation." with title "darwin-rebuild" default answer "" with icon caution with hidden answer' \
