@@ -28,6 +28,10 @@ let
   # `-A` when SUDO_ASKPASS is set, and `bin/brew` allowlists that variable
   # through its environment filter, so the prompt moves to a GUI dialog that
   # says what it is asking for. See issue #416.
+  #
+  # `sudo -A` never offers pam_tid.so, though, so on a host with Touch ID the
+  # dialog would replace a fingerprint with a typed password. There the
+  # variable is left unset and Homebrew's sudo takes Touch ID (#504).
   sudoAskpass = pkgs.writeShellScript "homebrew-sudo-askpass" ''
     exec /usr/bin/osascript \
       -e 'set reply to display dialog "Homebrew needs administrator rights to update casks during nix-darwin activation." with title "darwin-rebuild" default answer "" with icon caution with hidden answer' \
@@ -76,6 +80,8 @@ in
       cleanup = "uninstall";
       extraEnv = {
         HOMEBREW_NO_INSTALL_FROM_API = "1";
+      }
+      // lib.optionalAttrs (!config.security.pam.services.sudo_local.touchIdAuth) {
         SUDO_ASKPASS = "${sudoAskpass}";
       };
     };
