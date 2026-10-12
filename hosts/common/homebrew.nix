@@ -91,7 +91,6 @@ in
       # (`depends_on macos: :tahoe`) and is `auto_updates true` — Adrafinil
       # swaps itself in place, so the flake.lock pin is only the floor version.
       "adrafinil"
-      "arc"
       "blender"
       "claude"
       "discord"
