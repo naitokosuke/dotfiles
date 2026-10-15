@@ -33,8 +33,10 @@ jobs:
           cache: true
 
       # .void/project.json is gitignored, so the project is named explicitly.
+      # Void 1.x has no default platform and requires VOID_API_URL with VOID_TOKEN.
       - name: Deploy
         run: vp run deploy
         env:
+          VOID_API_URL: https://api.void.cloud
           VOID_TOKEN: ${{ secrets.VOID_TOKEN }}
           VOID_PROJECT: naitokosuke-dotfiles
