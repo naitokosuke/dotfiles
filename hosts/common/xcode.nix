@@ -4,8 +4,10 @@
 # cannot build iOS apps or run the Simulator.
 #
 # Installed from the Mac App Store through `mas`, which nix-darwin's homebrew
-# module puts on PATH for `brew bundle`. The Mac App Store must be signed in
-# once by hand before the first rebuild; `mas` cannot sign in on its own.
+# module puts on PATH for `brew bundle`. `mas` can neither sign in nor obtain
+# an app the Apple ID has never gotten, and in that case it waits silently
+# instead of failing, so on a fresh Apple ID get Xcode once by hand in the
+# App Store app before the first rebuild.
 # Removing the entry later does not uninstall Xcode (a Homebrew Bundle
 # limitation), and the App Store updates it independently of flake.lock.
 let
