@@ -562,6 +562,15 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
+  "hosts/common/xcode.nix": {
+    about: "Full Xcode from the Mac App Store, selected as the active developer directory.",
+    tags: ["macos", "apps"],
+    walkthrough: {
+      intro:
+        "The Command Line Tools alone cannot build iOS apps or run the Simulator. `homebrew.masApps` installs Xcode through `mas` during the homebrew activation step; the Mac App Store has to be signed in by hand once beforehand. A `postActivation` script then replaces a manual `sudo xcode-select --switch`, accepts the license, and runs `xcodebuild -runFirstLaunch`. It is guarded on the app existing, so a failed App Store install leaves the rest of the activation intact.",
+    },
+  },
+
   "hosts/Mac-big/default.nix": {
     about: "Mac mini (Mac-big) host overrides — currently empty.",
     tags: ["host"],
