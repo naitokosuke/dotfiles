@@ -14,5 +14,6 @@
     ./packages.nix
     ./scroll.nix
     ./screen_capture.nix
+    ./xcode.nix
   ];
 }
