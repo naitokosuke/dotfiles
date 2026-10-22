@@ -12,6 +12,7 @@
     ./menubar.nix
     ./nix.nix
     ./packages.nix
+    ./pki.nix
     ./scroll.nix
     ./screen_capture.nix
     ./xcode.nix
