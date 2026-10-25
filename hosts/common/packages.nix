@@ -16,6 +16,7 @@ in
     agent-browser
     bun
     cargo-deny
+    cclens
     darwin-rebuild-nom
     devenv
     fd

@@ -4,6 +4,7 @@ let
   sources = pkgs.callPackage ./_sources/generated.nix { };
 in
 {
+  cclens = pkgs.callPackage ./cclens.nix { inherit sources; };
   frog = pkgs.callPackage ./frog.nix { inherit sources; };
   gh-sub-issue = pkgs.callPackage ./gh-sub-issue.nix { inherit sources; };
   gwq = pkgs.callPackage ./gwq.nix { inherit sources; };
