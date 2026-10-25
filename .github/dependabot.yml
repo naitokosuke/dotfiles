@@ -1,0 +1,19 @@
+version: 2
+
+updates:
+  # Workflows pin actions to commit SHAs with the version as a trailing
+  # comment; Dependabot rewrites both together.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Skip releases younger than a week, so a hijacked release is likely
+    # caught upstream before it is proposed here.
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore
