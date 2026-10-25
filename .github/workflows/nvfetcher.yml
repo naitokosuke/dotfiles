@@ -28,7 +28,7 @@ jobs:
       # derivation refuses to evaluate if they disagree (issue #413). nvfetcher
       # only knows about the launcher, so the lockfile is brought along here
       # rather than left as a manual step after every bump.
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "26"
 
