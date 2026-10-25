@@ -309,6 +309,15 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
+  ".github/dependabot.yml": {
+    about: "Weekly Dependabot PRs that move the workflows' SHA-pinned actions forward.",
+    tags: ["ci", "automation", "security"],
+    walkthrough: {
+      intro:
+        "Every `uses:` in the workflows names a full commit SHA, with the release it came from as a trailing comment, because a tag can be moved to a malicious commit and a SHA cannot. Pins don't update themselves, so Dependabot checks weekly and rewrites the SHA and the comment together. All action bumps land in one grouped PR, and `cooldown` holds back releases younger than seven days, which leaves time for a hijacked release to be noticed upstream first.",
+    },
+  },
+
   "modules/naitokosuke/default.nix": {
     about:
       "Typed personal-constants module — identity, directories, and the settings both shells share.",

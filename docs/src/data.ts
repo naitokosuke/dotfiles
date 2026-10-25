@@ -27,6 +27,11 @@ const rawModules: Record<string, string> = {
     query: "?raw",
     import: "default",
   }),
+  ...import.meta.glob("../../.github/dependabot.yml", {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  }),
   ...import.meta.glob("../../hosts/**/*.nix", {
     eager: true,
     query: "?raw",
