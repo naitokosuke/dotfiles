@@ -562,15 +562,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
-  "hosts/common/pki.nix": {
-    about: "Root CAs removed from the Nix CA bundle ahead of nixpkgs.",
-    tags: ["macos", "security"],
-    walkthrough: {
-      intro:
-        "Eight eMudhra intermediates under emSign Root TLS CA - G3 were generated with weak keys (CVE-2026-111943). Homebrew and certifi dropped the related roots, but NSS, and so nixpkgs' `cacert`, still ships `emSign ECC Root CA - G3`. `security.pki.caCertificateBlacklist` removes it from `/etc/ssl/certs/ca-certificates.crt`. This covers Nix-built tools only: Safari, `/usr/bin/curl` and the system Python use the macOS Keychain. `cacert` fails to build on a blocklist entry it does not have, so the build breaks once upstream drops the root, and the list can go.",
-    },
-  },
-
   "hosts/common/xcode.nix": {
     about: "Full Xcode from the Mac App Store, selected as the active developer directory.",
     tags: ["macos", "apps"],
