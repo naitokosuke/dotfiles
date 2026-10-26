@@ -26,6 +26,9 @@ let
     "${home}/.gomi"
     "${home}/.local/share/gomi"
 
+    # cclens writes its analysis store here, also when run from a session
+    "${home}/.local/state/cclens"
+
     # Toolchain caches — losing them is harmless
     "${home}/.cache"
     "${home}/Library/Caches"

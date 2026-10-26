@@ -6,6 +6,14 @@
   dockerTools,
 }:
 {
+  cclens-darwin-arm64 = {
+    pname = "cclens-darwin-arm64";
+    version = "v0.4.0";
+    src = fetchurl {
+      url = "https://github.com/lambdalisue/cclens/releases/download/v0.4.0/cclens-v0.4.0-aarch64-apple-darwin.tar.gz";
+      sha256 = "sha256-2XfMbv/GM8nPHTlaOUPd7nMM6euH98x5yN+9rN1lpeM=";
+    };
+  };
   frog-darwin-arm64 = {
     pname = "frog-darwin-arm64";
     version = "1.1.0";
