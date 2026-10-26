@@ -174,6 +174,11 @@ in
     };
   };
 
+  # Kept in this repository and installed from the store, so they cannot
+  # dangle the way links into a separate, uncloned checkout did (#535).
+  programs.claude-code.context = ./claude-context/CLAUDE.md;
+  programs.claude-code.rulesDir = ./claude-context/rules;
+
   # Skills are linked one by one instead of linking ~/.claude/skills itself:
   # programs.claude-code installs its generated MCP plugin into
   # ~/.claude/skills/claude-code-home-manager, which fails with
@@ -192,15 +197,10 @@ in
           builtins.readDir "${inputs.skill-skill-skill}/.claude/skills"
         )
       );
-      skillLinks = lib.listToAttrs (
-        map (
-          name: lib.nameValuePair ".claude/skills/${name}" (link "skill-skill-skill/.claude/skills/${name}")
-        ) skillNames
-      );
     in
-    {
-      ".claude/rules" = link "rule-rule-rule/rules";
-      ".claude/CLAUDE.md" = link "rule-rule-rule/CLAUDE.md";
-    }
-    // skillLinks;
+    lib.listToAttrs (
+      map (
+        name: lib.nameValuePair ".claude/skills/${name}" (link "skill-skill-skill/.claude/skills/${name}")
+      ) skillNames
+    );
 }

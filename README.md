@@ -61,11 +61,10 @@ configuration — and in this order.
   gh ssh-key add ~/.ssh/id_ed25519.pub --type signing --title "$(hostname -s)"
   ```
 
-* Clone the repositories [`home/claude.nix`](home/claude.nix) links into `~/.claude`. Those are
-  out-of-store symlinks into working trees under the ghq root, so activation succeeds either way
-  and the links simply dangle until the trees exist.
+* Clone the skills repository [`home/claude.nix`](home/claude.nix) links into `~/.claude/skills`.
+  Those are out-of-store symlinks into a working tree under the ghq root, so activation succeeds
+  either way and the links simply dangle until the tree exists.
   ```bash
-  ghq get naitokosuke/rule-rule-rule
   ghq get naitokosuke/skill-skill-skill
   ```
 
