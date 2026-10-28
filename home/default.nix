@@ -7,7 +7,6 @@
     ./claude-sandbox.nix
     ./claude.nix
     ./direnv.nix
-    ./gh-dash.nix
     ./gh.nix
     ./ghostty.nix
     ./git.nix

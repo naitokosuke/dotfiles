@@ -749,29 +749,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
-  "home/gh-dash.nix": {
-    about: "gh-dash — a terminal dashboard for PRs, issues, and notifications.",
-    tags: ["github", "cli"],
-    walkthrough: {
-      intro:
-        "gh-dash is a TUI dashboard for GitHub. The home-manager module installs it and registers it as a gh extension, so it runs as both `gh-dash` and `gh dash`. Everything else in the file is the dashboard itself, declared as a Nix attrset.",
-      sections: [
-        {
-          title: "Sections",
-          prose:
-            "Pull requests split into mine, the ones waiting on my review, and everything else I'm involved in; issues into mine, assigned, and involved. Notifications get a tab per reason — author, participating, mention, review requested, and so on.",
-          lines: [11, 72],
-        },
-        {
-          title: "Defaults and layout",
-          prose:
-            "It opens on the PR view with the preview pane showing, lists 20 items per view, and uses `LGTM` as the approve comment. Assignee and base-branch columns are hidden to leave room for the rest.",
-          lines: [77, 117],
-        },
-      ],
-    },
-  },
-
   "home/ghostty.nix": {
     about: "Ghostty terminal — Nushell shell, Catppuccin Mocha theme.",
     tags: ["terminal"],
