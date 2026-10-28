@@ -93,7 +93,6 @@ in
       "adrafinil"
       "blender"
       "claude"
-      "discord"
       "dockdoor"
       "ghostty"
       "google-chrome"
