@@ -29,7 +29,6 @@ in
     gwq
     herdr
     idris2
-    ni
     nixd
     nix-output-monitor
     nodejs_26

@@ -8,4 +8,4 @@
 
 - Conventional Commits, single line, in English
 - One feature per commit
-- Run tests and lint before committing with `nr`
+- Run tests and lint before committing with `vp run`

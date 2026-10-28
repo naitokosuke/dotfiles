@@ -546,7 +546,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `frog`, `gwq`, `playwright-cli`, and `vite-plus` (`vp`) from the `./pkgs` overlay.",
+            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `frog`, `gwq`, `playwright-cli`, and `vite-plus` (`vp`) from the `./pkgs` overlay.",
           lines: [16, 48],
         },
       ],
