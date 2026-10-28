@@ -546,7 +546,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, `ni`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `frog`, `gwq`, `playwright-cli`, and `vite-plus` (`vp`) from the `./pkgs` overlay.",
+            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `frog`, `gwq`, `playwright-cli`, and `vite-plus` (`vp`) from the `./pkgs` overlay.",
           lines: [16, 48],
         },
       ],
@@ -746,29 +746,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     walkthrough: {
       intro:
         "`gh` is the GitHub CLI; this module configures it — SSH as the git protocol, vim as the editor, and a `co` alias for `pr checkout` — and ships the `gh-sub-issue` extension. The extension isn't in nixpkgs, so it comes from `./pkgs` as the official prebuilt binary, version-tracked by nvfetcher.",
-    },
-  },
-
-  "home/gh-dash.nix": {
-    about: "gh-dash — a terminal dashboard for PRs, issues, and notifications.",
-    tags: ["github", "cli"],
-    walkthrough: {
-      intro:
-        "gh-dash is a TUI dashboard for GitHub. The home-manager module installs it and registers it as a gh extension, so it runs as both `gh-dash` and `gh dash`. Everything else in the file is the dashboard itself, declared as a Nix attrset.",
-      sections: [
-        {
-          title: "Sections",
-          prose:
-            "Pull requests split into mine, the ones waiting on my review, and everything else I'm involved in; issues into mine, assigned, and involved. Notifications get a tab per reason — author, participating, mention, review requested, and so on.",
-          lines: [11, 72],
-        },
-        {
-          title: "Defaults and layout",
-          prose:
-            "It opens on the PR view with the preview pane showing, lists 20 items per view, and uses `LGTM` as the approve comment. Assignee and base-branch columns are hidden to leave room for the rest.",
-          lines: [77, 117],
-        },
-      ],
     },
   },
 

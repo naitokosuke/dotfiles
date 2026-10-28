@@ -91,7 +91,6 @@ in
         la = "ls -la";
         ll = "ls -l";
         ":q" = "exit";
-        nid = "ni -D";
       };
 
       # One entry per reason, each declared once. home-manager is the only
