@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   # Free space on the startup disk, shown as "󰋊 <free> / <size>". Starship
@@ -17,7 +17,7 @@ let
   diskFree = style: min: max: {
     command = "/bin/df -h / | /usr/bin/awk 'NR == 2 { print $4 \" / \" $2 }'";
     when = "p=$(/bin/df -k / | /usr/bin/awk 'NR == 2 { print int(($2 - $4) * 100 / $2) }'); [ $p -ge ${toString min} ] && [ $p -lt ${toString max} ]";
-    shell = [ "${pkgs.bash}/bin/sh" ];
+    shell = [ (lib.getExe' pkgs.bash "sh") ];
     inherit style;
     # Nerd Font hard disk glyph (nf-md-harddisk)
     symbol = "󰋊 ";
