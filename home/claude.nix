@@ -79,6 +79,8 @@ in
     }
   ];
 
+  programs.claude-code.enable = true;
+
   programs.claude-code.settings = {
     theme = "dark-daltonized";
     verbose = false;

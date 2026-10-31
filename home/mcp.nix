@@ -20,8 +20,5 @@
 
   programs.mcp.enable = true;
 
-  programs.claude-code = {
-    enable = true;
-    enableMcpIntegration = true;
-  };
+  programs.claude-code.enableMcpIntegration = true;
 }
