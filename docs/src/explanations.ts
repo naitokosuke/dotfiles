@@ -462,30 +462,12 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
-  "hosts/common/key_repeat.nix": {
-    about: "Fastest macOS key-repeat tuning (KeyRepeat=1, InitialKeyRepeat=20).",
-    tags: ["macos", "keyboard"],
-    walkthrough: {
-      intro:
-        "macOS's default key-repeat is glacial for vim muscle memory. `KeyRepeat = 1` is the fastest tick the OS exposes, and `InitialKeyRepeat = 20` (≈ 200 ms) cuts the dead-time before repeat kicks in.",
-    },
-  },
-
   "hosts/common/keyboard.nix": {
     about: "Disables Ctrl+Space / Ctrl+Option+Space input-source switching.",
     tags: ["macos", "keyboard"],
     walkthrough: {
       intro:
         "The macOS input-source toggles `Ctrl+Space` and `Ctrl+Option+Space` collide with editor / shell keybinds. Disabling them via `symbolichotkeys` frees those chords for vim and Emacs-style readline.",
-    },
-  },
-
-  "hosts/common/menubar.nix": {
-    about: "Hides the macOS menu bar permanently.",
-    tags: ["macos", "ui"],
-    walkthrough: {
-      intro:
-        "`_HIHideMenuBar = true` hides the menu bar permanently — it slides in only when the cursor hits the top edge. Combined with the auto-hidden Dock, every pixel of vertical space is reclaimed for the editor or terminal.",
     },
   },
 
@@ -530,6 +512,35 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
+  "hosts/common/nsglobaldomain.nix": {
+    about: "Global macOS preferences: key repeat, hidden menu bar, scrolling.",
+    tags: ["macos", "keyboard", "ui"],
+    walkthrough: {
+      intro:
+        "The `NSGlobalDomain` keys that have no app of their own, in one module instead of a file per key. They used to be `key_repeat.nix`, `menubar.nix` and `scroll.nix`, each three lines of header around a single setting.",
+      sections: [
+        {
+          title: "Key repeat",
+          prose:
+            "macOS's default key repeat is glacial for vim muscle memory. `KeyRepeat = 1` is the fastest tick the OS exposes, and `InitialKeyRepeat = 20` (≈ 200 ms) cuts the dead time before repeat kicks in.",
+          lines: [6, 9],
+        },
+        {
+          title: "Menu bar",
+          prose:
+            "`_HIHideMenuBar = true` hides the menu bar permanently — it slides in only when the cursor hits the top edge. Combined with the auto-hidden Dock, every pixel of vertical space is reclaimed for the editor or terminal.",
+          lines: [11, 12],
+        },
+        {
+          title: "Scrolling",
+          prose:
+            "Two small ergonomics toggles. `swipescrolldirection = true` keeps macOS's natural direction (drag content, not viewport). `AppleShowScrollBars = \"WhenScrolling\"` shows the scrollbar only during active scroll so it doesn't pin a column of pixels.",
+          lines: [14, 16],
+        },
+      ],
+    },
+  },
+
   "hosts/common/packages.nix": {
     about: "System-wide CLI packages declared in environment.systemPackages.",
     tags: ["cli", "packages"],
@@ -559,15 +570,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     walkthrough: {
       intro:
         "Screenshots default to the Desktop on macOS, which mixes them with everything else. Pinning them under `~/Pictures/screenshots` makes them easy to find and easy to ignore in `.gitignore`s.",
-    },
-  },
-
-  "hosts/common/scroll.nix": {
-    about: "Swipe scroll direction and scrollbar visibility mode.",
-    tags: ["macos"],
-    walkthrough: {
-      intro:
-        "Two small ergonomics toggles. `swipescrolldirection = true` keeps macOS's natural direction (drag content, not viewport). `AppleShowScrollBars = \"WhenScrolling\"` shows the scrollbar only during active scroll so it doesn't pin a column of pixels.",
     },
   },
 
@@ -911,7 +913,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "github.com",
           prose:
             "A single ed25519 key, with `IdentitiesOnly` so ssh doesn't offer every key in the agent. The key is added to the agent on first use, and `UseKeychain` stores its passphrase in the macOS Keychain.",
-          lines: [17, 23],
+          lines: [14, 19],
         },
       ],
     },

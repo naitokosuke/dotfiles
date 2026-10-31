@@ -2,17 +2,15 @@
 
 {
   imports = [
-    ./key_repeat.nix
     ./dock.nix
     ./finder.nix
     ./gomi.nix
     ./home-manager.nix
     ./homebrew.nix
     ./keyboard.nix
-    ./menubar.nix
     ./nix.nix
+    ./nsglobaldomain.nix
     ./packages.nix
-    ./scroll.nix
     ./screen_capture.nix
     ./xcode.nix
   ];
