@@ -109,7 +109,7 @@ create by hand first. Worth revisiting when there is a secret that actually want
 │   ├── ghostty.nix    # Terminal
 │   ├── starship.nix   # Prompt
 │   ├── claude-*       # Claude Code deletion guard hook and Seatbelt sandbox
-│   └── …              # atuin, direnv, gh, gomi, gwq, mcp, nh, ssh, vite-plus, vscode, zoxide
+│   └── …              # adrafinil, atuin, direnv, gh, gomi, gwq, mcp, nh, ssh, vite-plus, vscode, zoxide
 └── docs/              # Interactive walkthrough web app (Vite+ / void)
                        #   deployed to https://naitokosuke-dotfiles.void.app/
 ```

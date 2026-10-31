@@ -7,18 +7,6 @@
 }:
 
 let
-  # The hooks below run binaries that Homebrew casks install, so they cannot
-  # come from the store. They can still be tied to the declaration that
-  # provides them: drop a cask from hosts/common/homebrew.nix and evaluation
-  # fails here, instead of the hook silently doing nothing at runtime.
-  # nix-darwin normalises homebrew.casks into submodules, so the names are read
-  # off `name` rather than the list itself.
-  requireCask =
-    cask: reference:
-    lib.throwIfNot (lib.any (declared: declared.name == cask) osConfig.homebrew.casks)
-      "home/claude.nix runs `${reference}`, which the ${cask} cask provides, but that cask is not in hosts/common/homebrew.nix."
-      reference;
-
   # Adrafinil (cask in hosts/common/homebrew.nix) keeps the Mac awake only
   # while an agent turn is running. Its one-click installer writes these hooks
   # into ~/.claude/settings.json, which is a read-only store symlink here, so
@@ -28,12 +16,10 @@ let
   # self-updates past the flake.lock pin, so re-check upstream when it does.
   # The commands must match upstream byte for byte — Adrafinil recognises its
   # hooks by command and compares them verbatim, so Settings → Agents reports
-  # Claude Code as connected without the `_adrafinil` marker. The bundle path
-  # is used instead of /usr/local/bin/adrafinil, which the app only creates
-  # asynchronously at launch.
+  # Claude Code as connected without the `_adrafinil` marker.
   adrafinil =
     let
-      cli = requireCask "adrafinil" "/Applications/Adrafinil.app/Contents/Helpers/adrafinil";
+      cli = config.naitokosuke.adrafinilCli;
       hook =
         {
           command,
@@ -80,6 +66,19 @@ let
 in
 
 {
+  # The plan hook below runs `code`, which a Homebrew cask installs, so it
+  # cannot come from the store. It can still be tied to the declaration that
+  # provides it: drop the cask from hosts/common/homebrew.nix and evaluation
+  # fails here, instead of the hook silently doing nothing at runtime.
+  # nix-darwin normalises homebrew.casks into submodules, so the name is read
+  # off `name` rather than the list itself.
+  assertions = [
+    {
+      assertion = lib.any (declared: declared.name == "visual-studio-code") osConfig.homebrew.casks;
+      message = "home/claude.nix runs `code`, which the visual-studio-code cask provides, but that cask is not in hosts/common/homebrew.nix.";
+    }
+  ];
+
   programs.claude-code.settings = {
     theme = "dark-daltonized";
     verbose = false;
@@ -165,7 +164,7 @@ in
               # the glob would be passed through literally, so the match is
               # tested before opening anything — the hook is best-effort, and a
               # failure here is quiet enough to stay unnoticed.
-              command = ''plan=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n "$plan" ] && ${requireCask "visual-studio-code" "code"} "$plan" || true'';
+              command = ''plan=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n "$plan" ] && code "$plan" || true'';
               timeout = 5;
             }
           ];
