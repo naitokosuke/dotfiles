@@ -25,6 +25,10 @@ in
       type = types.str;
       description = "Root directory for source checkouts, shared by ghq and gwq.";
     };
+    githubDirectory = mkOption {
+      type = types.str;
+      description = "Directory under srcDirectory holding this user's own GitHub repositories, in ghq's layout: where new shells start, and where the dotfiles and skills checkouts are expected.";
+    };
   };
 
   config.naitokosuke = {
@@ -33,5 +37,6 @@ in
     email = "kosuke.naito.engineer@gmail.com";
     homeDirectory = "/Users/naitokosuke";
     srcDirectory = "${config.naitokosuke.homeDirectory}/src";
+    githubDirectory = "${config.naitokosuke.srcDirectory}/github.com/${config.naitokosuke.username}";
   };
 }

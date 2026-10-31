@@ -71,7 +71,7 @@ in
 
       # A new terminal starts in the ghq directory unless VS Code opened it.
       if [[ -z $VSCODE_GIT_IPC_HANDLE && $TERM_PROGRAM != vscode ]]; then
-        cd ${config.naitokosuke.srcDirectory}/github.com/${config.home.username}
+        cd ${config.naitokosuke.githubDirectory}
       fi
     '';
   };

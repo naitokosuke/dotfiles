@@ -324,19 +324,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["module", "config"],
     walkthrough: {
       intro:
-        "A small NixOS-module-style namespace that centralizes the personal literals the rest of the tree needs. It declares typed `naitokosuke.{username,fullName,email,homeDirectory,srcDirectory}` options and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
+        "A small NixOS-module-style namespace that centralizes the personal literals the rest of the tree needs. It declares typed `naitokosuke.{username,fullName,email,homeDirectory,srcDirectory,githubDirectory}` options and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
       sections: [
         {
           title: "Typed options",
           prose:
             "Each constant is an `mkOption` with `type = types.str` and a description, so the values are self-documenting and type-checked rather than bare strings copied around the repo.",
-          lines: [7, 27],
+          lines: [7, 32],
         },
         {
           title: "Defaults",
           prose:
-            "`config.naitokosuke` sets the defaults for this user. `srcDirectory` is derived from `homeDirectory` and is the one root that ghq, gwq, nh, and the Claude Code rule and skill links all build their paths from. Because they're module options, a per-host module can override any field without touching the call sites that consume them.",
-          lines: [30, 36],
+            "`config.naitokosuke` sets the defaults for this user. `srcDirectory` is derived from `homeDirectory` and is the one root that ghq, gwq, nh, and the Claude Code rule and skill links all build their paths from. `githubDirectory` goes one step further down ghq's layout to this user's own repositories, so `home/claude.nix`, `home/nh.nix` and `home/zsh.nix` read one option instead of each assembling `<srcDirectory>/github.com/<username>`. Because they're module options, a per-host module can override any field without touching the call sites that consume them.",
+          lines: [34, 41],
         },
       ],
     },
@@ -864,8 +864,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Pointing nh at this flake",
           prose:
-            "`darwinFlake` is this checkout under the ghq root, so `nh darwin switch` picks `darwinConfigurations.<hostname>` without a `--flake` argument.",
-          lines: [5, 12],
+            "`darwinFlake` is this checkout under `naitokosuke.githubDirectory`, so `nh darwin switch` picks `darwinConfigurations.<hostname>` without a `--flake` argument.",
+          lines: [5, 10],
         },
       ],
     },

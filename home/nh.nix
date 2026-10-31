@@ -2,12 +2,9 @@
 # store GC runs as a root `nh clean all` daemon in hosts/common/nix.nix.
 { config, ... }:
 
-let
-  darwinFlake = "${config.naitokosuke.srcDirectory}/github.com/${config.home.username}/dotfiles";
-in
 {
   programs.nh = {
     enable = true;
-    inherit darwinFlake;
+    darwinFlake = "${config.naitokosuke.githubDirectory}/dotfiles";
   };
 }
