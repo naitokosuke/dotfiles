@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./adrafinil.nix
     ./atuin.nix
     ./claude-rm-guard
     ./claude-sandbox.nix
