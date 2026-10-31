@@ -258,22 +258,6 @@
         "type": "github"
       }
     },
-    "nu-scripts": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1792843086,
-        "narHash": "sha256-Lx44zQPldtkF3haks6E5DtZIBKLveafgE4HtwbX2yt4=",
-        "owner": "nushell",
-        "repo": "nu_scripts",
-        "rev": "02cb1a2bfb8f7b6977af6914dbe44f450d6f9df2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nushell",
-        "repo": "nu_scripts",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "brew-src": "brew-src",
@@ -287,7 +271,6 @@
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
-        "nu-scripts": "nu-scripts",
         "skill-skill-skill": "skill-skill-skill",
         "treefmt-nix": "treefmt-nix",
         "vscode-settings": "vscode-settings"

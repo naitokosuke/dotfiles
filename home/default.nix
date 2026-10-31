@@ -15,12 +15,12 @@
     ./mcp.nix
     ./nh.nix
     ./playwright.nix
-    ./shell
     ./ssh.nix
     ./starship.nix
     ./vite-plus.nix
     ./vscode.nix
     ./zoxide.nix
+    ./zsh.nix
   ];
 
   home.stateVersion = "25.05";

@@ -10,7 +10,4 @@ in
     enable = true;
     inherit darwinFlake;
   };
-
-  # home.sessionVariables only reaches zsh; Nushell needs it set explicitly.
-  programs.nushell.environmentVariables.NH_DARWIN_FLAKE = darwinFlake;
 }
