@@ -1,6 +1,7 @@
 {
   lib,
   stdenvNoCC,
+  versionCheckHook,
   sources,
 }:
 
@@ -19,12 +20,8 @@ stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
+  nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
-  installCheckPhase = ''
-    runHook preInstallCheck
-    $out/bin/frog --version > /dev/null
-    runHook postInstallCheck
-  '';
 
   meta = {
     description = "Automated friction logging for agents";

@@ -4,6 +4,7 @@
 {
   lib,
   stdenvNoCC,
+  versionCheckHook,
   sources,
 }:
 
@@ -19,6 +20,9 @@ stdenvNoCC.mkDerivation {
     install -Dm755 $src $out/bin/gh-sub-issue
     runHook postInstall
   '';
+
+  nativeInstallCheckInputs = [ versionCheckHook ];
+  doInstallCheck = true;
 
   meta = {
     description = "gh extension for creating and listing GitHub sub-issues";
