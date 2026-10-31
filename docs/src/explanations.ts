@@ -153,13 +153,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Fetch and install",
           prose:
             "The asset is a single gzipped file, not an archive, so `dontUnpack` skips stdenv's unpack phase and `installPhase` gunzips the source straight into `$out/bin/frog`, then makes it executable.",
-          lines: [12, 20],
+          lines: [13, 21],
         },
         {
           title: "Install check",
           prose:
-            "`frog --version` has to run successfully, which confirms the decompressed binary actually executes on this platform.",
-          lines: [22, 27],
+            "nixpkgs' `versionCheckHook` runs `frog --version` and checks that the output contains the derivation's `version`, which confirms the decompressed binary executes on this platform and is the release nvfetcher pinned. The same two lines do this in every binary package here.",
+          lines: [23, 24],
         },
       ],
     },
@@ -176,7 +176,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Fetch and install",
           prose:
             "`dontUnpack` plus `install -Dm755` places the pinned binary as `$out/bin/gh-sub-issue`. The version comes from nvfetcher with the tag's `v` already stripped.",
-          lines: [10, 21],
+          lines: [11, 22],
+        },
+        {
+          title: "Install check",
+          prose:
+            "`versionCheckHook` runs `gh-sub-issue --version` and checks that the output contains `version`, so a binary that does not execute, or belongs to a different release than nvfetcher pinned, fails the build instead of surfacing as a broken `gh` extension.",
+          lines: [24, 25],
         },
       ],
     },
@@ -210,13 +216,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Dependencies from the upstream lockfile",
           prose:
             "`importNpmLock` reads `package-lock.json` straight out of the pinned source, so there's no `npmDepsHash` to update by hand after each nvfetcher bump (issue #411). `src` is bound in a `let` because both the derivation and `importNpmLock` need the same tree. `dontNpmBuild` skips `npm run build`.",
-          lines: [13, 28],
+          lines: [14, 29],
         },
         {
           title: "Browsers stay runtime-managed",
           prose:
             "Browsers are left to Playwright's own cache. Pinning nixpkgs' `playwright-driver.browsers` would pair them with a different Playwright version than the one vendored here.",
-          lines: [30, 32],
+          lines: [31, 33],
+        },
+        {
+          title: "Install check",
+          prose:
+            "`versionCheckHook` runs `playwright-cli --version` and checks that the output contains `version`, the same check the binary packages here use, so the installed entry point is known to start before it lands on `$PATH`.",
+          lines: [35, 36],
         },
       ],
     },

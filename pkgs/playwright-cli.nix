@@ -7,6 +7,7 @@
   lib,
   buildNpmPackage,
   importNpmLock,
+  versionCheckHook,
   sources,
 }:
 
@@ -31,12 +32,8 @@ buildNpmPackage {
   # nixpkgs' playwright-driver.browsers would mismatch the vendored
   # Playwright, which tracks alpha releases ahead of nixpkgs.
 
+  nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
-  installCheckPhase = ''
-    runHook preInstallCheck
-    $out/bin/playwright-cli --version > /dev/null
-    runHook postInstallCheck
-  '';
 
   meta = {
     description = "Playwright CLI for browser automation";
