@@ -4,7 +4,6 @@
   programs.atuin = {
     enable = true;
     enableZshIntegration = true;
-    enableNushellIntegration = true;
 
     settings = {
       search_mode = "fuzzy";

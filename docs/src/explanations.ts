@@ -52,38 +52,38 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Inputs",
           prose:
-            "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: `brew-src`, the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings`, `skill-skill-skill`, and `nu-scripts`. `brew-src` pins Homebrew itself at a release tag (7.0.1) ahead of the one nix-homebrew locks, and nix-homebrew's own `brew-src` follows it. `llm-agents` supplies Claude Code and `mcp-servers-nix` the MCP module.",
-          lines: [4, 67],
+            "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: `brew-src`, the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings` and `skill-skill-skill`. `brew-src` pins Homebrew itself at a release tag (7.0.1) ahead of the one nix-homebrew locks, and nix-homebrew's own `brew-src` follows it. `llm-agents` supplies Claude Code and `mcp-servers-nix` the MCP module.",
+          lines: [4, 62],
         },
         {
           title: "One package set, two roots",
           prose:
             "The overlays and the Nixpkgs config are named once and used twice: by the `pkgs` the flake's own outputs are built from, and by the inline module every host loads. `customPackages` is the single entry into `./pkgs`, so the `packages` output and the overlay are visibly the same function rather than two similar-looking expressions — a custom package that grows a dependency on another custom package, or on an unfree one, cannot build one way through `nix build .#<pkg>` and another through `darwin-rebuild switch`.",
-          lines: [80, 102],
+          lines: [75, 97],
         },
         {
           title: "mkDarwinConfig",
           prose:
             "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module pins `aarch64-darwin` and applies the shared `nixpkgsConfig` and `overlays` defined above. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
-          lines: [109, 133],
+          lines: [104, 128],
         },
         {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [136, 136],
+          lines: [131, 131],
         },
         {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay injects, so `nix build .#gwq` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [138, 138],
+          lines: [133, 133],
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
-          lines: [140, 143],
+          lines: [135, 138],
         },
       ],
     },
@@ -320,11 +320,11 @@ export const explanations: Readonly<Record<string, Explanation>> = {
 
   "modules/naitokosuke/default.nix": {
     about:
-      "Typed personal-constants module — identity, directories, and the settings both shells share.",
+      "Typed personal-constants module — identity and directories.",
     tags: ["module", "config"],
     walkthrough: {
       intro:
-        "A small NixOS-module-style namespace that centralizes the personal literals the rest of the tree needs. It declares typed `naitokosuke.{username,fullName,email,homeDirectory,srcDirectory}` options plus the `naitokosuke.shell.*` settings both shells render, and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
+        "A small NixOS-module-style namespace that centralizes the personal literals the rest of the tree needs. It declares typed `naitokosuke.{username,fullName,email,homeDirectory,srcDirectory}` options and sets their defaults, so every other module reads `config.naitokosuke.*` instead of hardcoding `naitokosuke`. It's loaded into both nix-darwin (via the flake `modules` list) and home-manager (via `home-manager.sharedModules`), so both trees resolve the same values — and a host can override any of them in one place.",
       sections: [
         {
           title: "Typed options",
@@ -333,22 +333,10 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           lines: [7, 27],
         },
         {
-          title: "Shared shell settings",
-          prose:
-            "`$PATH`, environment variables, aliases and the Homebrew-forbidden formulae have to be identical in Nushell and Zsh. They used to live in `home/shell/common.nix` as a plain function of `username` that three modules each imported — data that never appeared in `config`, could not be overridden per host, and was invisible to anything inspecting the evaluated configuration. They are options here instead, marked `visible = false` because they are internal to this repository rather than an interface (issue #483).",
-          lines: [29, 53],
-        },
-        {
           title: "Defaults",
           prose:
             "`config.naitokosuke` sets the defaults for this user. `srcDirectory` is derived from `homeDirectory` and is the one root that ghq, gwq, nh, and the Claude Code rule and skill links all build their paths from. Because they're module options, a per-host module can override any field without touching the call sites that consume them.",
-          lines: [56, 62],
-        },
-        {
-          title: "One PATH entry per reason",
-          prose:
-            "`HOMEBREW_FORBIDDEN_FORMULAE` (`bun`, `claude`, `node`, …) is exported by both shells so `brew install` can never shadow a Nix-managed binary. `pathEntries` runs lowest to highest priority, and holds only what has a reason to be there: `/opt/homebrew/bin` for cask binaries, and the three Nix directories — which home-manager is the *only* thing that puts on either shell's `$PATH`, since `hosts/common/nix.nix` disables nix-darwin's Zsh integration and Ghostty starts `nu --login` rather than a login Zsh. `/usr/local/bin`, `/opt/homebrew/sbin` and `~/.nix-profile/bin` were dropped in #483: the first two hold nothing this configuration depends on, and with `useUserPackages` nothing is ever installed into `~/.nix-profile`.",
-          lines: [64, 112],
+          lines: [30, 36],
         },
       ],
     },
@@ -467,7 +455,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["macos", "keyboard"],
     walkthrough: {
       intro:
-        "macOS's default key-repeat is glacial for vim/Nushell muscle memory. `KeyRepeat = 1` is the fastest tick the OS exposes, and `InitialKeyRepeat = 20` (≈ 200 ms) cuts the dead-time before repeat kicks in.",
+        "macOS's default key-repeat is glacial for vim muscle memory. `KeyRepeat = 1` is the fastest tick the OS exposes, and `InitialKeyRepeat = 20` (≈ 200 ms) cuts the dead-time before repeat kicks in.",
     },
   },
 
@@ -476,7 +464,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["macos", "keyboard"],
     walkthrough: {
       intro:
-        "The macOS input-source toggles `Ctrl+Space` and `Ctrl+Option+Space` collide with editor / shell keybinds. Disabling them via `symbolichotkeys` frees those chords for vim, Emacs-style readline, and Nushell.",
+        "The macOS input-source toggles `Ctrl+Space` and `Ctrl+Option+Space` collide with editor / shell keybinds. Disabling them via `symbolichotkeys` frees those chords for vim and Emacs-style readline.",
     },
   },
 
@@ -494,12 +482,12 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["nix", "infra"],
     walkthrough: {
       intro:
-        "Configures the Nix daemon itself. Lix replaces upstream Nix, `experimental-features` turns on `nix-command` and `flakes`, a weekly `nh clean all` daemon and `nix.optimise` keep the store in check, and zsh's `/etc` management is delegated to home-manager so Nushell stays the primary interactive shell.",
+        "Configures the Nix daemon itself. Lix replaces upstream Nix, `experimental-features` turns on `nix-command` and `flakes`, a weekly `nh clean all` daemon and `nix.optimise` keep the store in check, and zsh's `/etc` management is delegated to home-manager.",
       sections: [
         {
           title: "Hand zsh to home-manager",
           prose:
-            "`nix-darwin` normally rewrites `/etc/zshrc`; disabling that lets home-manager own every dotfile end-to-end. Nushell is the interactive shell in Ghostty, so zsh stays minimal — just the login shell for IDEs / SSH.",
+            "`nix-darwin` normally rewrites `/etc/zshrc`; disabling that lets home-manager own every dotfile end-to-end, so `home/zsh.nix` is the one place the shell is configured.",
           lines: [10, 14],
         },
         {
@@ -622,11 +610,11 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/atuin.nix": {
-    about: "atuin (synced fuzzy shell history) with Zsh + Nushell integration.",
+    about: "atuin (synced fuzzy shell history) with Zsh integration.",
     tags: ["shell", "history"],
     walkthrough: {
       intro:
-        "atuin replaces the shell's built-in history with a synced, fuzzy-searchable SQLite store. Both Zsh and Nushell hook into it, search mode is fuzzy, and the scope is global so the same history surfaces no matter which directory the search starts from. The search UI is compact, 20 lines tall, with a preview of the selected command.",
+        "atuin replaces the shell's built-in history with a synced, fuzzy-searchable SQLite store. Zsh hooks into it, search mode is fuzzy, and the scope is global so the same history surfaces no matter which directory the search starts from. The search UI is compact, 20 lines tall, with a preview of the selected command.",
     },
   },
 
@@ -732,11 +720,11 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/direnv.nix": {
-    about: "direnv + nix-direnv, with Nushell integration.",
+    about: "direnv + nix-direnv.",
     tags: ["dev-env"],
     walkthrough: {
       intro:
-        "`direnv` + `nix-direnv` is how per-project shells materialise — drop a `.envrc` into a project, run `direnv allow`, and the right `nix shell` or `devenv` env loads on `cd`, in Nushell too. nix-direnv caches the evaluated environment and roots it against garbage collection, so entering a project is instant after the first load.",
+        "`direnv` + `nix-direnv` is how per-project shells materialise — drop a `.envrc` into a project, run `direnv allow`, and the right `nix shell` or `devenv` env loads on `cd`. nix-direnv caches the evaluated environment and roots it against garbage collection, so entering a project is instant after the first load.",
     },
   },
 
@@ -750,17 +738,17 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/ghostty.nix": {
-    about: "Ghostty terminal — Nushell shell, Catppuccin Mocha theme.",
+    about: "Ghostty terminal — Catppuccin Mocha theme.",
     tags: ["terminal"],
     walkthrough: {
       intro:
-        "Ghostty is the primary terminal. The actual binary comes from Homebrew Cask (`package = null` disables the Nix-side install to avoid double-installing), while the config is declared here: Nushell as a login shell, the Catppuccin Mocha theme, and ligatures turned off via `font-feature`.",
+        "Ghostty is the primary terminal. The actual binary comes from Homebrew Cask (`package = null` disables the Nix-side install to avoid double-installing), while the config is declared here: the Catppuccin Mocha theme and ligatures turned off via `font-feature`. No `command` is set, so Ghostty starts the login shell, which is Zsh.",
       sections: [
         {
           title: "Shift+Enter",
           prose:
             "Ghostty implements fixterms, so Shift+Enter sends an escape sequence — which breaks multi-line input in Claude Code. The keybind makes it send a literal newline instead, matching iTerm2.",
-          lines: [21, 26],
+          lines: [16, 21],
         },
       ],
     },
@@ -854,8 +842,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Pointing nh at this flake",
           prose:
-            "`darwinFlake` is this checkout under the ghq root, so `nh darwin switch` picks `darwinConfigurations.<hostname>` without a `--flake` argument. `home.sessionVariables` only reaches zsh, so `NH_DARWIN_FLAKE` is set again for Nushell.",
-          lines: [12, 22],
+            "`darwinFlake` is this checkout under the ghq root, so `nh darwin switch` picks `darwinConfigurations.<hostname>` without a `--flake` argument.",
+          lines: [5, 12],
         },
       ],
     },
@@ -871,8 +859,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "One variable, nothing else moves",
           prose:
-            "Playwright resolves its registry directory from `PLAYWRIGHT_BROWSERS_PATH` at runtime, so pointing that at `~/.cache/ms-playwright` — Playwright's own default on Linux, and ordinary data as far as macOS is concerned — is the whole fix. Browsers stay runtime-managed by Playwright, the same decision recorded in `pkgs/playwright-cli.nix`, and the cache stays keyed by browser build id, so every project on a matching build shares one copy. `home.sessionVariables` only reaches zsh, so the variable is set again for Nushell.",
-          lines: [19, 26],
+            "Playwright resolves its registry directory from `PLAYWRIGHT_BROWSERS_PATH` at runtime, so pointing that at `~/.cache/ms-playwright` — Playwright's own default on Linux, and ordinary data as far as macOS is concerned — is the whole fix. Browsers stay runtime-managed by Playwright, the same decision recorded in `pkgs/playwright-cli.nix`, and the cache stays keyed by browser build id, so every project on a matching build shares one copy.",
+          lines: [19, 24],
         },
       ],
     },
@@ -896,17 +884,17 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/starship.nix": {
-    about: "Starship prompt — explicit module format, Nushell integration.",
+    about: "Starship prompt — explicit module format.",
     tags: ["shell", "prompt"],
     walkthrough: {
       intro:
-        "Starship is the cross-shell prompt, enabled here for Nushell. A leading newline gives every prompt breathing room, and instead of the default module list, `format` names exactly what appears.",
+        "Starship is the prompt; home-manager wires it into Zsh. A leading newline gives every prompt breathing room, and instead of the default module list, `format` names exactly what appears.",
       sections: [
         {
           title: "Format",
           prose:
             "User, host, free disk space, directory, git branch and status, and command duration, then a line break and the `❯` character — green on success, red on failure. The user and host show even outside SSH, and the command duration only for commands that took two seconds or more.",
-          lines: [36, 36],
+          lines: [34, 34],
         },
         {
           title: "Free disk space",
@@ -918,7 +906,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Colour by usage",
           prose:
             "A custom module can't restyle itself from its own output, so there are three of them, one per colour: cyan below 90% used, yellow from 90%, and red from 95% — the same levels as Powerlevel10k's `disk_usage`. Each one's `when` computes the used share and shows the module only inside its own range, so exactly one appears.",
-          lines: [55, 59],
+          lines: [53, 57],
         },
       ],
     },
@@ -951,60 +939,40 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/zoxide.nix": {
-    about: "zoxide — a learning `cd`. Integrated into Zsh and Nushell.",
+    about: "zoxide — a learning `cd`, integrated into Zsh.",
     tags: ["shell", "navigation"],
     walkthrough: {
       intro:
-        "`zoxide` watches which directories you `cd` into and learns frequency + recency, then exposes a `z` command that jumps to the best match for a fragment. Both Zsh and Nushell integrate, so the same history surfaces in either shell.",
+        "`zoxide` watches which directories you `cd` into and learns frequency + recency, then exposes a `z` command that jumps to the best match for a fragment.",
     },
   },
 
-  "home/shell/default.nix": {
-    about: "Pulls in Nushell (interactive) and Zsh (login), and sets the session PATH.",
-    tags: ["shell", "index"],
-    walkthrough: {
-      intro:
-        "The shell story is dual: Nushell is the interactive shell inside Ghostty (structured-data, modern), while Zsh remains the *login* shell so VS Code extensions, SSH, and Claude Code see a familiar POSIX environment. This file imports both.",
-      sections: [
-        {
-          title: "Session PATH",
-          prose:
-            "`home.sessionPath` is a session-wide option, so it's set here rather than in a shell-specific module (issue #366): `config.naitokosuke.shell.pathEntries` reversed, since that list runs from lowest to highest priority while `sessionPath` runs the other way. Zsh picks it up in `.zprofile`; Nushell builds its own `$PATH` from the same list in `nushell.nix`, because Ghostty starts it directly rather than through a login Zsh.",
-          lines: [13, 16],
-        },
-      ],
-    },
-  },
-
-  "home/shell/nushell.nix": {
-    about: "Nushell — interactive shell inside Ghostty.",
+  "home/zsh.nix": {
+    about: "Zsh — the only shell: PATH, environment variables, aliases.",
     tags: ["shell"],
     walkthrough: {
       intro:
-        "Nushell is the interactive shell. Unlike POSIX shells, every command's output is structured data, which is a much better fit for the kinds of data-shaped pipelines this dotfiles repo encourages. Some IDE integrations still need POSIX, which is why Zsh sticks around as the login shell.",
+        "Zsh is the login shell for VS Code extensions, SSH and Claude Code, and the interactive shell in Ghostty. Until #540 Nushell was the interactive shell, and `$PATH`, environment variables and aliases had to be declared once and rendered into both shells through `naitokosuke.shell.*` options; with one shell they are the plain home-manager options again.",
       sections: [
+        {
+          title: "One PATH entry per reason",
+          prose:
+            "`home.sessionPath` holds only what has a reason to be there, highest priority first: the three Nix directories — which home-manager is the *only* thing that puts on `$PATH`, since `hosts/common/nix.nix` disables nix-darwin's Zsh integration — and `/opt/homebrew/bin` for cask binaries. `/usr/local/bin`, `/opt/homebrew/sbin` and `~/.nix-profile/bin` were dropped in #483: the first two hold nothing this configuration depends on, and with `useUserPackages` nothing is ever installed into `~/.nix-profile`.",
+          lines: [35, 48],
+        },
         {
           title: "Environment",
           prose:
-            "Aliases and environment variables come from `config.naitokosuke.shell`. `env.nu` splits `$PATH` into a list, then `path add`s each shared entry — this is the only mechanism that reaches Nushell, since Ghostty starts `nu --login` directly and `home.sessionPath` is written into Zsh's `.zprofile`.",
-          lines: [17, 35],
+            "`HOMEBREW_FORBIDDEN_FORMULAE` (`bun`, `claude`, `node`, …) is exported so `brew install` can never shadow a Nix-managed binary.",
+          lines: [50, 53],
         },
         {
-          title: "Completions and helpers",
+          title: "Aliases and helpers",
           prose:
-            "Completions for git, gh, nix, pnpm, and rg come from the pinned `nu_scripts` input. `mkcd` makes a directory and enters it, and `cpwd` copies the current directory to the clipboard — a command rather than an alias, because Nushell aliases can't contain pipelines. A new terminal starts in `~/src/github.com/<user>` unless it was opened by VS Code.",
-          lines: [37, 57],
+            "`cpwd` copies the current directory to the clipboard and `mkcd` makes a directory and enters it. A new terminal starts in `~/src/github.com/<user>` unless it was opened by VS Code.",
+          lines: [58, 76],
         },
       ],
-    },
-  },
-
-  "home/shell/zsh.nix": {
-    about: "Zsh — login shell for VS Code extensions, SSH, and Claude Code.",
-    tags: ["shell"],
-    walkthrough: {
-      intro:
-        "Zsh handles login-shell responsibilities — anything that spawns a non-interactive shell to read `$PATH` and environment variables sees Zsh, not Nushell. `$PATH` comes from `home.sessionPath` in `shell/default.nix`, so this module only adds the shared environment variables and aliases from `config.naitokosuke.shell`, plus `cl` and `cpwd` (`pwd | pbcopy`, which copies the current directory to the clipboard).",
     },
   },
 

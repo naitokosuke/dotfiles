@@ -103,7 +103,7 @@ create by hand first. Worth revisiting when there is a secret that actually want
 │   ├── Mac-big/       # Mac mini host
 │   └── Macbook-heavy/ # MacBook host (Touch ID for sudo)
 ├── home/              # User-level settings (home-manager), one module per program
-│   ├── shell/         # Shell configurations (Nushell, Zsh)
+│   ├── zsh.nix        # Shell: PATH, environment variables, aliases
 │   ├── git.nix        # Git
 │   ├── claude.nix     # Claude Code settings, rules, skills
 │   ├── ghostty.nix    # Terminal

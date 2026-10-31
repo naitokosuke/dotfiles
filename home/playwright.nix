@@ -21,7 +21,4 @@ let
 in
 {
   home.sessionVariables.PLAYWRIGHT_BROWSERS_PATH = browsersPath;
-
-  # home.sessionVariables only reaches zsh; Nushell needs it set explicitly.
-  programs.nushell.environmentVariables.PLAYWRIGHT_BROWSERS_PATH = browsersPath;
 }

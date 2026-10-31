@@ -161,7 +161,7 @@ in
               type = "command";
               # Opens the newest plan in VS Code. `code` comes from the
               # visual-studio-code cask via /opt/homebrew/bin (see
-              # naitokosuke.shell.pathEntries for that PATH entry). With no plan file
+              # home.sessionPath in home/zsh.nix for that PATH entry). With no plan file
               # the glob would be passed through literally, so the match is
               # tested before opening anything — the hook is best-effort, and a
               # failure here is quiet enough to stay unnoticed.

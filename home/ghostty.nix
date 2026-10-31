@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}:
+{ ... }:
 
 {
   programs.ghostty = {
@@ -9,8 +6,6 @@
     # Ghostty is installed via Homebrew Cask, so don't install via Nix
     package = null;
     settings = {
-      command = "${pkgs.nushell}/bin/nu --login";
-
       theme = "Catppuccin Mocha";
       font-feature = [
         "-calt"
