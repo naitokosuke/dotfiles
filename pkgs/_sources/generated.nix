@@ -30,14 +30,6 @@
       sha256 = "sha256-UmVEz2zi7kZF0horOEfP4bZUhA/hwAuE5xrKgZHVSAc=";
     };
   };
-  gwq-darwin-arm64 = {
-    pname = "gwq-darwin-arm64";
-    version = "v0.1.2";
-    src = fetchurl {
-      url = "https://github.com/d-kuro/gwq/releases/download/v0.1.2/gwq_Darwin_arm64.tar.gz";
-      sha256 = "sha256-/uvTIrjv9DZeL5CtY95tJlqLbYV5Mij2QlhXqXZZDsY=";
-    };
-  };
   playwright-cli = {
     pname = "playwright-cli";
     version = "v0.1.23";

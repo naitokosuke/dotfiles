@@ -16,11 +16,11 @@ in
     agent-browser
     bun
     cargo-deny
-    cclens
+    naitokosuke.cclens
     darwin-rebuild-nom
     devenv
     fd
-    frog
+    naitokosuke.frog
     fzf
     gh
     ghq
@@ -33,7 +33,7 @@ in
     nix-output-monitor
     nodejs_26
     oxfmt
-    playwright-cli
+    naitokosuke.playwright-cli
     pnpm
     ripgrep
     rustup
@@ -41,6 +41,6 @@ in
     tree
     uv
     vim
-    vite-plus
+    naitokosuke.vite-plus
   ];
 }

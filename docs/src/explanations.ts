@@ -58,32 +58,32 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "One package set, two roots",
           prose:
-            "The overlays and the Nixpkgs config are named once and used twice: by the `pkgs` the flake's own outputs are built from, and by the inline module every host loads. `customPackages` is the single entry into `./pkgs`, so the `packages` output and the overlay are visibly the same function rather than two similar-looking expressions — a custom package that grows a dependency on another custom package, or on an unfree one, cannot build one way through `nix build .#<pkg>` and another through `darwin-rebuild switch`.",
-          lines: [75, 97],
+            "The overlays and the Nixpkgs config are named once and used twice: by the `pkgs` the flake's own outputs are built from, and by the inline module every host loads. `customPackages` is the single entry into `./pkgs`, so the `packages` output and the overlay are visibly the same function rather than two similar-looking expressions — a custom package that grows a dependency on another custom package, or on an unfree one, cannot build one way through `nix build .#<pkg>` and another through `darwin-rebuild switch`. The overlay puts the set under `pkgs.naitokosuke` rather than at the top level, so a custom package can never shadow a nixpkgs attribute of the same name: `frog` used to replace nixpkgs' unrelated Dutch NLP tool that way (#545).",
+          lines: [75, 99],
         },
         {
           title: "mkDarwinConfig",
           prose:
             "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module pins `aarch64-darwin` and applies the shared `nixpkgsConfig` and `overlays` defined above. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
-          lines: [104, 128],
+          lines: [106, 130],
         },
         {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [131, 131],
+          lines: [133, 133],
         },
         {
           title: "Custom packages output",
           prose:
-            "`packages.<system>` exposes the same `./pkgs` set that the overlay injects, so `nix build .#gwq` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [133, 133],
+            "`packages.<system>` exposes the same `./pkgs` set that the overlay puts under `pkgs.naitokosuke`, so `nix build .#frog` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
+          lines: [135, 135],
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
-          lines: [135, 138],
+          lines: [137, 140],
         },
       ],
     },
@@ -99,26 +99,26 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Release binaries",
           prose:
-            '`src.github` watches `d-kuro/gwq` releases; `fetch.url` downloads the `gwq_Darwin_arm64.tar.gz` asset for that tag (`$ver` is substituted). Each entry is named after the exact asset it pins, so adding another platform later is a new entry, not a rewrite. `gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag\'s `v` prefix, so `src.prefix = "v"` strips it at the tracker level and the URL re-adds it where needed.',
-          lines: [4, 13],
+            '`src.github` watches each upstream for releases, and `fetch.url` downloads one asset for that tag (`$ver` is substituted). Each entry is named after the exact asset it pins, so adding another platform later is a new entry, not a rewrite. `gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag\'s `v` prefix, so `src.prefix = "v"` strips it at the tracker level and the URL re-adds it where needed.',
+          lines: [5, 10],
         },
         {
           title: "vite-plus from npm",
           prose:
             "The GitHub release carries only the `vp` launcher, while the JavaScript toolchain it delegates to is built separately from `pkgs/vite-plus-runtime`. Both halves are published to npm under one version, so the entry watches GitHub tags but fetches the launcher's npm tarball, with the prefix stripped so `$ver` is exactly that npm version.",
-          lines: [15, 23],
+          lines: [12, 20],
         },
         {
           title: "playwright-cli from source",
           prose:
             "`@playwright/cli` has no release binaries, so `fetch.github` pins the source tree at the tag instead, and `pkgs/playwright-cli.nix` builds it with `buildNpmPackage`.",
-          lines: [25, 30],
+          lines: [22, 27],
         },
         {
           title: "frog",
           prose:
             "frog's tags carry a project-name prefix (`frog@`) that `src.prefix` strips, and its release asset is a gzipped single binary.",
-          lines: [32, 37],
+          lines: [29, 34],
         },
       ],
     },
@@ -138,7 +138,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["packages", "index"],
     walkthrough: {
       intro:
-        "The index of the custom package set. It `callPackage`s the colocated `_sources/generated.nix` to materialise the pins, then hands them to each derivation. The resulting attrset is consumed twice: injected into `pkgs` via an overlay in `flake.nix`, and exposed as the flake's `packages` output for standalone `nix build .#<name>`.",
+        "The index of the custom package set. It `callPackage`s the colocated `_sources/generated.nix` to materialise the pins, then hands them to each derivation. The resulting attrset is consumed twice: put under `pkgs.naitokosuke` by an overlay in `flake.nix`, so no custom package shadows a nixpkgs one, and exposed as the flake's `packages` output for standalone `nix build .#<name>`.",
     },
   },
 
@@ -183,23 +183,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           prose:
             "`versionCheckHook` runs `gh-sub-issue --version` and checks that the output contains `version`, so a binary that does not execute, or belongs to a different release than nvfetcher pinned, fails the build instead of surfacing as a broken `gh` extension.",
           lines: [24, 25],
-        },
-      ],
-    },
-  },
-
-  "pkgs/gwq.nix": {
-    about: "gwq (worktree counterpart to ghq) — installs the prebuilt darwin-arm64 tarball.",
-    tags: ["packages", "git"],
-    walkthrough: {
-      intro:
-        "Upstream publishes prebuilt binaries, so the derivation installs the `gwq_Darwin_arm64.tar.gz` asset that nvfetcher pinned. The configuration lives in `home/gwq.nix`.",
-      sections: [
-        {
-          title: "Fetch and install",
-          prose:
-            'The tarball is flat — the `gwq` binary sits at its root — so `sourceRoot = "."` keeps the unpacker in place, and `versionCheckHook` confirms the binary reports the pinned version.',
-          lines: [8, 23],
         },
       ],
     },
@@ -551,7 +534,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["cli", "packages"],
     walkthrough: {
       intro:
-        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked overlay in `./pkgs` (`frog`, `gwq`, `playwright-cli`, `vite-plus`, …).",
+        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked set in `./pkgs`, reached as `naitokosuke.*` (`frog`, `playwright-cli`, `vite-plus`, …).",
       sections: [
         {
           title: "darwin-rebuild-nom wrapper",
@@ -562,7 +545,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `frog`, `gwq`, `playwright-cli`, and `vite-plus` (`vp`) from the `./pkgs` overlay.",
+            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `cclens`, `frog`, `playwright-cli`, and `vite-plus` (`vp`) come from `./pkgs` as `naitokosuke.*`.",
           lines: [16, 48],
         },
       ],
@@ -852,7 +835,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["git", "workflow"],
     walkthrough: {
       intro:
-        "`gwq` is to git worktrees what `ghq` is to `git clone` — a unified directory hierarchy of worktrees you can fuzzy-jump into. The binary comes from `./pkgs`; the TOML config is generated from a Nix attrset via `pkgs.formats.toml`, so the source of truth is still this Nix file even though gwq reads TOML.",
+        "`gwq` is to git worktrees what `ghq` is to `git clone` — a unified directory hierarchy of worktrees you can fuzzy-jump into. The package comes from nixpkgs, built from source; the TOML config is generated from a Nix attrset via `pkgs.formats.toml`, so the source of truth is still this Nix file even though gwq reads TOML.",
       sections: [
         {
           title: "Where worktrees land",

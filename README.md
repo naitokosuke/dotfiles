@@ -92,7 +92,7 @@ create by hand first. Worth revisiting when there is a secret that actually want
 .
 ├── flake.nix          # Entry point: flake inputs and darwinConfigurations
 ├── nvfetcher.toml     # Version tracker for CLI tools not in nixpkgs (nvfetcher)
-├── pkgs/              # Custom package derivations (frog, gh-sub-issue, gwq, playwright-cli, vite-plus)
+├── pkgs/              # Custom package derivations (cclens, frog, gh-sub-issue, playwright-cli, vite-plus)
 │   └── _sources/      # nvfetcher-generated pins (version + URL + hash) — never edit by hand
 ├── modules/
 │   └── naitokosuke/   # Shared module: personal constants (username, email, …)
@@ -121,10 +121,10 @@ Each `default.nix` aggregates the modules in its directory — see them for the 
 Managed via nixpkgs. See [`hosts/common/packages.nix`](hosts/common/packages.nix).
 
 Tools not available in nixpkgs ([`frog`](https://github.com/wevm/frog),
-[`gh-sub-issue`](https://github.com/yahsan2/gh-sub-issue), [`gwq`](https://github.com/d-kuro/gwq),
+[`gh-sub-issue`](https://github.com/yahsan2/gh-sub-issue),
 [`vite-plus`](https://github.com/voidzero-dev/vite-plus) (`vp`),
 [`playwright-cli`](https://github.com/microsoft/playwright-cli))
-are packaged in [`pkgs/`](pkgs/),
+are packaged in [`pkgs/`](pkgs/) and reached as `pkgs.naitokosuke.<name>`, so they never shadow a nixpkgs attribute,
 with versions and hashes tracked by [nvfetcher](https://github.com/berberman/nvfetcher) via
 [`nvfetcher.toml`](nvfetcher.toml). A daily GitHub Actions workflow (08:00 JST) regenerates the pins and opens an update PR.
 

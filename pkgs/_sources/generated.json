@@ -44,21 +44,6 @@
         },
         "version": "0.5.1"
     },
-    "gwq-darwin-arm64": {
-        "cargoLock": null,
-        "date": null,
-        "extract": null,
-        "name": "gwq-darwin-arm64",
-        "passthru": null,
-        "pinned": false,
-        "src": {
-            "name": null,
-            "sha256": "sha256-/uvTIrjv9DZeL5CtY95tJlqLbYV5Mij2QlhXqXZZDsY=",
-            "type": "url",
-            "url": "https://github.com/d-kuro/gwq/releases/download/v0.1.2/gwq_Darwin_arm64.tar.gz"
-        },
-        "version": "v0.1.2"
-    },
     "playwright-cli": {
         "cargoLock": null,
         "date": null,

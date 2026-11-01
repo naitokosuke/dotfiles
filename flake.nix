@@ -85,8 +85,10 @@
         allowUnfree = true;
       };
 
+      # Namespaced, so a custom package never shadows a nixpkgs attribute of
+      # the same name (#545).
       overlays = [
-        (final: _: customPackages final)
+        (final: _: { naitokosuke = customPackages final; })
         llm-agents.overlays.shared-nixpkgs
       ];
 
