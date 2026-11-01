@@ -331,8 +331,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "modules/naitokosuke/default.nix": {
-    about:
-      "Typed personal-constants module — identity and directories.",
+    about: "Typed personal-constants module — identity and directories.",
     tags: ["module", "config"],
     walkthrough: {
       intro:
