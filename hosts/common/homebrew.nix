@@ -59,7 +59,15 @@ in
       "stablyai/homebrew-orca" = inputs.homebrew-orca;
     };
     mutableTaps = false;
+    # `brew shellenv` would put Homebrew ahead of the Nix profiles on every
+    # interactive zsh start; environment.systemPath below adds the one
+    # directory needed, after them.
+    enableZshIntegration = false;
   };
+
+  # Cask binaries: `code` for the plan hook in home/claude.nix, and Orca's
+  # CLI. Ordered after the Nix profiles and before the system directories.
+  environment.systemPath = lib.mkOrder 1100 [ "${config.homebrew.prefix}/bin" ];
 
   homebrew = {
     enable = true;
