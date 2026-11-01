@@ -444,19 +444,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Pinned, read-only taps",
           prose:
             "`taps` pulls every tap from a flake input, so even Homebrew's tap repos are pinned. `mutableTaps = false` makes them read-only — `brew tap` is disabled, and a new tap has to arrive as a flake input.",
-          lines: [49, 60],
+          lines: [52, 61],
+        },
+        {
+          title: "Homebrew on PATH, after Nix",
+          prose:
+            "Cask binaries such as `code` and Orca's `orca` live in `/opt/homebrew/bin`, which nix-darwin does not put on `$PATH` by itself. `environment.systemPath` adds it with `mkOrder 1100`, after the Nix profiles and before the system directories. nix-homebrew's zsh integration would instead run `brew shellenv` on every interactive start and put Homebrew first, so it is turned off.",
+          lines: [62, 70],
         },
         {
           title: "Taps and activation policy",
           prose:
             'The Brewfile mirrors the pinned tap list so `brew bundle` cleanup does not untap them. `HOMEBREW_NO_INSTALL_FROM_API` forces cask definitions to come from those pinned taps rather than Homebrew\'s API, and `cleanup = "uninstall"` converges the machine onto exactly the cask list below — new versions arrive via `nix flake update`.',
-          lines: [62, 82],
+          lines: [72, 94],
         },
         {
           title: "Casks",
           prose:
             "Everything in `casks` is materialised on `darwin-rebuild`. `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
-          lines: [84, 108],
+          lines: [96, 120],
         },
       ],
     },
@@ -476,37 +482,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["nix", "infra"],
     walkthrough: {
       intro:
-        "Configures the Nix daemon itself. Lix replaces upstream Nix, `experimental-features` turns on `nix-command` and `flakes`, a weekly `nh clean all` daemon and `nix.optimise` keep the store in check, and zsh's `/etc` management is delegated to home-manager.",
+        "Configures the Nix daemon itself. Lix replaces upstream Nix, `experimental-features` turns on `nix-command` and `flakes`, a weekly `nh clean all` daemon and `nix.optimise` keep the store in check, and nix-darwin writes zsh's `/etc` files.",
       sections: [
         {
-          title: "Hand zsh to home-manager",
+          title: "System zsh files",
           prose:
-            "`nix-darwin` normally rewrites `/etc/zshrc`; disabling that lets home-manager own every dotfile end-to-end, so `home/zsh.nix` is the one place the shell is configured.",
-          lines: [10, 14],
+            "nix-darwin writes `/etc/zshenv`, `/etc/zprofile` and `/etc/zshrc`. They load the system environment, including `$PATH`, into every zsh, and link each profile's `share/zsh` onto `fpath`, so the completions that packages ship are found (#544). The global `compinit` and the default prompt are turned off, because home-manager runs `compinit` in `~/.zshrc` and Starship draws the prompt.",
+          lines: [10, 17],
         },
         {
           title: "Weekly GC with nh",
           prose:
             "`nix.package = pkgs.lix` opts into the Lix fork of CppNix. Garbage collection doesn't use `nix.gc`: a root launchd daemon runs `nh clean all --keep-since 14d` every Sunday at 03:15. Besides system and user generations, that also drops stale GC roots — forgotten `result` links and nix-direnv profiles — while keeping two weeks of rollback. Running as root means nh never has to elevate itself; home-manager's `programs.nh.clean` isn't used because on Darwin it only cleans user profiles.",
-          lines: [16, 32],
+          lines: [19, 35],
         },
         {
           title: "Store optimisation",
           prose:
             "An hour after the GC, `nix.optimise` hard-links identical files across whatever the cleanup left in the store.",
-          lines: [33, 40],
+          lines: [36, 43],
         },
         {
           title: "Flakes and trusted users",
           prose:
             '`experimental-features = "nix-command flakes"` turns on flakes globally so every shell can do `nix run`, `nix build`, etc., without `--extra-experimental-features` flags. `trusted-users` adds the primary user next to root, so daemon-level settings such as extra substituters are honoured for them.',
-          lines: [42, 46],
+          lines: [45, 49],
         },
         {
           title: "Build provenance",
           prose:
             "`system.configurationRevision` records the flake's git revision (or its dirty revision), so the running system can always be traced back to the commit it was built from.",
-          lines: [48, 48],
+          lines: [51, 51],
         },
       ],
     },
@@ -984,29 +990,23 @@ export const explanations: Readonly<Record<string, Explanation>> = {
   },
 
   "home/zsh.nix": {
-    about: "Zsh — the only shell: PATH, environment variables, aliases.",
+    about: "Zsh — the only shell: environment variables, aliases.",
     tags: ["shell"],
     walkthrough: {
       intro:
-        "Zsh is the login shell for VS Code extensions, SSH and Claude Code, and the interactive shell in Ghostty. Until #540 Nushell was the interactive shell, and `$PATH`, environment variables and aliases had to be declared once and rendered into both shells through `naitokosuke.shell.*` options; with one shell they are the plain home-manager options again.",
+        "Zsh is the login shell for VS Code extensions, SSH and Claude Code, and the interactive shell in Ghostty. Until #540 Nushell was the interactive shell, and `$PATH`, environment variables and aliases had to be declared once and rendered into both shells through `naitokosuke.shell.*` options; with one shell they are the plain home-manager options again. `$PATH` is not set here: nix-darwin's `/etc/zshenv` sets it (see `hosts/common/nix.nix`).",
       sections: [
-        {
-          title: "One PATH entry per reason",
-          prose:
-            "`home.sessionPath` holds only what has a reason to be there, highest priority first: the three Nix directories — which home-manager is the *only* thing that puts on `$PATH`, since `hosts/common/nix.nix` disables nix-darwin's Zsh integration — and `/opt/homebrew/bin` for cask binaries. `/usr/local/bin`, `/opt/homebrew/sbin` and `~/.nix-profile/bin` were dropped in #483: the first two hold nothing this configuration depends on, and with `useUserPackages` nothing is ever installed into `~/.nix-profile`.",
-          lines: [35, 48],
-        },
         {
           title: "Environment",
           prose:
             "`HOMEBREW_FORBIDDEN_FORMULAE` (`bun`, `claude`, `node`, …) is exported so `brew install` can never shadow a Nix-managed binary.",
-          lines: [50, 53],
+          lines: [33, 36],
         },
         {
           title: "Aliases and helpers",
           prose:
             "`cpwd` copies the current directory to the clipboard and `mkcd` makes a directory and enters it. A new terminal starts in `~/src/github.com/<user>` unless it was opened by VS Code.",
-          lines: [58, 76],
+          lines: [41, 59],
         },
       ],
     },

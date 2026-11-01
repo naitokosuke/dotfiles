@@ -7,8 +7,14 @@
 }:
 
 {
-  # Zsh configuration is handled entirely by home-manager.
-  programs.zsh.enable = false;
+  # nix-darwin writes /etc/zsh*, which load the system environment and put
+  # every profile's share/zsh on fpath, so packaged completions work (#544).
+  # compinit and the prompt are left to home/zsh.nix and home/starship.nix.
+  programs.zsh = {
+    enable = true;
+    enableGlobalCompInit = false;
+    promptInit = "";
+  };
 
   nix.package = pkgs.lix;
 
