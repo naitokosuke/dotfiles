@@ -1,9 +1,6 @@
 # Version tracker for CLI tools not available in nixpkgs (issue #342).
 # Regenerate pkgs/_sources/generated.nix after editing:
 #   nix run nixpkgs#nvfetcher -- -o pkgs/_sources
-[gwq-darwin-arm64]
-src.github = "d-kuro/gwq"
-fetch.url = "https://github.com/d-kuro/gwq/releases/download/$ver/gwq_Darwin_arm64.tar.gz"
 
 # The asset name embeds the version without the "v" tag prefix, so strip it
 # here instead of in the derivation.

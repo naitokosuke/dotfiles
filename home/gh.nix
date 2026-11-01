@@ -7,7 +7,7 @@
   programs.gh = {
     enable = true;
     extensions = [
-      pkgs.gh-sub-issue
+      pkgs.naitokosuke.gh-sub-issue
     ];
     settings = {
       version = 1;
