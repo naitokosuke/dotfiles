@@ -83,6 +83,7 @@
 
       nixpkgsConfig = {
         allowUnfree = true;
+        input-fonts.acceptLicense = true;
       };
 
       # Namespaced, so a custom package never shadows a nixpkgs attribute of
