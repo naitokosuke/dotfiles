@@ -13,14 +13,6 @@ catalog:
   undici: ^7.30.1
   postal-mime: ^4.0.8
   zod: ^4.6.6
-minimumReleaseAgeExclude:
-  - "@void/deploy-cloudflare@1.1.11"
-  - "@void/deploy-core@1.1.11"
-  - "@void/edge@1.1.11"
-  - "@void/isr@1.1.11"
-  - "@void/platform@1.1.11"
-  - void@1.1.11
-  - "@void/vue@1.1.11"
 overrides:
   esbuild: ">=0.28.1"
   sharp: "catalog:"

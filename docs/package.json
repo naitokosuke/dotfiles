@@ -10,13 +10,13 @@
     "deploy": "vp exec void deploy"
   },
   "dependencies": {
-    "@void/vue": "^1.1.11"
+    "@void/vue": "^1.6.2"
   },
   "devDependencies": {
     "typescript": "~7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "void": "^1.1.11",
+    "void": "^1.6.2",
     "vue": "^3.5.44",
     "wrangler": "^4.151.0"
   },
