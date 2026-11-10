@@ -43,10 +43,10 @@
   };
   vite-plus-darwin-arm64 = {
     pname = "vite-plus-darwin-arm64";
-    version = "1.5.0";
+    version = "1.5.1";
     src = fetchurl {
-      url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-1.5.0.tgz";
-      sha256 = "sha256-M8ADLM5oxEbxY0mRwQfX9i3vtjfF4NnhaiTunBvTOw4=";
+      url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-1.5.1.tgz";
+      sha256 = "sha256-fya0JYDTGQD2J3Sf98dTH818Ud77+YGSMl8qoFo6syY=";
     };
   };
 }
