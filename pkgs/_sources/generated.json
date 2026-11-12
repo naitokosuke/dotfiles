@@ -74,10 +74,10 @@
         "pinned": false,
         "src": {
             "name": null,
-            "sha256": "sha256-fya0JYDTGQD2J3Sf98dTH818Ud77+YGSMl8qoFo6syY=",
+            "sha256": "sha256-UxmpGBFpxF0GifhEu5kksMRqdaySDo5ce4nZs/+s1Ss=",
             "type": "url",
-            "url": "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-1.5.1.tgz"
+            "url": "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-1.6.0.tgz"
         },
-        "version": "1.5.1"
+        "version": "1.6.0"
     }
 }
