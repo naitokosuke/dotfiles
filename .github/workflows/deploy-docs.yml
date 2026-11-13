@@ -8,8 +8,13 @@ on:
   push:
     branches: [main]
 
+# id-token: write lets `void deploy` mint a GitHub OIDC token and exchange it
+# for a short-lived deploy token, so no long-lived VOID_TOKEN secret is stored.
+# The repository is authorized with `void github connect`, which names this
+# workflow file as the only one allowed to deploy.
 permissions:
   contents: read
+  id-token: write
 
 # Queue deploys instead of cancelling one mid-upload; only the newest pending
 # run is kept, so a burst of merges still ends on the latest main.
@@ -33,7 +38,7 @@ jobs:
           cache: true
 
       # .void/project.json is gitignored, so the project is named explicitly.
-      # Void 1.x has no default platform and requires VOID_API_URL with VOID_TOKEN.
+      # Void 1.x has no default platform, so VOID_API_URL is set explicitly.
       # It also only deploys to a saved connection, which a fresh runner lacks.
       - name: Deploy
         run: |
@@ -41,5 +46,4 @@ jobs:
           vp run deploy
         env:
           VOID_API_URL: https://api.void.cloud
-          VOID_TOKEN: ${{ secrets.VOID_TOKEN }}
           VOID_PROJECT: naitokosuke-dotfiles
