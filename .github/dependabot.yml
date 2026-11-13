@@ -1,8 +1,8 @@
 version: 2
 
 updates:
-  # Workflows pin actions to commit SHAs with the version as a trailing
-  # comment; Dependabot rewrites both together.
+  # Workflows reference actions by tag and actions.lock records the commits;
+  # Dependabot updates both together.
   - package-ecosystem: github-actions
     directory: /
     schedule:
