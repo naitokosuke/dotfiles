@@ -324,8 +324,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Deploy",
           prose:
-            "`voidzero-dev/setup-vp` installs Vite+ and runs `vp install` in `docs/`, then `vp run deploy` runs the same `void deploy` used locally. `VOID_TOKEN` is a repository secret holding the token `void auth token` copies to the clipboard. The local project link in `.void/project.json` is gitignored, so `VOID_PROJECT` names the project explicitly — without it, `void deploy` would fail in CI rather than prompt.",
-          lines: [26, 40],
+            "`voidzero-dev/setup-vp` installs Vite+ and runs `vp install` in `docs/`, then `vp run deploy` runs the same `void deploy` used locally. There is no stored token: `void deploy` exchanges a GitHub OIDC token for a short-lived deploy token. void only does that for the current head of `main`, so when several merges land together a run that a newer commit has overtaken skips the deploy and succeeds, and the run queued behind it deploys the newer commit (#605). The local project link in `.void/project.json` is gitignored, so `VOID_PROJECT` names the project explicitly — without it, `void deploy` would fail in CI rather than prompt.",
+          lines: [26, 57],
         },
       ],
     },

@@ -40,8 +40,16 @@ jobs:
       # .void/project.json is gitignored, so the project is named explicitly.
       # Void 1.x has no default platform, so VOID_API_URL is set explicitly.
       # It also only deploys to a saved connection, which a fresh runner lacks.
+      #
+      # void only exchanges the OIDC token for the current head of main, so a
+      # run that a newer commit has overtaken cannot deploy. It is skipped; the
+      # run queued behind it deploys the newer commit (#605).
       - name: Deploy
         run: |
+          if [ "$(git ls-remote origin refs/heads/main | cut -f1)" != "$GITHUB_SHA" ]; then
+            echo "main has moved past $GITHUB_SHA; the run queued behind this one deploys instead."
+            exit 0
+          fi
           vp exec void connect "$VOID_API_URL" --no-login
           vp run deploy
         env:
