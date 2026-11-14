@@ -65,15 +65,17 @@ let
     };
   };
 in
-# The launcher and the toolchain are two halves of one release and must not
-# drift apart. nvfetcher bumps the launcher on its own and never touches the
-# lockfile, so without this a `chore: update nvfetcher sources` PR would
-# quietly restore the very breakage this package exists to fix — the same class
-# of drift as #411, caught at eval time instead of at runtime. (nix-vite-plus
-# keeps both in step from one update script; here the two update paths are
-# separate, so this fails loudly rather than silently.)
-lib.throwIf (lockedVersion != version)
-  ''
+stdenvNoCC.mkDerivation {
+  pname = "vite-plus";
+  inherit version;
+  src = sources.vite-plus-darwin-arm64.src;
+
+  # The launcher and the toolchain are two halves of one release and must not
+  # drift apart. A mismatch fails this build rather than evaluation, so the
+  # rest of the flake still evaluates (#559). The nvfetcher workflow bumps
+  # both together and builds the result before proposing it.
+  preUnpack = lib.optionalString (lockedVersion != version) ''
+    cat >&2 <<'MESSAGE'
     vite-plus: the launcher is at ${version}, but pkgs/vite-plus-runtime pins vite-plus ${lockedVersion}.
     Regenerate the lockfile to match:
       cd pkgs/vite-plus-runtime
@@ -84,91 +86,87 @@ lib.throwIf (lockedVersion != version)
     The old lockfile has to go first: vite-plus lists oxlint, oxfmt and vitest
     as peers of itself, and npm gives up with ERESOLVE rather than migrate that
     tree across a bump.
-  ''
-  (
-    stdenvNoCC.mkDerivation {
-      pname = "vite-plus";
-      inherit version;
-      src = sources.vite-plus-darwin-arm64.src;
+    MESSAGE
+    exit 1
+  '';
 
-      # The npm tarball keeps everything under a single `package/` directory.
-      sourceRoot = "package";
+  # The npm tarball keeps everything under a single `package/` directory.
+  sourceRoot = "package";
 
-      nativeBuildInputs = [ makeWrapper ];
+  nativeBuildInputs = [ makeWrapper ];
 
-      installPhase = ''
-        runHook preInstall
+  installPhase = ''
+    runHook preInstall
 
-        install -Dm755 vp $out/bin/vp
+    install -Dm755 vp $out/bin/vp
 
-        # Symlinked rather than copied: node follows it transparently and the
-        # toolchain stays a single copy in the store.
-        ln -s ${nodeModules}/node_modules $out/node_modules
+    # Symlinked rather than copied: node follows it transparently and the
+    # toolchain stays a single copy in the store.
+    ln -s ${nodeModules}/node_modules $out/node_modules
 
-        # The JavaScript half needs a node to run on whatever the caller has on
-        # PATH. vp dispatches on argv[0], which makeWrapper preserves with
-        # `exec -a "$0"`, so the aliases below still work through the wrapper.
-        wrapProgram $out/bin/vp --prefix PATH : ${lib.makeBinPath [ nodejs ]}
+    # The JavaScript half needs a node to run on whatever the caller has on
+    # PATH. vp dispatches on argv[0], which makeWrapper preserves with
+    # `exec -a "$0"`, so the aliases below still work through the wrapper.
+    wrapProgram $out/bin/vp --prefix PATH : ${lib.makeBinPath [ nodejs ]}
 
-        # Provide the standalone aliases the official installer creates via
-        # `vp env setup`: vp is a multi-call binary dispatching on argv[0]
-        # (vpr -> `vp run`, vpx -> `vp dlx`). The node/npm/npx/corepack shims
-        # it also creates are deliberately omitted — they belong to the
-        # opt-out-able Node version manager and would conflict with Nix-managed Node.
-        ln -s vp $out/bin/vpr
-        ln -s vp $out/bin/vpx
+    # Provide the standalone aliases the official installer creates via
+    # `vp env setup`: vp is a multi-call binary dispatching on argv[0]
+    # (vpr -> `vp run`, vpx -> `vp dlx`). The node/npm/npx/corepack shims
+    # it also creates are deliberately omitted — they belong to the
+    # opt-out-able Node version manager and would conflict with Nix-managed Node.
+    ln -s vp $out/bin/vpr
+    ln -s vp $out/bin/vpx
 
-        # Since 0.3.2 vp installs itself on first start unless this marker sits
-        # next to the resolved executable (issue #434). Without it the first run
-        # downloads a second, unmanaged copy of vite-plus into the Vite+ home and
-        # appends to ~/.zshenv — and in the sandbox it dies on an interactive
-        # prompt instead. wrapProgram moved the binary to .vp-wrapped, which is
-        # still in this directory, so the marker is found through the wrapper.
-        touch $out/bin/.vp-setup-complete
+    # Since 0.3.2 vp installs itself on first start unless this marker sits
+    # next to the resolved executable (issue #434). Without it the first run
+    # downloads a second, unmanaged copy of vite-plus into the Vite+ home and
+    # appends to ~/.zshenv — and in the sandbox it dies on an interactive
+    # prompt instead. wrapProgram moved the binary to .vp-wrapped, which is
+    # still in this directory, so the marker is found through the wrapper.
+    touch $out/bin/.vp-setup-complete
 
-        runHook postInstall
-      '';
+    runHook postInstall
+  '';
 
-      doInstallCheck = true;
+  doInstallCheck = true;
 
-      # Runs from a directory with no project-local vite-plus, which is exactly
-      # where the launcher-only build used to fail. `--version` alone would not
-      # catch it: it is served by the launcher and passed even while every
-      # JavaScript subcommand was broken.
-      installCheckPhase = ''
-        runHook preInstallCheck
-        checkdir=$(mktemp -d)
-        checkhome=$(mktemp -d)
-        # Mirrors home/vite-plus.nix. Without it vp falls back to managed mode
-        # and downloads its own Node into $HOME, which is not how it runs on a
-        # configured machine.
-        mkdir -p "$checkhome/.config/vite-plus"
-        echo '{"shimMode":"system_first"}' > "$checkhome/.config/vite-plus/config.json"
-        before=$(cd "$checkhome" && find . | sort)
-        # Deliberately no .node-version. Pinning one sends vp off to its own
-        # managed Node instead of the one wrapProgram put on PATH, and in the
-        # sandbox that fails outright with "Failed to download Node.js runtime".
-        ( cd "$checkdir" && HOME="$checkhome" $out/bin/vp fmt --help ) > /dev/null
-        # A store-installed vp must never set itself up again in $HOME. If
-        # upstream changes how self-setup is skipped, fail here rather than
-        # write into the user's home on first use.
-        after=$(cd "$checkhome" && find . | sort)
-        if [ "$before" != "$after" ]; then
-          echo "vp wrote into HOME:" >&2
-          echo "$after" >&2
-          exit 1
-        fi
-        runHook postInstallCheck
-      '';
+  # Runs from a directory with no project-local vite-plus, which is exactly
+  # where the launcher-only build used to fail. `--version` alone would not
+  # catch it: it is served by the launcher and passed even while every
+  # JavaScript subcommand was broken.
+  installCheckPhase = ''
+    runHook preInstallCheck
+    checkdir=$(mktemp -d)
+    checkhome=$(mktemp -d)
+    # Mirrors home/vite-plus.nix. Without it vp falls back to managed mode
+    # and downloads its own Node into $HOME, which is not how it runs on a
+    # configured machine.
+    mkdir -p "$checkhome/.config/vite-plus"
+    echo '{"shimMode":"system_first"}' > "$checkhome/.config/vite-plus/config.json"
+    before=$(cd "$checkhome" && find . | sort)
+    # Deliberately no .node-version. Pinning one sends vp off to its own
+    # managed Node instead of the one wrapProgram put on PATH, and in the
+    # sandbox that fails outright with "Failed to download Node.js runtime".
+    ( cd "$checkdir" && HOME="$checkhome" $out/bin/vp fmt --help ) > /dev/null
+    # A store-installed vp must never set itself up again in $HOME. If
+    # upstream changes how self-setup is skipped, fail here rather than
+    # write into the user's home on first use.
+    after=$(cd "$checkhome" && find . | sort)
+    if [ "$before" != "$after" ]; then
+      echo "vp wrote into HOME:" >&2
+      echo "$after" >&2
+      exit 1
+    fi
+    runHook postInstallCheck
+  '';
 
-      meta = {
-        description = "Unified toolchain for JavaScript";
-        homepage = "https://viteplus.dev";
-        changelog = "https://github.com/voidzero-dev/vite-plus/releases/tag/v${version}";
-        license = lib.licenses.mit;
-        sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
-        mainProgram = "vp";
-        platforms = [ "aarch64-darwin" ];
-      };
-    }
-  )
+  meta = {
+    description = "Unified toolchain for JavaScript";
+    homepage = "https://viteplus.dev";
+    changelog = "https://github.com/voidzero-dev/vite-plus/releases/tag/v${version}";
+    license = lib.licenses.mit;
+    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
+    mainProgram = "vp";
+    platforms = [ "aarch64-darwin" ];
+  };
+}

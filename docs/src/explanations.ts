@@ -239,20 +239,20 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Refusing to drift",
           prose:
-            "The launcher and the toolchain are two halves of one release. nvfetcher bumps the launcher but never touches the lockfile, so `lib.throwIf` fails evaluation whenever the two versions disagree, printing the commands that regenerate the lockfile. The nvfetcher workflow runs those same commands, so update PRs arrive with both halves in step.",
-          lines: [68, 82],
+            "The launcher and the toolchain are two halves of one release. nvfetcher bumps the launcher but never touches the lockfile, so the build fails in `preUnpack` whenever the two versions disagree, printing the commands that regenerate the lockfile. It fails the build rather than evaluation, so a mismatch does not take the rest of the flake down with it (#559). The nvfetcher workflow runs those same commands and builds the result, so update PRs arrive with both halves in step.",
+          lines: [73, 91],
         },
         {
           title: "Install",
           prose:
             "The launcher comes from the npm platform tarball (everything under `package/`). `node_modules` is symlinked next to it rather than copied, `wrapProgram` puts Nix's Node on `$PATH` for the JavaScript half, and `vpr` / `vpx` are linked the way the official installer's `vp env setup` would — vp dispatches on `argv[0]` (`vpr` → `vp run`, `vpx` → `vp dlx`), which the wrapper preserves. The `node` / `npm` / `npx` / `corepack` shims that step also creates are deliberately omitted: they belong to vp's Node version manager and would shadow Nix-managed Node. Finally, a `.vp-setup-complete` marker next to the binary stops vp from installing a second, unmanaged copy of itself into `$HOME` on first start (issue #434).",
-          lines: [94, 125],
+          lines: [93, 129],
         },
         {
           title: "An install check that runs the toolchain",
           prose:
             "`vp --version` is answered by the launcher alone, so it passes even when every JavaScript subcommand is broken. The check runs `vp fmt --help` from an empty directory instead, which only succeeds when the launcher finds the toolchain installed next to it. It runs against a throwaway `$HOME` holding the same `shimMode` config as `home/vite-plus.nix`, and fails if vp wrote anything into it, so a change in how upstream skips self-setup is caught at build time rather than in the user's home.",
-          lines: [127, 157],
+          lines: [131, 161],
         },
       ],
     },
@@ -274,7 +274,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Syncing the vite-plus runtime",
           prose:
-            "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to evaluate unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything.",
+            "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to build unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything.",
           lines: [28, 48],
         },
         {
