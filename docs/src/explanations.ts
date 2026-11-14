@@ -512,16 +512,16 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           lines: [36, 43],
         },
         {
-          title: "Flakes and trusted users",
+          title: "Flakes, and no trusted user",
           prose:
-            '`experimental-features = "nix-command flakes"` turns on flakes globally so every shell can do `nix run`, `nix build`, etc., without `--extra-experimental-features` flags. `trusted-users` adds the primary user next to root, so daemon-level settings such as extra substituters are honoured for them.',
-          lines: [45, 49],
+            '`experimental-features = "nix-command flakes"` turns on flakes globally so every shell can do `nix run`, `nix build`, etc., without `--extra-experimental-features` flags. The primary user is deliberately left out of `trusted-users`: a trusted user can set any daemon setting, including substituters and `post-build-hook`, which amounts to root, and every process running as that user inherits it (#560). What needed that trust is declared globally instead: the binary cache that the nixpkgs of devenv is built into, with its public key.',
+          lines: [45, 54],
         },
         {
           title: "Build provenance",
           prose:
             "`system.configurationRevision` records the flake's git revision (or its dirty revision), so the running system can always be traced back to the commit it was built from.",
-          lines: [51, 51],
+          lines: [56, 56],
         },
       ],
     },
