@@ -11,19 +11,18 @@
   sources,
 }:
 
-let
-  # Bound here because importNpmLock has to read the lockfile out of the very
-  # same source tree the derivation builds.
-  src = sources.playwright-cli.src;
-in
 buildNpmPackage {
   pname = "playwright-cli";
   version = lib.removePrefix "v" sources.playwright-cli.version;
-  inherit src;
+  src = sources.playwright-cli.src;
 
-  # node_modules comes straight from the upstream package-lock.json, so there
-  # is no dependency hash to keep in sync with nvfetcher's version bumps.
-  npmDeps = importNpmLock { npmRoot = src; };
+  # nvfetcher copies both files out of the source into pkgs/_sources on every
+  # bump (`extract` in nvfetcher.toml), so they are read from the repository.
+  # Reading them out of `src` would be import-from-derivation (#546).
+  npmDeps = importNpmLock {
+    package = lib.importJSON sources.playwright-cli.extract."package.json";
+    packageLock = lib.importJSON sources.playwright-cli.extract."package-lock.json";
+  };
   npmConfigHook = importNpmLock.npmConfigHook;
 
   dontNpmBuild = true;

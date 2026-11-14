@@ -53,7 +53,7 @@ jobs:
       - name: Check the flake
         run: |
           git add --intent-to-add pkgs
-          nix flake check --print-build-logs
+          nix flake check --print-build-logs --option allow-import-from-derivation false
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8.1.2

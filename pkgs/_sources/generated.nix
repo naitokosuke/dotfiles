@@ -40,6 +40,10 @@
       fetchSubmodules = false;
       sha256 = "sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q/hO6EA6DXDKA=";
     };
+    extract = {
+      "package-lock.json" = ./. + "/sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q_hO6EA6DXDKA=/package-lock.json";
+      "package.json" = ./. + "/sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q_hO6EA6DXDKA=/package.json";
+    };
   };
   vite-plus-darwin-arm64 = {
     pname = "vite-plus-darwin-arm64";

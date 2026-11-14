@@ -23,4 +23,4 @@ jobs:
 
       # Evaluates and builds every host, every custom package and the
       # formatting check (see `checks` in flake.nix).
-      - run: nix flake check --print-build-logs
+      - run: nix flake check --print-build-logs --option allow-import-from-derivation false
