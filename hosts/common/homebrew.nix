@@ -24,7 +24,7 @@ let
   # (`Library/Homebrew/brew.sh`), and cask uninstall directives such as
   # `launchctl:` shell out to sudo once per launchd domain, so a cask upgrade
   # during activation asks for a password repeatedly on the very terminal that
-  # `darwin-rebuild-nom` has `nom` repainting. Homebrew's `sudo_prefix` adds
+  # `nh` has `nom` repainting. Homebrew's `sudo_prefix` adds
   # `-A` when SUDO_ASKPASS is set, and `bin/brew` allowlists that variable
   # through its environment filter, so the prompt moves to a GUI dialog that
   # says what it is asking for. See issue #416.

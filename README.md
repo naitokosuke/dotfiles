@@ -162,16 +162,16 @@ The flake builds one `darwinConfiguration` per host listed in [`flake.nix`](flak
 
 Apply configuration changes:
 ```bash
-sudo darwin-rebuild switch --flake .#Mac-big
+nh darwin switch
 ```
 
-`sudo darwin-rebuild-nom switch --flake .#Mac-big` does the same with nix-output-monitor progress, and
-`nh darwin switch` picks the host from the hostname and shows a closure diff before activating.
+`nh` picks the host from the hostname, shows nix-output-monitor progress and a closure diff before
+activating. `sudo darwin-rebuild switch --flake .#Mac-big` is the plain equivalent.
 
 Update flake inputs:
 ```bash
 nix flake update
-sudo darwin-rebuild switch --flake .#Mac-big
+nh darwin switch
 ```
 
 Update nvfetcher-tracked tool versions (regenerates `pkgs/_sources/`):
