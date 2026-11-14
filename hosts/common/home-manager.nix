@@ -11,6 +11,10 @@
   home-manager.backupFileExtension = "backup";
   home-manager.sharedModules = [
     ../../modules/naitokosuke
+    # The module is evaluated a second time inside home-manager, so the values
+    # this host resolved are handed over: an override made on the nix-darwin
+    # side applies to both.
+    { inherit (config) naitokosuke; }
     inputs.mcp-servers-nix.homeManagerModules.default
   ];
   # home-manager derives home.username / home.homeDirectory from users.users,
