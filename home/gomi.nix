@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
@@ -101,6 +102,25 @@ in
         max_size = "10MB";
         max_files = 3;
       };
+    };
+  };
+
+  # Weekly prune of trashed files older than 45 days. No StandardOutPath /
+  # StandardErrorPath: gomi records each prune in its own log
+  # (~/.local/share/gomi/debug.log), so launchd's copy is discarded (#369).
+  launchd.agents.gomi-prune = {
+    enable = true;
+    config = {
+      ProgramArguments = [
+        (lib.getExe pkgs.gomi)
+        "--prune=45d,orphans"
+      ];
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+        }
+      ];
     };
   };
 }
