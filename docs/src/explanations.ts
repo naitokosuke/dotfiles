@@ -234,25 +234,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "The JavaScript toolchain",
           prose:
             "`importNpmLock.buildNodeModules` materialises `node_modules` from the lockfile in `pkgs/vite-plus-runtime`, on `nodejs_26` to match the system Node. `postInstall` then patches `vp create` so templates it copies out of the store come out writable, drops `node_modules/.bin` so a second oxlint / oxfmt never reaches `$PATH`, and deletes npm's `.package-lock.json`, whose store references would otherwise keep around 300 MB of source tarballs in the closure.",
-          lines: [36, 66],
+          lines: [32, 62],
         },
         {
           title: "Refusing to drift",
           prose:
             "The launcher and the toolchain are two halves of one release. nvfetcher bumps the launcher but never touches the lockfile, so the build fails in `preUnpack` whenever the two versions disagree, printing the commands that regenerate the lockfile. It fails the build rather than evaluation, so a mismatch does not take the rest of the flake down with it (#559). The nvfetcher workflow runs those same commands and builds the result, so update PRs arrive with both halves in step.",
-          lines: [73, 91],
+          lines: [69, 87],
         },
         {
           title: "Install",
           prose:
             "The launcher comes from the npm platform tarball (everything under `package/`). `node_modules` is symlinked next to it rather than copied, `wrapProgram` puts Nix's Node on `$PATH` for the JavaScript half, and `vpr` / `vpx` are linked the way the official installer's `vp env setup` would — vp dispatches on `argv[0]` (`vpr` → `vp run`, `vpx` → `vp dlx`), which the wrapper preserves. The `node` / `npm` / `npx` / `corepack` shims that step also creates are deliberately omitted: they belong to vp's Node version manager and would shadow Nix-managed Node. Finally, a `.vp-setup-complete` marker next to the binary stops vp from installing a second, unmanaged copy of itself into `$HOME` on first start (issue #434).",
-          lines: [93, 129],
+          lines: [89, 122],
         },
         {
           title: "An install check that runs the toolchain",
           prose:
             "`vp --version` is answered by the launcher alone, so it passes even when every JavaScript subcommand is broken. The check runs `vp fmt --help` from an empty directory instead, which only succeeds when the launcher finds the toolchain installed next to it. It runs against a throwaway `$HOME` holding the same `shimMode` config as `home/vite-plus.nix`, and fails if vp wrote anything into it, so a change in how upstream skips self-setup is caught at build time rather than in the user's home.",
-          lines: [131, 161],
+          lines: [124, 152],
         },
       ],
     },
@@ -424,37 +424,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Sudo prompts go to a dialog",
           prose:
             "Homebrew resets sudo's timestamp on every invocation, and some cask uninstall steps shell out to sudo repeatedly, so a cask upgrade during activation would ask for a password over and over on the very terminal `nom` is repainting. `SUDO_ASKPASS` points at a small `osascript` dialog instead — Homebrew adds `-A` to sudo whenever it's set, so the prompt appears as a GUI dialog that says what it's for (issue #416).",
-          lines: [23, 35],
+          lines: [20, 26],
         },
         {
           title: "Homebrew ahead of nix-homebrew",
           prose:
             "`nix-homebrew` installs and pins the Homebrew binary itself via Nix. That binary comes from the `brew-src` input in `flake.nix`, pinned at 7.0.1 ahead of the version nix-homebrew locks (issue #432). nix-homebrew labels its package with the ref from its own `flake.lock`, so the store path would otherwise name that ref rather than the one pinned here; `package` rebuilds the name and version from this repository's `flake.lock` (`brewVersion` at the top of the file) so they match the ref pinned in `flake.nix`. A flake input reaches a module as a source tree, and the tag it is pinned to is not part of that interface — hence reading the lock as data, via `inputs.self` rather than a relative path, with a `throw` that explains itself if `brew-src` is ever pinned to something other than a tag.",
-          lines: [39, 48],
+          lines: [30, 37],
         },
         {
           title: "Pinned, read-only taps",
           prose:
             "`taps` pulls every tap from a flake input, so even Homebrew's tap repos are pinned. `mutableTaps = false` makes them read-only — `brew tap` is disabled, and a new tap has to arrive as a flake input.",
-          lines: [52, 61],
+          lines: [41, 50],
         },
         {
           title: "Homebrew on PATH, after Nix",
           prose:
             "Cask binaries, which today is Orca's `orca`, live in `/opt/homebrew/bin`, which nix-darwin does not put on `$PATH` by itself. `environment.systemPath` adds it with `mkOrder 1100`, after the Nix profiles and before the system directories. nix-homebrew's zsh integration would instead run `brew shellenv` on every interactive start and put Homebrew first, so it is turned off.",
-          lines: [62, 70],
+          lines: [51, 59],
         },
         {
           title: "Taps and activation policy",
           prose:
             'The Brewfile mirrors the pinned tap list so `brew bundle` cleanup does not untap them. `HOMEBREW_NO_INSTALL_FROM_API` forces cask definitions to come from those pinned taps rather than Homebrew\'s API, and `cleanup = "uninstall"` converges the machine onto exactly the cask list below — new versions arrive via `nix flake update`.',
-          lines: [72, 94],
+          lines: [61, 82],
         },
         {
           title: "Casks",
           prose:
             "Everything in `casks` is materialised on `darwin-rebuild`. An app is a cask only for a reason, recorded above the list: it has no darwin build in nixpkgs, or it updates itself in place or holds macOS privacy permissions that are tied to its path, which a changing store path would lose. VS Code and Ghostty come from nixpkgs instead (#556). `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
-          lines: [96, 125],
+          lines: [84, 110],
         },
       ],
     },
@@ -716,25 +716,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "settings.json",
           prose:
             'Global preferences — theme, editor mode, notifications, Japanese spinner verbs. The binary comes from the store, so nothing may update it in place: `env` turns off Claude Code\'s own auto-updater and installation checks, which is the mechanism the CLI actually reads (`DISABLE_AUTOUPDATER` from the process environment; the legacy `autoUpdates` preference is migrated out of `~/.claude.json` into exactly this block). The `installMethod = "unknown"` and `autoUpdates = true` lines that used to sit at the top were never read from `settings.json`, and the second one claimed the opposite of what the machine does — both dropped in issue #485.',
-          lines: [11, 50],
+          lines: [11, 42],
         },
         {
           title: "Permissions",
           prose:
             "`permissions.deny` blocks reading credentials (`.env*`, `secrets/`, `~/.ssh`, `~/.aws`, `~/.gnupg`), wiping `/` or `~`, force-pushing, and raw `curl` / `wget` in favour of WebFetch with an explicit domain — plus a tongue-in-cheek ban on `perl` and `python`.",
-          lines: [51, 82],
+          lines: [43, 74],
         },
         {
           title: "Plan hook",
           prose:
             'A `PreToolUse` hook on `ExitPlanMode` opens the newest plan file in VS Code, so a plan can be read in the editor before it\'s approved. The glob is resolved into a variable and tested first: with no plan files it would otherwise reach `ls` literally and end up running `code ""` on an empty argument. `code` is the store path of the VS Code that `home/vscode.nix` installs, so the hook does not depend on `$PATH`. The Adrafinil handlers from `home/adrafinil.nix` are merged in alongside it.',
-          lines: [83, 101],
+          lines: [75, 93],
         },
         {
           title: "Rules and skills",
           prose:
             "`CLAUDE.md` and the files under `rules/` live in `home/claude-context/` and are installed through `programs.claude-code.context` and `rulesDir`. They used to be out-of-store links into the separate `rule-rule-rule` repository, which dangled silently wherever it was not cloned and stopped taking changes once it was archived (issue #535). Skills come from the locked `skill-skill-skill` input through `programs.claude-code.skills`, so names and content have one source and nothing can dangle (#548): a skill change arrives with `nix flake update skill-skill-skill`. home-manager links the files one by one, which leaves room for the MCP plugin it installs into `~/.claude/skills` itself.",
-          lines: [103, 114],
+          lines: [95, 105],
         },
       ],
     },
@@ -844,7 +844,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Where worktrees land",
           prose:
             "`worktree.basedir` is `~/src`, the same root as ghq, and the naming template appends `---<branch>` to the repository path. Each worktree therefore sits right beside the clone it came from.",
-          lines: [15, 18],
+          lines: [11, 14],
         },
       ],
     },
@@ -887,7 +887,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "One variable, nothing else moves",
           prose:
             "Playwright resolves its registry directory from `PLAYWRIGHT_BROWSERS_PATH` at runtime, so pointing that at `~/.cache/ms-playwright` — Playwright's own default on Linux, and ordinary data as far as macOS is concerned — is the whole fix. Browsers stay runtime-managed by Playwright, the same decision recorded in `pkgs/playwright-cli.nix`, and the cache stays keyed by browser build id, so every project on a matching build shares one copy.",
-          lines: [19, 24],
+          lines: [9, 14],
         },
       ],
     },
@@ -921,19 +921,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Format",
           prose:
             "User, host, free disk space, directory, git branch and status, and command duration, then a line break and the `❯` character — green on success, red on failure. The user and host show even outside SSH, and the command duration only for commands that took two seconds or more.",
-          lines: [34, 34],
+          lines: [30, 30],
         },
         {
           title: "Free disk space",
           prose:
             "Starship has no built-in module for disk space, so `diskFree` builds a `custom` module that runs `/bin/df -h /` and prints a hard disk glyph followed by the available space over the disk size, as in `with 󰋊 120Gi / 500Gi`. The macOS system and data volumes share one APFS container, so `/` reports the same free space as the data volume. `df` and `awk` are macOS's own and spelled out in full: the awk programs read the column layout of BSD `df`, which GNU coreutils' would not reproduce, so this is one place where staying out of the store is the right answer and the comment says so (issue #482). `sh`, which only runs a pipeline and a test, is pinned to the store instead — the prompt then depends on no `$PATH` ordering at all.",
-          lines: [3, 26],
+          lines: [3, 22],
         },
         {
           title: "Colour by usage",
           prose:
             "A custom module can't restyle itself from its own output, so there are three of them, one per colour: cyan below 90% used, yellow from 90%, and red from 95% — the same levels as Powerlevel10k's `disk_usage`. Each one's `when` computes the used share and shows the module only inside its own range, so exactly one appears.",
-          lines: [53, 57],
+          lines: [49, 53],
         },
       ],
     },
@@ -959,7 +959,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "JSONC → JSON with jsonnet",
           prose:
             "JSONC — `//` and `/* */` comments, trailing commas — is valid Jsonnet input, and jsonnet emits plain JSON. So the conversion is a real parse: malformed input fails the build instead of being silently corrupted (issue #364).",
-          lines: [9, 16],
+          lines: [9, 13],
         },
       ],
     },

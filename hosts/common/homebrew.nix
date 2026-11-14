@@ -7,11 +7,8 @@
 }:
 
 let
-  # A flake input is exposed to modules as a source tree, so the tag it is
-  # pinned to is not part of that interface; the lock is read as data to
-  # recover it. Reached through the flake's own source rather than a relative
-  # walk up the tree, so the expression does not depend on where this module
-  # sits.
+  # A flake input reaches modules as a source tree, without the tag it is
+  # pinned to, so the tag is read from the lock.
   brewNode = (lib.importJSON (inputs.self + "/flake.lock")).nodes.brew-src.original;
   brewVersion =
     brewNode.ref or (throw ''
@@ -20,17 +17,11 @@ let
       flake.lock has it as: ${builtins.toJSON brewNode}
     '');
 
-  # Homebrew calls `sudo --reset-timestamp` on every invocation
-  # (`Library/Homebrew/brew.sh`), and cask uninstall directives such as
-  # `launchctl:` shell out to sudo once per launchd domain, so a cask upgrade
-  # during activation asks for a password repeatedly on the very terminal that
-  # `nh` has `nom` repainting. Homebrew's `sudo_prefix` adds
-  # `-A` when SUDO_ASKPASS is set, and `bin/brew` allowlists that variable
-  # through its environment filter, so the prompt moves to a GUI dialog that
-  # says what it is asking for. See issue #416.
-  #
-  # `sudo -A` never offers pam_tid.so, though, so on a host with Touch ID the
-  # dialog would replace a fingerprint with a typed password (#504).
+  # Homebrew asks for sudo repeatedly during a cask upgrade, on the terminal
+  # `nh` has `nom` repainting. With SUDO_ASKPASS set it runs `sudo -A`, so
+  # the prompt becomes a GUI dialog that says what it is for (#416).
+  # `sudo -A` never offers Touch ID, so hosts that have it keep the terminal
+  # prompt (#504).
   sudoAskpass = pkgs.writeShellScript "homebrew-sudo-askpass" ''
     exec /usr/bin/osascript \
       -e 'set reply to display dialog "Homebrew needs administrator rights to update casks during nix-darwin activation." with title "darwin-rebuild" default answer "" with icon caution with hidden answer' \
@@ -41,10 +32,8 @@ in
 {
   nix-homebrew = {
     enable = true;
-    # nix-homebrew labels its default package with the brew-src ref from its
-    # own flake.lock, so with brew-src following ours the store path would
-    # still read `brew-6.x-patched`. Rebuild the label from this repo's
-    # flake.lock so it names the ref actually pinned in flake.nix (#432).
+    # nix-homebrew labels its package with the brew-src ref from its own
+    # flake.lock, so the label is rebuilt from the ref pinned here (#432).
     package = inputs.brew-src // {
       name = "brew-${brewVersion}";
       version = brewVersion;
@@ -76,11 +65,10 @@ in
     # `brew bundle` cleanup does not try to untap them.
     taps = builtins.attrNames config.nix-homebrew.taps;
 
-    # Fully declarative (issue #363): cask definitions come from the
-    # flake-pinned taps (HOMEBREW_NO_INSTALL_FROM_API), so activation
-    # converges installed apps to what flake.lock pins — new versions arrive
-    # via `nix flake update` + rebuild, and casks removed from the list below
-    # are uninstalled. Most of these apps still self-update independently.
+    # Fully declarative (#363): cask definitions come from the flake-pinned
+    # taps, so activation converges the installed apps to flake.lock, and
+    # casks removed from the list below are uninstalled. Most of these apps
+    # still update themselves independently.
     onActivation = {
       autoUpdate = false;
       upgrade = true;
@@ -101,10 +89,9 @@ in
     # large build into every system closure. VS Code and Ghostty come from
     # nixpkgs (home/vscode.nix, home/ghostty.nix).
     casks = [
-      # Keeps the Mac awake only while an AI agent is working; the Claude Code
-      # hooks that drive it live in home/claude.nix. The cask requires macOS 26
-      # (`depends_on macos: :tahoe`) and is `auto_updates true` — Adrafinil
-      # swaps itself in place, so the flake.lock pin is only the floor version.
+      # Keeps the Mac awake only while an AI agent is working (see
+      # home/adrafinil.nix). Requires macOS 26. Adrafinil updates itself in
+      # place, so the flake.lock pin is only the floor version.
       "adrafinil"
       "blender"
       "claude"
@@ -116,10 +103,8 @@ in
       "productdevbook/tap/portkiller"
       "raycast"
       "scroll-reverser"
-      # Ships the `orca` CLI as a `binary` stanza, so the cask covers both the
-      # app and the shell entrypoint. The cask is `auto_updates true`; Orca
-      # swaps itself in place via electron-updater, so the flake.lock pin is
-      # only the floor version installed on a fresh machine.
+      # Also ships the `orca` CLI. Orca updates itself in place, so the
+      # flake.lock pin is only the floor version.
       "stablyai/orca/orca"
       "thebrowsercompany-dia"
     ];

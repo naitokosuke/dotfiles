@@ -2,16 +2,12 @@
 # to pkgs.vite-plus and delete this file, pkgs/vite-plus-runtime and the
 # nvfetcher entry.
 #
-# `vp` is only the Rust launcher. Every subcommand that does real work (dev,
-# build, test, check, lint, fmt, create, migrate, ...) is handed to a
-# JavaScript toolchain that vp resolves at <prefix>/node_modules/vite-plus,
-# relative to the resolved path of the executable. Installing the launcher on
-# its own leaves all of them dying with "Cannot find module" (issue #413), so
-# the npm dependency tree is built here and installed next to it.
+# `vp` is only the Rust launcher. Every subcommand that does real work is
+# handed to a JavaScript toolchain that vp resolves at
+# <prefix>/node_modules/vite-plus, relative to the executable, so the npm
+# dependency tree is built here and installed next to it (#413).
 #
-# The approach is taken from https://github.com/ryoppippi/nix-vite-plus, which
-# worked this out first and documents the parts that are not obvious until you
-# hit them. Deviations from it are noted where they occur.
+# The approach follows https://github.com/ryoppippi/nix-vite-plus.
 {
   lib,
   stdenvNoCC,
@@ -117,12 +113,9 @@ stdenvNoCC.mkDerivation {
     ln -s vp $out/bin/vpr
     ln -s vp $out/bin/vpx
 
-    # Since 0.3.2 vp installs itself on first start unless this marker sits
-    # next to the resolved executable (issue #434). Without it the first run
-    # downloads a second, unmanaged copy of vite-plus into the Vite+ home and
-    # appends to ~/.zshenv — and in the sandbox it dies on an interactive
-    # prompt instead. wrapProgram moved the binary to .vp-wrapped, which is
-    # still in this directory, so the marker is found through the wrapper.
+    # vp installs itself on first start unless this marker sits next to the
+    # resolved executable (#434). wrapProgram moved the binary to .vp-wrapped
+    # in the same directory, so the marker is found through the wrapper.
     touch $out/bin/.vp-setup-complete
 
     runHook postInstall
@@ -130,10 +123,8 @@ stdenvNoCC.mkDerivation {
 
   doInstallCheck = true;
 
-  # Runs from a directory with no project-local vite-plus, which is exactly
-  # where the launcher-only build used to fail. `--version` alone would not
-  # catch it: it is served by the launcher and passed even while every
-  # JavaScript subcommand was broken.
+  # Runs a JavaScript subcommand from a directory with no project-local
+  # vite-plus. `--version` would not do: the launcher answers it alone.
   installCheckPhase = ''
     runHook preInstallCheck
     checkdir=$(mktemp -d)
