@@ -59,37 +59,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "One nixpkgs instance",
           prose:
             "`pkgs` is imported once, with the overlays and the Nixpkgs config, and used by everything: the flake's own outputs are built from it, and every host takes the same instance through `nixpkgs.pkgs` instead of evaluating nixpkgs again (#554). `customPackages` is the single entry into `./pkgs`, so the `packages` output and the overlay are visibly the same function — a custom package cannot build one way through `nix build .#<pkg>` and another through `darwin-rebuild switch`. The overlay puts the set under `pkgs.naitokosuke` rather than at the top level, so a custom package can never shadow a nixpkgs attribute of the same name: `frog` used to replace nixpkgs' unrelated Dutch NLP tool that way (#545).",
-          lines: [75, 98],
+          lines: [75, 105],
         },
         {
           title: "mkDarwinConfig",
           prose:
             "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module hands every host the `pkgs` defined above through `nixpkgs.pkgs`. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
-          lines: [105, 127],
+          lines: [112, 134],
         },
         {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [129, 129],
+          lines: [136, 136],
         },
         {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay puts under `pkgs.naitokosuke`, so `nix build .#frog` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [141, 141],
+          lines: [148, 148],
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
-          lines: [131, 143],
+          lines: [138, 150],
         },
         {
           title: "Checks",
           prose:
             "`nix flake check` on its own only notices that `darwinConfigurations` exists. `checks` lists what should actually be built: the `system.build.toplevel` of every host, every custom package, and a treefmt check that fails on unformatted files. The `check` workflow runs it on every pull request, and the nvfetcher workflow runs it before proposing a bump.",
-          lines: [145, 156],
+          lines: [152, 163],
         },
       ],
     },
@@ -383,13 +383,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Auto-hide and suppress recents",
           prose:
             "`autohide` reclaims the bottom of the screen by default; the Dock only appears when the cursor hits the edge. `show-recents = false` stops the Dock from growing unpredictably as you switch projects.",
-          lines: [4, 6],
+          lines: [2, 4],
         },
         {
           title: "Sizing and animation",
           prose:
             "Tiles render at 50px and magnify to 64px on hover — enough feedback without being noisy. `mineffect = scale` is sharper than the genie default, and `launchanim = false` removes the bouncing icon during app launch.",
-          lines: [7, 12],
+          lines: [5, 10],
         },
       ],
     },
@@ -497,14 +497,14 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Flakes, and no trusted user",
           prose:
-            '`experimental-features = "nix-command flakes"` turns on flakes globally so every shell can do `nix run`, `nix build`, etc., without `--extra-experimental-features` flags. The primary user is deliberately left out of `trusted-users`: a trusted user can set any daemon setting, including substituters and `post-build-hook`, which amounts to root, and every process running as that user inherits it (#560). What needed that trust is declared globally instead: the binary cache that the nixpkgs of devenv is built into, with its public key.',
-          lines: [48, 57],
+            "`experimental-features` turns on `nix-command` and `flakes` globally so every shell can do `nix run`, `nix build`, etc., without `--extra-experimental-features` flags. `nix.channel.enable = false` drops the channels a flakes-only setup has no use for, so `NIX_PATH` no longer carries them. The primary user is deliberately left out of `trusted-users`: a trusted user can set any daemon setting, including substituters and `post-build-hook`, which amounts to root, and every process running as that user inherits it (#560). What needed that trust is declared globally instead: the binary cache that the nixpkgs of devenv is built into, with its public key.",
+          lines: [48, 62],
         },
         {
           title: "Build provenance",
           prose:
             "`system.configurationRevision` records the flake's git revision (or its dirty revision), so the running system can always be traced back to the commit it was built from.",
-          lines: [59, 59],
+          lines: [64, 64],
         },
       ],
     },
@@ -521,19 +521,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Key repeat",
           prose:
             "macOS's default key repeat is glacial for vim muscle memory. `KeyRepeat = 1` is the fastest tick the OS exposes, and `InitialKeyRepeat = 20` (≈ 200 ms) cuts the dead time before repeat kicks in.",
-          lines: [6, 9],
+          lines: [4, 7],
         },
         {
           title: "Menu bar",
           prose:
             "`_HIHideMenuBar = true` hides the menu bar permanently — it slides in only when the cursor hits the top edge. Combined with the auto-hidden Dock, every pixel of vertical space is reclaimed for the editor or terminal.",
-          lines: [11, 12],
+          lines: [9, 10],
         },
         {
           title: "Scrolling",
           prose:
             "Two small ergonomics toggles. `swipescrolldirection = true` keeps macOS's natural direction (drag content, not viewport). `AppleShowScrollBars = \"WhenScrolling\"` shows the scrollbar only during active scroll so it doesn't pin a column of pixels.",
-          lines: [14, 16],
+          lines: [12, 14],
         },
       ],
     },
@@ -603,13 +603,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Tool modules",
           prose:
             "Each tool gets its own file or directory directly under `home/`. Composing them as a flat list keeps every concern shallow — opening `git.nix` shows the full git story, opening `claude.nix` shows the Claude Code settings, with its rm guard and sandbox in their own siblings.",
-          lines: [4, 25],
+          lines: [2, 23],
         },
         {
           title: "State version",
           prose:
             "`home.username` and `home.homeDirectory` aren't set here: home-manager derives them from `users.users`, which `hosts/common/home-manager.nix` fills from `config.naitokosuke`. `home.stateVersion` is pinned at the version this config was first written for — never bump casually.",
-          lines: [27, 27],
+          lines: [25, 25],
         },
       ],
     },

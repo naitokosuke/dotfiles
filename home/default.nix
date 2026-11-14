@@ -1,5 +1,3 @@
-{ ... }:
-
 {
   imports = [
     ./adrafinil.nix

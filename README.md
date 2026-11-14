@@ -1,6 +1,6 @@
 # Nix Configuration for macOS
 
-Personal Nix configuration for macOS using [nix-darwin](https://github.com/LnL7/nix-darwin) and [home-manager](https://github.com/nix-community/home-manager).
+Personal Nix configuration for macOS using [nix-darwin](https://github.com/nix-darwin/nix-darwin) and [home-manager](https://github.com/nix-community/home-manager).
 
 An interactive, VS Code-flavoured walkthrough of this repository is published at
 **[naitokosuke-dotfiles.void.app](https://naitokosuke-dotfiles.void.app/)** (source in [`docs/`](docs/)).

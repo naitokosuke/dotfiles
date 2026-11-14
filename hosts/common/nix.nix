@@ -45,7 +45,12 @@
     };
   };
 
-  nix.settings.experimental-features = "nix-command flakes";
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+  # Flakes only: without this NIX_PATH still carries the root channels.
+  nix.channel.enable = false;
   # The primary user is deliberately not in trusted-users. A trusted user can
   # set any daemon setting, including substituters and post-build-hook, which
   # amounts to root, and every process running as that user inherits it
