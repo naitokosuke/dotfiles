@@ -441,7 +441,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Homebrew on PATH, after Nix",
           prose:
-            "Cask binaries such as `code` and Orca's `orca` live in `/opt/homebrew/bin`, which nix-darwin does not put on `$PATH` by itself. `environment.systemPath` adds it with `mkOrder 1100`, after the Nix profiles and before the system directories. nix-homebrew's zsh integration would instead run `brew shellenv` on every interactive start and put Homebrew first, so it is turned off.",
+            "Cask binaries, which today is Orca's `orca`, live in `/opt/homebrew/bin`, which nix-darwin does not put on `$PATH` by itself. `environment.systemPath` adds it with `mkOrder 1100`, after the Nix profiles and before the system directories. nix-homebrew's zsh integration would instead run `brew shellenv` on every interactive start and put Homebrew first, so it is turned off.",
           lines: [62, 70],
         },
         {
@@ -453,8 +453,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Casks",
           prose:
-            "Everything in `casks` is materialised on `darwin-rebuild`. `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
-          lines: [96, 120],
+            "Everything in `casks` is materialised on `darwin-rebuild`. An app is a cask only for a reason, recorded above the list: it has no darwin build in nixpkgs, or it updates itself in place or holds macOS privacy permissions that are tied to its path, which a changing store path would lose. VS Code and Ghostty come from nixpkgs instead (#556). `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
+          lines: [96, 125],
         },
       ],
     },
@@ -626,7 +626,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "The path, as an option",
           prose:
             "A `readOnly` option with a default is how the module system shares one value between modules without letting either of them redefine it. `osConfig` is nix-darwin's configuration as seen from home-manager, which is what makes the cask list visible here.",
-          lines: [16, 21],
+          lines: [15, 19],
         },
         {
           title: "Tied to the cask",
@@ -714,34 +714,28 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           lines: [10, 65],
         },
         {
-          title: "Cask-provided binaries, checked at eval time",
-          prose:
-            "The plan hook runs `code`, which a Homebrew cask installs, so its path cannot come from the store. An `assertions` entry ties it to the cask that provides it: drop `visual-studio-code` from `hosts/common/homebrew.nix` and evaluation fails, naming the file and the cask, instead of leaving a hook that silently does nothing (issue #482). nix-darwin normalises `homebrew.casks` into submodules, so the check reads each entry's `name`. The Adrafinil CLI the hooks above run is guarded the same way in `home/adrafinil.nix`, which declares its path once for this file and `home/mcp.nix`.",
-          lines: [69, 80],
-        },
-        {
           title: "settings.json",
           prose:
             'Global preferences — theme, editor mode, notifications, Japanese spinner verbs. The binary comes from the store, so nothing may update it in place: `env` turns off Claude Code\'s own auto-updater and installation checks, which is the mechanism the CLI actually reads (`DISABLE_AUTOUPDATER` from the process environment; the legacy `autoUpdates` preference is migrated out of `~/.claude.json` into exactly this block). The `installMethod = "unknown"` and `autoUpdates = true` lines that used to sit at the top were never read from `settings.json`, and the second one claimed the opposite of what the machine does — both dropped in issue #485.',
-          lines: [84, 123],
+          lines: [71, 110],
         },
         {
           title: "Permissions",
           prose:
             "`permissions.deny` blocks reading credentials (`.env*`, `secrets/`, `~/.ssh`, `~/.aws`, `~/.gnupg`), wiping `/` or `~`, force-pushing, and raw `curl` / `wget` in favour of WebFetch with an explicit domain — plus a tongue-in-cheek ban on `perl` and `python`.",
-          lines: [124, 155],
+          lines: [111, 142],
         },
         {
           title: "Plan hook",
           prose:
-            'A `PreToolUse` hook on `ExitPlanMode` opens the newest plan file in VS Code, so a plan can be read in the editor before it\'s approved. The glob is resolved into a variable and tested first: with no plan files it would otherwise reach `ls` literally and end up running `code ""` on an empty argument. The Adrafinil handlers are merged in alongside it.',
-          lines: [156, 175],
+            'A `PreToolUse` hook on `ExitPlanMode` opens the newest plan file in VS Code, so a plan can be read in the editor before it\'s approved. The glob is resolved into a variable and tested first: with no plan files it would otherwise reach `ls` literally and end up running `code ""` on an empty argument. `code` is the store path of the VS Code that `home/vscode.nix` installs, so the hook does not depend on `$PATH`. The Adrafinil handlers are merged in alongside it.',
+          lines: [143, 161],
         },
         {
           title: "Rules and skills",
           prose:
             "`CLAUDE.md` and the files under `rules/` live in `home/claude-context/` and are installed through `programs.claude-code.context` and `rulesDir`. They used to be out-of-store links into the separate `rule-rule-rule` repository, which dangled silently wherever it was not cloned and stopped taking changes once it was archived (issue #535). Skills come from the locked `skill-skill-skill` input through `programs.claude-code.skills`, so names and content have one source and nothing can dangle (#548): a skill change arrives with `nix flake update skill-skill-skill`. home-manager links the files one by one, which leaves room for the MCP plugin it installs into `~/.claude/skills` itself.",
-          lines: [178, 188],
+          lines: [163, 174],
         },
       ],
     },
@@ -770,13 +764,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["terminal"],
     walkthrough: {
       intro:
-        "Ghostty is the primary terminal. The actual binary comes from Homebrew Cask (`package = null` disables the Nix-side install to avoid double-installing), while the config is declared here: the Catppuccin Mocha theme and ligatures turned off via `font-feature`. No `command` is set, so Ghostty starts the login shell, which is Zsh.",
+        "Ghostty is the primary terminal. The app is `ghostty-bin`, the upstream macOS build repackaged by nixpkgs, so the terminal and its config come from the same place (#556). The config is declared here: the Catppuccin Mocha theme and ligatures turned off via `font-feature`. No `command` is set, so Ghostty starts the login shell, which is Zsh.",
       sections: [
         {
           title: "Shift+Enter",
           prose:
             "Ghostty implements fixterms, so Shift+Enter sends an escape sequence — which breaks multi-line input in Claude Code. The keybind makes it send a literal newline instead, matching iTerm2.",
-          lines: [16, 21],
+          lines: [15, 19],
         },
       ],
     },
@@ -960,7 +954,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["editor"],
     walkthrough: {
       intro:
-        "VS Code's `settings.json` and `keybindings.json` are sourced from a separate repo (`naitokosuke/vscode-settings`), pinned via the flake input. Settings are linked as-is; the keybinding file upstream is JSONC (comments included), so it's converted to JSON at build time.",
+        "VS Code's `settings.json` and `keybindings.json` are sourced from a separate repo (`naitokosuke/vscode-settings`), pinned via the flake input. Settings are linked as-is; the keybinding file upstream is JSONC (comments included), so it's converted to JSON at build time. The editor itself is `pkgs.vscode`, installed here too, so the `code` that the plan hook in `home/claude.nix` runs is a store path rather than something a cask has to provide (#556).",
       sections: [
         {
           title: "JSONC → JSON with jsonnet",

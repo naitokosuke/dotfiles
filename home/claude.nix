@@ -2,7 +2,7 @@
   config,
   lib,
   inputs,
-  osConfig,
+  pkgs,
   ...
 }:
 
@@ -66,19 +66,6 @@ let
 in
 
 {
-  # The plan hook below runs `code`, which a Homebrew cask installs, so it
-  # cannot come from the store. It can still be tied to the declaration that
-  # provides it: drop the cask from hosts/common/homebrew.nix and evaluation
-  # fails here, instead of the hook silently doing nothing at runtime.
-  # nix-darwin normalises homebrew.casks into submodules, so the name is read
-  # off `name` rather than the list itself.
-  assertions = [
-    {
-      assertion = lib.any (declared: declared.name == "visual-studio-code") osConfig.homebrew.casks;
-      message = "home/claude.nix runs `code`, which the visual-studio-code cask provides, but that cask is not in hosts/common/homebrew.nix.";
-    }
-  ];
-
   programs.claude-code.enable = true;
 
   programs.claude-code.settings = {
@@ -160,13 +147,12 @@ in
           hooks = [
             {
               type = "command";
-              # Opens the newest plan in VS Code. `code` comes from the
-              # visual-studio-code cask via /opt/homebrew/bin (see
-              # environment.systemPath in hosts/common/homebrew.nix). With no plan file
-              # the glob would be passed through literally, so the match is
-              # tested before opening anything — the hook is best-effort, and a
-              # failure here is quiet enough to stay unnoticed.
-              command = ''plan=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n "$plan" ] && code "$plan" || true'';
+              # Opens the newest plan in VS Code (installed by ./vscode.nix).
+              # With no plan file the glob would be passed through literally,
+              # so the match is tested before opening anything — the hook is
+              # best-effort, and a failure here is quiet enough to stay
+              # unnoticed.
+              command = ''plan=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n "$plan" ] && ${lib.getExe pkgs.vscode} "$plan" || true'';
               timeout = 5;
             }
           ];

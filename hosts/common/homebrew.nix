@@ -65,8 +65,8 @@ in
     enableZshIntegration = false;
   };
 
-  # Cask binaries: `code` for the plan hook in home/claude.nix, and Orca's
-  # CLI. Ordered after the Nix profiles and before the system directories.
+  # Cask binaries, which is Orca's CLI. Ordered after the Nix profiles and
+  # before the system directories.
   environment.systemPath = lib.mkOrder 1100 [ "${config.homebrew.prefix}/bin" ];
 
   homebrew = {
@@ -93,6 +93,13 @@ in
       };
     };
 
+    # An app is a cask only for a reason (#556). obs, dockdoor, dia, the
+    # Claude desktop app and the two tap casks have no darwin build in
+    # nixpkgs. The rest do, but update themselves in place or hold macOS
+    # privacy permissions (TCC), which are tied to the app's path and would
+    # be lost every time a store path changes. Blender would also put a very
+    # large build into every system closure. VS Code and Ghostty come from
+    # nixpkgs (home/vscode.nix, home/ghostty.nix).
     casks = [
       # Keeps the Mac awake only while an AI agent is working; the Claude Code
       # hooks that drive it live in home/claude.nix. The cask requires macOS 26
@@ -102,7 +109,6 @@ in
       "blender"
       "claude"
       "dockdoor"
-      "ghostty"
       "google-chrome"
       "monitorcontrol"
       "obs"
@@ -116,7 +122,6 @@ in
       # only the floor version installed on a fresh machine.
       "stablyai/orca/orca"
       "thebrowsercompany-dia"
-      "visual-studio-code"
     ];
   };
 }
