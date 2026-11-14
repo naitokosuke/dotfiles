@@ -74,11 +74,10 @@
     let
       system = "aarch64-darwin";
 
-      # One definition of the package set for both roots that evaluate it: the
-      # darwin configurations below, and the flake's own `packages` output. A
-      # custom package that grows a dependency on another custom package or on
-      # an unfree one then builds the same way through `nix build .#<pkg>` as
-      # it does through `darwin-rebuild switch`.
+      # `pkgs` below is the one nixpkgs instance: the hosts take it through
+      # `nixpkgs.pkgs`, and the flake's own outputs are built from it. A custom
+      # package therefore builds the same way through `nix build .#<pkg>` as it
+      # does through `darwin-rebuild switch`.
       customPackages = final: import ./pkgs { pkgs = final; };
 
       nixpkgsConfig = {
@@ -118,9 +117,7 @@
                 networking.hostName = hostName;
                 networking.computerName = hostName;
                 system.primaryUser = config.naitokosuke.username;
-                nixpkgs.config = nixpkgsConfig;
-                nixpkgs.hostPlatform = system;
-                nixpkgs.overlays = overlays;
+                nixpkgs.pkgs = pkgs;
               }
             )
             home-manager.darwinModules.home-manager
