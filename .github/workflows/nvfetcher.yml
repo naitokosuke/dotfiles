@@ -2,6 +2,11 @@ name: nvfetcher
 
 on:
   workflow_dispatch:
+    inputs:
+      skip-cooldown:
+        description: Propose releases regardless of their age (for urgent fixes)
+        type: boolean
+        default: false
   schedule:
     # Daily at 08:00 JST
     - cron: "0 23 * * *"
@@ -20,10 +25,37 @@ jobs:
 
       - uses: cachix/install-nix-action@v31.11.3
 
-      - name: Run nvfetcher
+      # The pinned hash only records what was fetched, so a hijacked release
+      # would be pinned as it is. Releases younger than the cooldown are
+      # skipped, which leaves time for one to be noticed upstream (#584).
+      # nvfetcher has no such option, so each `src.github` is replaced with
+      # the newest release that is old enough, as a fixed `src.manual`
+      # version. A pin that is already newer than that is kept.
+      - name: Hold back releases younger than the cooldown
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COOLDOWN_DAYS: ${{ inputs.skip-cooldown && '0' || '3' }}
         run: |
-          printf '[keys]\ngithub = "%s"\n' "${{ secrets.GITHUB_TOKEN }}" > "$RUNNER_TEMP/keyfile.toml"
-          nix run --inputs-from . nixpkgs#nvfetcher -- --keyfile "$RUNNER_TEMP/keyfile.toml" -o pkgs/_sources
+          set -euo pipefail
+          cutoff=$(jq -rn --argjson days "$COOLDOWN_DAYS" 'now - $days * 86400 | todate')
+          echo "COOLDOWN_CUTOFF=$cutoff" >> "$GITHUB_ENV"
+          cp nvfetcher.toml "$RUNNER_TEMP/nvfetcher.toml"
+          nix eval --json --impure --expr 'builtins.fromTOML (builtins.readFile ./nvfetcher.toml)' |
+            jq -r 'to_entries[] | [.key, .value.src.github, .value.src.prefix // ""] | @tsv' |
+            while IFS=$'\t' read -r name repo prefix; do
+              current=$prefix$(jq -r --arg name "$name" '.[$name].version' pkgs/_sources/generated.json)
+              tag=$(gh api "repos/$repo/releases?per_page=100" | jq -r \
+                --arg prefix "$prefix" --arg cutoff "$cutoff" --arg current "$current" '
+                  map(select((.draft or .prerelease | not) and (.tag_name | startswith($prefix)))) as $releases
+                  | ($releases | map(.published_at <= $cutoff) | index(true)) as $eligible
+                  | ($releases | map(.tag_name == $current) | index(true)) as $pinned
+                  | $releases[[$eligible, $pinned] | map(values) | min // empty].tag_name // $current')
+              echo "$name: $tag (pinned: $current)"
+              sed -i.bak "s|src.github = \"$repo\"|src.manual = \"$tag\"|" "$RUNNER_TEMP/nvfetcher.toml"
+            done
+
+      - name: Run nvfetcher
+        run: nix run --inputs-from . nixpkgs#nvfetcher -- -c "$RUNNER_TEMP/nvfetcher.toml" -o pkgs/_sources
 
       # The vite-plus launcher that nvfetcher pins and the JavaScript toolchain
       # in pkgs/vite-plus-runtime are two halves of one release, and the
@@ -38,14 +70,19 @@ jobs:
         run: |
           version=$(jq -r '.["vite-plus-darwin-arm64"].version' pkgs/_sources/generated.json)
           cd pkgs/vite-plus-runtime
+          # The lockfile only moves together with the launcher.
+          if [ "$(jq -r '.dependencies["vite-plus"]' package.json)" = "$version" ]; then
+            exit 0
+          fi
           npm pkg set "dependencies.vite-plus=$version"
           # vite-plus lists oxlint, oxfmt and vitest as peers of itself, so a
           # bump rearranges a graph npm cannot migrate in place: it holds on to
           # the tree the committed lockfile describes and gives up with
           # ERESOLVE. The lockfile is regenerated wholesale for the pinned
-          # version either way, so the old one goes first.
+          # version either way, so the old one goes first. `--before` applies
+          # the same cooldown to every dependency it resolves.
           rm -f package-lock.json
-          npm install --package-lock-only --ignore-scripts
+          npm install --package-lock-only --ignore-scripts --before="$COOLDOWN_CUTOFF"
 
       # A pull request opened with GITHUB_TOKEN does not trigger the check
       # workflow, so the same check runs here: a bump that does not evaluate

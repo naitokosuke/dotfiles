@@ -266,28 +266,34 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         "The automation half of the nvfetcher story. Every morning at 08:00 JST (or on manual dispatch) CI reruns nvfetcher; if any tracked tool released a new version, the regenerated `pkgs/_sources/` — plus the vite-plus runtime lockfile that has to move with it — lands in an auto-created pull request instead of anyone remembering to bump versions. Requires the repo setting that lets Actions create PRs.",
       sections: [
         {
+          title: "Cooldown",
+          prose:
+            "A pinned hash only records what was fetched, so a hijacked release would be pinned as it is. Releases younger than three days are therefore skipped (#584). nvfetcher has no such option, so this step looks up each upstream's releases and rewrites a copy of `nvfetcher.toml`, replacing every `src.github` with the newest release that is old enough as a fixed `src.manual` version. A pin that is already newer is kept, so nothing is downgraded. Dispatching the workflow by hand with `skip-cooldown` sets the window to zero for an urgent fix.",
+          lines: [28, 55],
+        },
+        {
           title: "Running nvfetcher",
           prose:
-            "A throwaway keyfile passes `GITHUB_TOKEN` to nvfetcher so release lookups aren't rate-limited, then `nix run --inputs-from . nixpkgs#nvfetcher -- -o pkgs/_sources` regenerates the pins — the same command used locally, with nvfetcher itself taken from the nixpkgs this flake locks.",
-          lines: [23, 26],
+            "`nix run --inputs-from . nixpkgs#nvfetcher` regenerates the pins from that rewritten config, with nvfetcher itself taken from the nixpkgs this flake locks.",
+          lines: [57, 58],
         },
         {
           title: "Syncing the vite-plus runtime",
           prose:
-            "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to build unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything.",
-          lines: [28, 48],
+            "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to build unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything. `--before` holds every dependency it resolves to the same cooldown, and the step does nothing when the launcher version did not change, so the lockfile only moves together with the launcher.",
+          lines: [60, 85],
         },
         {
           title: "Checking before proposing",
           prose:
             "A pull request opened with `GITHUB_TOKEN` does not trigger other workflows, so the `check` workflow would never see it. The job therefore runs on macOS and runs `nix flake check` itself: a bump that does not evaluate or build fails the run instead of becoming a pull request.",
-          lines: [50, 56],
+          lines: [87, 93],
         },
         {
           title: "The update PR",
           prose:
             "`peter-evans/create-pull-request` commits only `pkgs/_sources/` and `pkgs/vite-plus-runtime/` to a fixed `nvfetcher-update` branch — repeated runs update the same PR rather than piling up new ones, and the branch deletes itself on merge.",
-          lines: [58, 69],
+          lines: [95, 106],
         },
       ],
     },
