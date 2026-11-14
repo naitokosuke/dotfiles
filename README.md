@@ -41,7 +41,7 @@ done the machine looks healthy: the very first `git commit` is what fails, becau
 [`home/git.nix`](home/git.nix) signs every commit and tag with `~/.ssh/id_ed25519.pub` and nothing
 here creates that key.
 
-Run them after the Installation switch above — `gh`, `ghq` and `playwright-cli` come from the
+Run them after the Installation switch above — `gh` and `playwright-cli` come from the
 configuration — and in this order.
 
 * Generate the key pair that [`home/ssh.nix`](home/ssh.nix) uses as the GitHub identity and
@@ -59,13 +59,6 @@ configuration — and in this order.
   gh auth refresh -h github.com -s admin:public_key -s admin:ssh_signing_key
   gh ssh-key add ~/.ssh/id_ed25519.pub --type authentication --title "$(hostname -s)"
   gh ssh-key add ~/.ssh/id_ed25519.pub --type signing --title "$(hostname -s)"
-  ```
-
-* Clone the skills repository [`home/claude.nix`](home/claude.nix) links into `~/.claude/skills`.
-  Those are out-of-store symlinks into a working tree under the ghq root, so activation succeeds
-  either way and the links simply dangle until the tree exists.
-  ```bash
-  ghq get naitokosuke/skill-skill-skill
   ```
 
 * Install the Playwright browsers. They are runtime-managed on purpose, so no closure contains
