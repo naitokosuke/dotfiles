@@ -77,19 +77,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay puts under `pkgs.naitokosuke`, so `nix build .#frog` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [142, 142],
+          lines: [144, 144],
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
-          lines: [134, 144],
+          lines: [134, 146],
         },
         {
           title: "Checks",
           prose:
             "`nix flake check` on its own only notices that `darwinConfigurations` exists. `checks` lists what should actually be built: the `system.build.toplevel` of every host, every custom package, and a treefmt check that fails on unformatted files. The `check` workflow runs it on every pull request, and the nvfetcher workflow runs it before proposing a bump.",
-          lines: [146, 157],
+          lines: [148, 159],
         },
       ],
     },
@@ -117,14 +117,14 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "playwright-cli from source",
           prose:
-            "`@playwright/cli` has no release binaries, so `fetch.github` pins the source tree at the tag instead, and `pkgs/playwright-cli.nix` builds it with `buildNpmPackage`.",
-          lines: [22, 27],
+            "`@playwright/cli` has no release binaries, so `fetch.github` pins the source tree at the tag instead, and `pkgs/playwright-cli.nix` builds it with `buildNpmPackage`. `extract` copies `package.json` and `package-lock.json` out of that tree into `pkgs/_sources`, so the derivation can read them without fetching anything during evaluation.",
+          lines: [22, 28],
         },
         {
           title: "frog",
           prose:
             "frog's tags carry a project-name prefix (`frog@`) that `src.prefix` strips, and its release asset is a gzipped single binary.",
-          lines: [29, 34],
+          lines: [32, 37],
         },
       ],
     },
@@ -204,20 +204,20 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Dependencies from the upstream lockfile",
           prose:
-            "`importNpmLock` reads `package-lock.json` straight out of the pinned source, so there's no `npmDepsHash` to update by hand after each nvfetcher bump (issue #411). `src` is bound in a `let` because both the derivation and `importNpmLock` need the same tree. `dontNpmBuild` skips `npm run build`.",
-          lines: [14, 29],
+            "`importNpmLock` builds the dependencies from the upstream `package.json` and `package-lock.json`, so there's no `npmDepsHash` to update by hand after each nvfetcher bump (issue #411). nvfetcher copies both files into `pkgs/_sources` on every bump, so they are read from the repository: reading them out of the fetched source would be import-from-derivation, and the flake has to evaluate with that disabled (#546). `dontNpmBuild` skips `npm run build`.",
+          lines: [14, 28],
         },
         {
           title: "Browsers stay runtime-managed",
           prose:
             "Browsers are left to Playwright's own cache. Pinning nixpkgs' `playwright-driver.browsers` would pair them with a different Playwright version than the one vendored here.",
-          lines: [31, 33],
+          lines: [30, 32],
         },
         {
           title: "Install check",
           prose:
             "`versionCheckHook` runs `playwright-cli --version` and checks that the output contains `version`, the same check the binary packages here use, so the installed entry point is known to start before it lands on `$PATH`.",
-          lines: [35, 36],
+          lines: [34, 35],
         },
       ],
     },

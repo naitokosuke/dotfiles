@@ -21,10 +21,13 @@ fetch.url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64
 
 # npm-only distribution (no release binaries), so this is built from source
 # with buildNpmPackage. Dependencies come from the upstream package-lock.json
-# via importNpmLock, so a version bump needs no extra manual step.
+# via importNpmLock, so a version bump needs no extra manual step. `extract`
+# copies the lockfile into pkgs/_sources, so evaluation does not have to fetch
+# the source to read it (#546).
 [playwright-cli]
 src.github = "microsoft/playwright-cli"
 fetch.github = "microsoft/playwright-cli"
+extract = ["package.json", "package-lock.json"]
 
 # Release tags carry an npm-style "frog@" prefix, stripped here so $ver is
 # the bare version. The release asset is a gzipped single binary.

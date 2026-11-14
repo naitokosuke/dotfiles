@@ -47,7 +47,10 @@
     "playwright-cli": {
         "cargoLock": null,
         "date": null,
-        "extract": null,
+        "extract": {
+            "package-lock.json": "sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q_hO6EA6DXDKA=/package-lock.json",
+            "package.json": "sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q_hO6EA6DXDKA=/package.json"
+        },
         "name": "playwright-cli",
         "passthru": null,
         "pinned": false,
