@@ -130,7 +130,7 @@ with versions and hashes tracked by [nvfetcher](https://github.com/berberman/nvf
 
 vite-plus is the one package with a second half: `vp` is only a launcher, and the JavaScript toolchain
 it delegates to is built from [`pkgs/vite-plus-runtime/`](pkgs/vite-plus-runtime/) and installed
-alongside it. The two must stay on the same version, so the derivation refuses to evaluate if the
+alongside it. The two must stay on the same version, so the derivation refuses to build if the
 lockfile and the nvfetcher pin disagree, and the nvfetcher workflow regenerates the lockfile as part
 of the same PR. The approach follows [nix-vite-plus](https://github.com/ryoppippi/nix-vite-plus).
 

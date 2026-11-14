@@ -27,7 +27,7 @@ jobs:
 
       # The vite-plus launcher that nvfetcher pins and the JavaScript toolchain
       # in pkgs/vite-plus-runtime are two halves of one release, and the
-      # derivation refuses to evaluate if they disagree (issue #413). nvfetcher
+      # derivation refuses to build if they disagree (issue #413). nvfetcher
       # only knows about the launcher, so the lockfile is brought along here
       # rather than left as a manual step after every bump.
       - uses: actions/setup-node@v7.1.0
