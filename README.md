@@ -133,7 +133,10 @@ lands, `pkgs/vite-plus.nix` will be replaced by `pkgs.vite-plus` (see the TODO i
 
 ### GUI Apps
 
-Managed via Homebrew Casks. See [`hosts/common/homebrew.nix`](hosts/common/homebrew.nix).
+Managed via Homebrew Casks where there is a reason for a cask (no darwin build in nixpkgs, in-place
+self-updates, or macOS privacy permissions tied to the app path). See
+[`hosts/common/homebrew.nix`](hosts/common/homebrew.nix). VS Code and Ghostty come from nixpkgs
+([`home/vscode.nix`](home/vscode.nix), [`home/ghostty.nix`](home/ghostty.nix)).
 
 ### Hosts
 

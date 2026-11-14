@@ -1,10 +1,10 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   programs.ghostty = {
     enable = true;
-    # Ghostty is installed via Homebrew Cask, so don't install via Nix
-    package = null;
+    # The upstream macOS build, repackaged by nixpkgs (#556).
+    package = pkgs.ghostty-bin;
     settings = {
       theme = "Catppuccin Mocha";
       font-feature = [
