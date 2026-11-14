@@ -404,23 +404,6 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
-  "hosts/common/gomi.nix": {
-    about: "Launchd agent that prunes Trash items older than 45 days via gomi.",
-    tags: ["launchd", "automation"],
-    walkthrough: {
-      intro:
-        "`gomi` is a safer `rm` that moves files to a trash directory. This module installs a user `launchd` agent that runs `gomi --prune=45d,orphans` once a week, so the trash doesn't accumulate forever. gomi's own settings live in `home/gomi.nix`.",
-      sections: [
-        {
-          title: "The launchd agent",
-          prose:
-            "`ProgramArguments` resolves `gomi` from the Nix store via `lib.getExe` — no `$PATH` dependency. `StartCalendarInterval` runs the prune every Sunday at 03:00; the agent is owned by the user, so it doesn't need root. No stdout/stderr paths are set, since gomi already records each prune in its own log (`~/.local/share/gomi/debug.log`).",
-          lines: [7, 24],
-        },
-      ],
-    },
-  },
-
   "hosts/common/home-manager.nix": {
     about: "Bridge from nix-darwin to home-manager.",
     tags: ["bridge", "home-manager"],
@@ -839,19 +822,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["cli", "config"],
     walkthrough: {
       intro:
-        "The user half of gomi, the trash-can alternative to `rm`; the package is in `hosts/common/packages.nix` and the weekly prune agent in `hosts/common/gomi.nix`. The YAML config is generated from a Nix attrset via `pkgs.formats.yaml`, so the source of truth stays in Nix.",
+        "The user half of gomi, the trash-can alternative to `rm`; the package is in `hosts/common/packages.nix`. The config and the weekly prune agent live together here (#557). The YAML config is generated from a Nix attrset via `pkgs.formats.yaml`, so the source of truth stays in Nix.",
       sections: [
         {
           title: "Trash",
           prose:
             "Trashed files go to `~/.gomi`, and `forbidden_paths` refuses to trash system directories, `/`, or other trash locations. Restores ask for confirmation, and permanent deletion is disabled.",
-          lines: [19, 47],
+          lines: [13, 41],
         },
         {
           title: "History and logging",
           prose:
             "The restore list covers the past year and skips `.DS_Store`. Debug logging is on, rotated at 10 MB with three files kept.",
-          lines: [92, 111],
+          lines: [86, 105],
+        },
+        {
+          title: "The prune agent",
+          prose:
+            "A home-manager `launchd` agent runs `gomi --prune=45d,orphans` every Sunday at 03:00, so the trash doesn't accumulate forever. `gomi` is resolved from the Nix store via `lib.getExe`, with no `$PATH` dependency. No stdout/stderr paths are set, since gomi already records each prune in its own log (`~/.local/share/gomi/debug.log`).",
+          lines: [108, 125],
         },
       ],
     },

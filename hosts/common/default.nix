@@ -5,7 +5,6 @@
     ./dock.nix
     ./finder.nix
     ./fonts.nix
-    ./gomi.nix
     ./home-manager.nix
     ./homebrew.nix
     ./keyboard.nix
