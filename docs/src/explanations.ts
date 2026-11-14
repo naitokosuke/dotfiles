@@ -593,7 +593,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["macos", "apps"],
     walkthrough: {
       intro:
-        "The Command Line Tools alone cannot build iOS apps or run the Simulator. `homebrew.masApps` installs Xcode through `mas` during the homebrew activation step. `mas` cannot sign in or obtain an app the Apple ID has never gotten, and then hangs instead of failing, so on a fresh Apple ID Xcode has to be gotten once by hand in the App Store app. A `postActivation` script then replaces a manual `sudo xcode-select --switch`, accepts the license, and runs `xcodebuild -runFirstLaunch`. It is guarded on the app existing, so a failed App Store install leaves the rest of the activation intact.",
+        "The Command Line Tools alone cannot build iOS apps or run the Simulator. `homebrew.masApps` installs Xcode through `mas` during the homebrew activation step. `mas` cannot sign in or obtain an app the Apple ID has never gotten, and then hangs instead of failing, so on a fresh Apple ID Xcode has to be gotten once by hand in the App Store app. A `postActivation` script then replaces a manual `sudo xcode-select --switch`, accepts the license, and runs `xcodebuild -runFirstLaunch` — each only when Xcode reports it is still needed (`xcodebuild -license check`, `-checkFirstLaunchStatus`), so an ordinary switch does none of them (#549). The script is guarded on the app existing and a failing step only warns, so neither a failed App Store install nor a failing `xcodebuild` takes the rest of the activation with it. Accepting the license automatically, also after an update, is a recorded decision: the App Store updates Xcode unattended, and an unaccepted license would break every build until someone noticed.",
     },
   },
 

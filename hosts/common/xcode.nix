@@ -12,23 +12,38 @@
 # limitation), and the App Store updates it independently of flake.lock.
 let
   developerDir = "/Applications/Xcode.app/Contents/Developer";
+  xcodebuild = "${developerDir}/usr/bin/xcodebuild";
 in
 {
   homebrew.masApps.Xcode = 497799835;
 
   # Runs after the homebrew activation step, so Xcode is already installed on
-  # a fresh machine. Guarded so a failed App Store install does not break the
-  # rest of the activation.
+  # a fresh machine. Each step only runs when Xcode reports it is still
+  # needed, and a failing step warns instead of aborting the rest of the
+  # activation (#549).
+  #
+  # Xcode is selected with `xcode-select` rather than DEVELOPER_DIR: the
+  # /usr/bin shims and GUI apps read the selected directory, not the
+  # environment. The license is accepted automatically, also when an Xcode
+  # update brings a new one: the App Store updates Xcode unattended, and an
+  # unaccepted license would break every build until someone noticed.
   system.activationScripts.postActivation.text = ''
     if [ -d ${developerDir} ]; then
       if [ "$(/usr/bin/xcode-select --print-path)" != ${developerDir} ]; then
         echo "selecting Xcode as the active developer directory..." >&2
-        /usr/bin/xcode-select --switch ${developerDir}
+        /usr/bin/xcode-select --switch ${developerDir} ||
+          echo "warning: could not select Xcode" >&2
       fi
-      # Accepts the license and installs the system packages Xcode asks for
-      # on first launch; both are no-ops once done.
-      ${developerDir}/usr/bin/xcodebuild -license accept
-      ${developerDir}/usr/bin/xcodebuild -runFirstLaunch
+      if ! ${xcodebuild} -license check >/dev/null 2>&1; then
+        echo "accepting the Xcode license..." >&2
+        ${xcodebuild} -license accept ||
+          echo "warning: could not accept the Xcode license" >&2
+      fi
+      if ! ${xcodebuild} -checkFirstLaunchStatus >/dev/null 2>&1; then
+        echo "installing the system packages Xcode asks for on first launch..." >&2
+        ${xcodebuild} -runFirstLaunch ||
+          echo "warning: Xcode first-launch setup failed" >&2
+      fi
     fi
   '';
 }
