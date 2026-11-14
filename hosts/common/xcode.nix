@@ -1,5 +1,3 @@
-{ ... }:
-
 # Full Xcode for iOS development (issue #523). The Command Line Tools alone
 # cannot build iOS apps or run the Simulator.
 #

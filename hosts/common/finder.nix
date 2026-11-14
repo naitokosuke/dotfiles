@@ -1,5 +1,3 @@
-{ ... }:
-
 {
   system.defaults.finder = {
     AppleShowAllExtensions = true;

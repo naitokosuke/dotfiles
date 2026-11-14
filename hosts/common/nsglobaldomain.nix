@@ -1,6 +1,4 @@
 # Global macOS preferences that have no app of their own.
-{ ... }:
-
 {
   system.defaults.NSGlobalDomain = {
     # The fastest key repeat the OS exposes, with the delay before it kicks

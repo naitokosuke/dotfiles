@@ -1,5 +1,3 @@
-{ ... }:
-
 {
   system.defaults.CustomUserPreferences = {
     "com.apple.symbolichotkeys" = {
