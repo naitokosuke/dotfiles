@@ -36,7 +36,6 @@ let
     "${home}/Library/pnpm"
     "${home}/.bun"
     "${home}/.cargo"
-    "${home}/.rustup"
   ];
 
   # CWD, GIT_COMMON_DIR and MAIN_CHECKOUT_RE are only known at launch, so

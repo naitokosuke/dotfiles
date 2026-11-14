@@ -549,8 +549,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `ghq`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd` and `devenv`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `cclens`, `frog`, `playwright-cli`, and `vite-plus` (`vp`) come from `./pkgs` as `naitokosuke.*`.",
-          lines: [4, 32],
+            "Daily drivers: `ghq`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. Only tools used outside any project belong here; a project pins its own toolchain in a devShell or devenv, which is why there is no Rust toolchain in this list (#550). The language tools that stay are used without a project: `nodejs_26` runs `vp`, `bun` and `pnpm` cover one-off scripts and the JavaScript checkouts without a shell of their own, `uv` runs one-off Python tools, `idris2` is for exercises, and `oxfmt` formats. Nix workflow tools: `nixd` and `devenv`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `cclens`, `frog`, `playwright-cli`, and `vite-plus` (`vp`) come from `./pkgs` as `naitokosuke.*`.",
+          lines: [4, 37],
         },
       ],
     },
@@ -688,13 +688,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "The profile",
           prose:
             "Everything is allowed except file writes, which are limited to the per-user temp dirs, `/private/tmp`, Claude Code's own state, the login keychain, `gomi`'s trash and log directories, and toolchain caches that are safe to lose. On top of that come the working directory, the git common dir, and — through a regex rule — any `<main checkout>---<branch>` sibling, so gwq can create and use worktrees next to the main checkout while the main checkout itself and other repositories stay read-only. These are only known at launch, so they arrive as SBPL parameters instead of being spliced into the profile text.",
-          lines: [18, 56],
+          lines: [16, 56],
         },
         {
           title: "Wrapping claude",
           prose:
             "`programs.claude-code.package` is a script that resolves the parameters — the git common dir lets commits from a worktree reach the main checkout's `.git`, and the main checkout path is regex-escaped for the sibling rule — and execs the real binary through `sandbox-exec`. home-manager's own wrapper — plugin dir, MCP servers — sits on top, so it ends up inside the sandbox too. The package itself is a `symlinkJoin` over the real `claude-code` with only `bin/claude` replaced by that script, inheriting `pname`, `version` and `meta`, so anything that inspects it sees the package it wraps: home-manager picks its plugin mechanism from the package version and falls back to the legacy `--plugin-dir` wrapper without one (#558).",
-          lines: [59, 100],
+          lines: [58, 99],
         },
       ],
     },
