@@ -1,0 +1,26 @@
+name: check
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flake-check:
+    # The flake only has aarch64-darwin outputs, and building them needs a
+    # machine of that platform.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: cachix/install-nix-action@v31.11.3
+
+      # Evaluates and builds every host, every custom package and the
+      # formatting check (see `checks` in flake.nix).
+      - run: nix flake check --print-build-logs

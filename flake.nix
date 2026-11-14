@@ -129,15 +129,31 @@
             ./hosts/${hostName}
           ];
         };
-    in
-    {
       darwinConfigurations = nixpkgs.lib.genAttrs hosts mkDarwinConfig;
 
-      packages.${system} = customPackages pkgs;
-
-      formatter.${system} = treefmt-nix.lib.mkWrapper pkgs {
+      treefmtEval = treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
         programs.nixfmt.enable = true;
       };
+    in
+    {
+      inherit darwinConfigurations;
+
+      packages.${system} = customPackages pkgs;
+
+      formatter.${system} = treefmtEval.config.build.wrapper;
+
+      # `nix flake check` only looks at whether `darwinConfigurations` exists,
+      # so the hosts and the custom packages are listed here to be built.
+      checks.${system} =
+        nixpkgs.lib.mapAttrs' (
+          name: host: nixpkgs.lib.nameValuePair "host-${name}" host.config.system.build.toplevel
+        ) darwinConfigurations
+        // nixpkgs.lib.mapAttrs' (
+          name: nixpkgs.lib.nameValuePair "package-${name}"
+        ) inputs.self.packages.${system}
+        // {
+          formatting = treefmtEval.config.build.check inputs.self;
+        };
     };
 }

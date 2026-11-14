@@ -12,7 +12,9 @@ permissions:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    # macOS, so the result can be built before it is proposed (see the check
+    # step below).
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -21,7 +23,7 @@ jobs:
       - name: Run nvfetcher
         run: |
           printf '[keys]\ngithub = "%s"\n' "${{ secrets.GITHUB_TOKEN }}" > "$RUNNER_TEMP/keyfile.toml"
-          nix run nixpkgs#nvfetcher -- --keyfile "$RUNNER_TEMP/keyfile.toml" -o pkgs/_sources
+          nix run --inputs-from . nixpkgs#nvfetcher -- --keyfile "$RUNNER_TEMP/keyfile.toml" -o pkgs/_sources
 
       # The vite-plus launcher that nvfetcher pins and the JavaScript toolchain
       # in pkgs/vite-plus-runtime are two halves of one release, and the
@@ -44,6 +46,14 @@ jobs:
           # version either way, so the old one goes first.
           rm -f package-lock.json
           npm install --package-lock-only --ignore-scripts
+
+      # A pull request opened with GITHUB_TOKEN does not trigger the check
+      # workflow, so the same check runs here: a bump that does not evaluate
+      # or build fails this job instead of becoming a pull request.
+      - name: Check the flake
+        run: |
+          git add --intent-to-add pkgs
+          nix flake check --print-build-logs
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8.1.2

@@ -175,7 +175,7 @@ sudo darwin-rebuild switch --flake .#Mac-big
 
 Update nvfetcher-tracked tool versions (regenerates `pkgs/_sources/`):
 ```bash
-nix run nixpkgs#nvfetcher -- -o pkgs/_sources
+nix run --inputs-from . nixpkgs#nvfetcher -- -o pkgs/_sources
 ```
 
 ## VSCode Settings Sync
