@@ -13,10 +13,6 @@ let
   '';
 in
 {
-  # From nixpkgs rather than a cask, so the `code` the plan hook in
-  # ./claude.nix runs is a store path (#556).
-  home.packages = [ pkgs.vscode ];
-
   home.file = {
     "Library/Application Support/Code/User/settings.json".source =
       "${inputs.vscode-settings}/.vscode/settings.json";

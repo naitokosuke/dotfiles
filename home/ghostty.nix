@@ -1,10 +1,9 @@
-{ pkgs, ... }:
-
 {
   programs.ghostty = {
     enable = true;
-    # The upstream macOS build, repackaged by nixpkgs (#556).
-    package = pkgs.ghostty-bin;
+    # The app is a cask (hosts/common/homebrew.nix); only its config is
+    # managed here.
+    package = null;
     settings = {
       theme = "Catppuccin Mocha";
       font-feature = [

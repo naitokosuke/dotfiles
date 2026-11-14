@@ -14,6 +14,7 @@
     ./mcp.nix
     ./nh.nix
     ./playwright.nix
+    ./required-casks.nix
     ./ssh.nix
     ./starship.nix
     ./vite-plus.nix
