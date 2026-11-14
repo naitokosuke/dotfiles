@@ -36,7 +36,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Packages outside nixpkgs",
           prose:
             "Tools nixpkgs doesn't ship are packaged under `pkgs/` and version-tracked by nvfetcher, with a daily workflow opening the update PR. vite-plus is the one package in two halves — the `vp` launcher and the JavaScript toolchain it delegates to — which must stay on the same version.",
-          lines: [119, 138],
+          lines: [119, 139],
         },
       ],
     },
@@ -561,19 +561,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["cli", "packages"],
     walkthrough: {
       intro:
-        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. The only derivation defined inline is `darwin-rebuild-nom` (pipes `darwin-rebuild` through `nix-output-monitor`); the rest come from nixpkgs, from the nvfetcher-tracked set in `./pkgs`, reached as `naitokosuke.*` (`frog`, `playwright-cli`, `vite-plus`, …).",
+        "The system CLI toolbelt. Everything here is on `$PATH` for every user and login shell. They come from nixpkgs and from the nvfetcher-tracked set in `./pkgs`, reached as `naitokosuke.*` (`frog`, `playwright-cli`, `vite-plus`, …). Each tool is installed by exactly one module (#555): `gh` and `git` belong to home-manager, and there is one rebuild command, `nh darwin switch`, which renders nix-output-monitor progress itself.",
       sections: [
-        {
-          title: "darwin-rebuild-nom wrapper",
-          prose:
-            "`darwin-rebuild` rejects `--log-format`, and Lix doesn't expose it as a setting either, so a small shell application pipes `darwin-rebuild`'s combined output into `nom` in its default mode, which parses plain Nix output. The result is the same rebuild command with nix-output-monitor's richer progress UI.",
-          lines: [4, 13],
-        },
         {
           title: "The CLI toolbelt",
           prose:
-            "Daily drivers: `gh`, `ghq`, `git`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd`, `devenv`, `nix-output-monitor`, plus the locally-built `darwin-rebuild-nom`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `cclens`, `frog`, `playwright-cli`, and `vite-plus` (`vp`) come from `./pkgs` as `naitokosuke.*`.",
-          lines: [16, 48],
+            "Daily drivers: `ghq`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. JavaScript: `nodejs_26`, `bun`, `pnpm`, and `oxfmt`. Language toolchains that should be available outside any project shell: `rustup` (with `cargo-deny`), `uv`, and `idris2`. Nix workflow tools: `nixd` and `devenv`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `cclens`, `frog`, `playwright-cli`, and `vite-plus` (`vp`) come from `./pkgs` as `naitokosuke.*`.",
+          lines: [4, 32],
         },
       ],
     },
