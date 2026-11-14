@@ -43,9 +43,14 @@
   };
 
   nix.settings.experimental-features = "nix-command flakes";
-  nix.settings.trusted-users = [
-    "root"
-    config.naitokosuke.username
+  # The primary user is deliberately not in trusted-users. A trusted user can
+  # set any daemon setting, including substituters and post-build-hook, which
+  # amounts to root, and every process running as that user inherits it
+  # (#560). What needed that trust is declared here instead: the binary cache
+  # devenv's nixpkgs is built into.
+  nix.settings.substituters = [ "https://devenv.cachix.org" ];
+  nix.settings.trusted-public-keys = [
+    "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
   ];
 
   system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
