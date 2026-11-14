@@ -22,7 +22,7 @@
 }:
 
 let
-  inherit (sources.vite-plus-darwin-arm64) version;
+  inherit (sources.vite-plus) version;
 
   # Kept in step with the system Node in hosts/common/packages.nix, so the
   # toolchain does not drag a second Node into the closure.
@@ -68,7 +68,7 @@ in
 stdenvNoCC.mkDerivation {
   pname = "vite-plus";
   inherit version;
-  src = sources.vite-plus-darwin-arm64.src;
+  src = sources.vite-plus.src;
 
   # The launcher and the toolchain are two halves of one release and must not
   # drift apart. A mismatch fails this build rather than evaluation, so the

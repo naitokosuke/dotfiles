@@ -6,24 +6,24 @@
   dockerTools,
 }:
 {
-  cclens-darwin-arm64 = {
-    pname = "cclens-darwin-arm64";
+  cclens = {
+    pname = "cclens";
     version = "v0.4.0";
     src = fetchurl {
       url = "https://github.com/lambdalisue/cclens/releases/download/v0.4.0/cclens-v0.4.0-aarch64-apple-darwin.tar.gz";
       sha256 = "sha256-2XfMbv/GM8nPHTlaOUPd7nMM6euH98x5yN+9rN1lpeM=";
     };
   };
-  frog-darwin-arm64 = {
-    pname = "frog-darwin-arm64";
+  frog = {
+    pname = "frog";
     version = "1.1.0";
     src = fetchurl {
       url = "https://github.com/wevm/frog/releases/download/frog@1.1.0/frog-darwin-arm64.gz";
       sha256 = "sha256-9QbnCokyF7VHcRpyy/S9pnZ6FcI2YBzg1gAhlcI3+pM=";
     };
   };
-  gh-sub-issue-darwin-arm64 = {
-    pname = "gh-sub-issue-darwin-arm64";
+  gh-sub-issue = {
+    pname = "gh-sub-issue";
     version = "0.5.1";
     src = fetchurl {
       url = "https://github.com/yahsan2/gh-sub-issue/releases/download/v0.5.1/gh-sub-issue_0.5.1_darwin-arm64";
@@ -45,8 +45,8 @@
       "package.json" = ./. + "/sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q_hO6EA6DXDKA=/package.json";
     };
   };
-  vite-plus-darwin-arm64 = {
-    pname = "vite-plus-darwin-arm64";
+  vite-plus = {
+    pname = "vite-plus";
     version = "1.6.0";
     src = fetchurl {
       url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-1.6.0.tgz";

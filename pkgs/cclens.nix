@@ -7,8 +7,8 @@
 
 stdenvNoCC.mkDerivation {
   pname = "cclens";
-  version = lib.removePrefix "v" sources.cclens-darwin-arm64.version;
-  src = sources.cclens-darwin-arm64.src;
+  version = lib.removePrefix "v" sources.cclens.version;
+  src = sources.cclens.src;
 
   # The tarball has no top-level directory — the `cclens` binary sits at the root.
   sourceRoot = ".";
@@ -25,7 +25,7 @@ stdenvNoCC.mkDerivation {
   meta = {
     description = "Lens onto your Claude Code usage: finds wasted time, tokens and effort in transcripts and config";
     homepage = "https://github.com/lambdalisue/cclens";
-    changelog = "https://github.com/lambdalisue/cclens/releases/tag/${sources.cclens-darwin-arm64.version}";
+    changelog = "https://github.com/lambdalisue/cclens/releases/tag/${sources.cclens.version}";
     license = lib.licenses.mit;
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
     mainProgram = "cclens";

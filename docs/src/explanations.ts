@@ -105,7 +105,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Release binaries",
           prose:
-            '`src.github` watches each upstream for releases, and `fetch.url` downloads one asset for that tag (`$ver` is substituted). Each entry is named after the exact asset it pins, so adding another platform later is a new entry, not a rewrite. `gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag\'s `v` prefix, so `src.prefix = "v"` strips it at the tracker level and the URL re-adds it where needed.',
+            '`src.github` watches each upstream for releases, and `fetch.url` downloads one asset for that tag (`$ver` is substituted). Each entry is named after the tool, so the derivations read `sources.<tool>`.`gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag\'s `v` prefix, so `src.prefix = "v"` strips it at the tracker level and the URL re-adds it where needed.',
           lines: [5, 10],
         },
         {
@@ -144,7 +144,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["packages", "index"],
     walkthrough: {
       intro:
-        "The index of the custom package set. It `callPackage`s the colocated `_sources/generated.nix` to materialise the pins, then hands them to each derivation. The resulting attrset is consumed twice: put under `pkgs.naitokosuke` by an overlay in `flake.nix`, so no custom package shadows a nixpkgs one, and exposed as the flake's `packages` output for standalone `nix build .#<name>`.",
+        "The index of the custom package set. It `callPackage`s the colocated `_sources/generated.nix` to materialise the pins, then hands them to each derivation. The resulting attrset is consumed twice: put under `pkgs.naitokosuke` by an overlay in `flake.nix`, so no custom package shadows a nixpkgs one, and exposed as the flake's `packages` output for standalone `nix build .#<name>`. The comment on top records, package by package, why most of them install the upstream release binary instead of building from source (#551).",
     },
   },
 

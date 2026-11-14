@@ -10,8 +10,8 @@
 
 stdenvNoCC.mkDerivation {
   pname = "gh-sub-issue";
-  version = sources.gh-sub-issue-darwin-arm64.version;
-  src = sources.gh-sub-issue-darwin-arm64.src;
+  version = sources.gh-sub-issue.version;
+  src = sources.gh-sub-issue.src;
 
   dontUnpack = true;
 
@@ -27,7 +27,7 @@ stdenvNoCC.mkDerivation {
   meta = {
     description = "gh extension for creating and listing GitHub sub-issues";
     homepage = "https://github.com/yahsan2/gh-sub-issue";
-    changelog = "https://github.com/yahsan2/gh-sub-issue/releases/tag/v${sources.gh-sub-issue-darwin-arm64.version}";
+    changelog = "https://github.com/yahsan2/gh-sub-issue/releases/tag/v${sources.gh-sub-issue.version}";
     license = lib.licenses.mit;
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
     mainProgram = "gh-sub-issue";

@@ -68,7 +68,7 @@ jobs:
 
       - name: Sync the vite-plus runtime lockfile
         run: |
-          version=$(jq -r '.["vite-plus-darwin-arm64"].version' pkgs/_sources/generated.json)
+          version=$(jq -r '.["vite-plus"].version' pkgs/_sources/generated.json)
           cd pkgs/vite-plus-runtime
           # The lockfile only moves together with the launcher.
           if [ "$(jq -r '.dependencies["vite-plus"]' package.json)" = "$version" ]; then
