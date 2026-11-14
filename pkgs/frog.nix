@@ -7,8 +7,8 @@
 
 stdenvNoCC.mkDerivation {
   pname = "frog";
-  version = sources.frog-darwin-arm64.version;
-  src = sources.frog-darwin-arm64.src;
+  version = sources.frog.version;
+  src = sources.frog.src;
 
   dontUnpack = true;
 
@@ -26,7 +26,7 @@ stdenvNoCC.mkDerivation {
   meta = {
     description = "Automated friction logging for agents";
     homepage = "https://frog.fm";
-    changelog = "https://github.com/wevm/frog/releases/tag/frog@${sources.frog-darwin-arm64.version}";
+    changelog = "https://github.com/wevm/frog/releases/tag/frog@${sources.frog.version}";
     license = lib.licenses.mit;
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
     mainProgram = "frog";

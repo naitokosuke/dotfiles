@@ -4,7 +4,7 @@
 
 # The asset name embeds the version without the "v" tag prefix, so strip it
 # here instead of in the derivation.
-[gh-sub-issue-darwin-arm64]
+[gh-sub-issue]
 src.github = "yahsan2/gh-sub-issue"
 src.prefix = "v"
 fetch.url = "https://github.com/yahsan2/gh-sub-issue/releases/download/v$ver/gh-sub-issue_$ver_darwin-arm64"
@@ -14,7 +14,7 @@ fetch.url = "https://github.com/yahsan2/gh-sub-issue/releases/download/v$ver/gh-
 # launcher alone, so it is taken from npm instead, where both halves are
 # published under the same version. The tag prefix is stripped so $ver matches
 # that npm version.
-[vite-plus-darwin-arm64]
+[vite-plus]
 src.github = "voidzero-dev/vite-plus"
 src.prefix = "v"
 fetch.url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-$ver.tgz"
@@ -31,11 +31,11 @@ extract = ["package.json", "package-lock.json"]
 
 # Release tags carry an npm-style "frog@" prefix, stripped here so $ver is
 # the bare version. The release asset is a gzipped single binary.
-[frog-darwin-arm64]
+[frog]
 src.github = "wevm/frog"
 src.prefix = "frog@"
 fetch.url = "https://github.com/wevm/frog/releases/download/frog@$ver/frog-darwin-arm64.gz"
 
-[cclens-darwin-arm64]
+[cclens]
 src.github = "lambdalisue/cclens"
 fetch.url = "https://github.com/lambdalisue/cclens/releases/download/$ver/cclens-$ver-aarch64-apple-darwin.tar.gz"

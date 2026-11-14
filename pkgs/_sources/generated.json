@@ -1,9 +1,9 @@
 {
-    "cclens-darwin-arm64": {
+    "cclens": {
         "cargoLock": null,
         "date": null,
         "extract": null,
-        "name": "cclens-darwin-arm64",
+        "name": "cclens",
         "passthru": null,
         "pinned": false,
         "src": {
@@ -14,11 +14,11 @@
         },
         "version": "v0.4.0"
     },
-    "frog-darwin-arm64": {
+    "frog": {
         "cargoLock": null,
         "date": null,
         "extract": null,
-        "name": "frog-darwin-arm64",
+        "name": "frog",
         "passthru": null,
         "pinned": false,
         "src": {
@@ -29,11 +29,11 @@
         },
         "version": "1.1.0"
     },
-    "gh-sub-issue-darwin-arm64": {
+    "gh-sub-issue": {
         "cargoLock": null,
         "date": null,
         "extract": null,
-        "name": "gh-sub-issue-darwin-arm64",
+        "name": "gh-sub-issue",
         "passthru": null,
         "pinned": false,
         "src": {
@@ -68,11 +68,11 @@
         },
         "version": "v0.1.24"
     },
-    "vite-plus-darwin-arm64": {
+    "vite-plus": {
         "cargoLock": null,
         "date": null,
         "extract": null,
-        "name": "vite-plus-darwin-arm64",
+        "name": "vite-plus",
         "passthru": null,
         "pinned": false,
         "src": {
