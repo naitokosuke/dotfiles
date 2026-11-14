@@ -716,8 +716,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Wrapping claude",
           prose:
-            "`programs.claude-code.package` is a script that resolves the parameters — the git common dir lets commits from a worktree reach the main checkout's `.git`, and the main checkout path is regex-escaped for the sibling rule — and execs the real binary through `sandbox-exec`. home-manager's own wrapper — plugin dir, MCP servers — sits on top, so it ends up inside the sandbox too. The script carries Claude Code's version, because home-manager picks its plugin mechanism from the package version and falls back to the legacy `--plugin-dir` wrapper without one.",
-          lines: [59, 89],
+            "`programs.claude-code.package` is a script that resolves the parameters — the git common dir lets commits from a worktree reach the main checkout's `.git`, and the main checkout path is regex-escaped for the sibling rule — and execs the real binary through `sandbox-exec`. home-manager's own wrapper — plugin dir, MCP servers — sits on top, so it ends up inside the sandbox too. The package itself is a `symlinkJoin` over the real `claude-code` with only `bin/claude` replaced by that script, inheriting `pname`, `version` and `meta`, so anything that inspects it sees the package it wraps: home-manager picks its plugin mechanism from the package version and falls back to the legacy `--plugin-dir` wrapper without one (#558).",
+          lines: [59, 100],
         },
       ],
     },

@@ -55,9 +55,10 @@ let
     (allow file-write* (regex (string-append "^" (param "MAIN_CHECKOUT_RE") "---[^/]+(/|$)")))
     ${lib.concatMapStrings (path: "(allow file-write* (subpath \"${path}\"))\n") writable}
   '';
-in
-{
-  programs.claude-code.package = pkgs.writeShellApplication {
+
+  inherit (pkgs.llm-agents) claude-code;
+
+  sandboxed = pkgs.writeShellApplication {
     name = "claude";
     runtimeInputs = [
       pkgs.git
@@ -65,9 +66,6 @@ in
     ];
     # `$1` in the sd replacement is a capture group, not a shell variable
     excludeShellChecks = [ "SC2016" ];
-    # home-manager picks its plugin mechanism from the package version; without
-    # one it falls back to the legacy `--plugin-dir` wrapper
-    derivationArgs.version = pkgs.llm-agents.claude-code.version;
     text = ''
       cwd=$(pwd -P)
       # Commits from a worktree write to the main checkout's .git
@@ -85,7 +83,19 @@ in
         -D CWD="$cwd" \
         -D GIT_COMMON_DIR="$git_common_dir" \
         -D MAIN_CHECKOUT_RE="$main_checkout_re" \
-        ${lib.getExe pkgs.llm-agents.claude-code} "$@"
+        ${lib.getExe claude-code} "$@"
+    '';
+  };
+in
+{
+  # The wrapped package with only bin/claude replaced, so anything that
+  # inspects it (home-manager reads `version`) sees the package it wraps.
+  programs.claude-code.package = pkgs.symlinkJoin {
+    inherit (claude-code) pname version meta;
+    paths = [ claude-code ];
+    postBuild = ''
+      rm $out/bin/claude
+      ln -s ${lib.getExe sandboxed} $out/bin/claude
     '';
   };
 }
