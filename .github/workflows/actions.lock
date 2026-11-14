@@ -3,6 +3,9 @@
 # Docs: https://gh.io/actions-lockfile
 version: 'v0.0.3'
 workflows:
+    '.github/workflows/check.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'cachix/install-nix-action@v31.11.3'
     '.github/workflows/deploy-docs.yml':
         - 'actions/checkout@v7.0.1'
         - 'voidzero-dev/setup-vp@v1.22.0'

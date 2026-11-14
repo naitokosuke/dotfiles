@@ -71,19 +71,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [133, 133],
+          lines: [132, 132],
         },
         {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay puts under `pkgs.naitokosuke`, so `nix build .#frog` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [135, 135],
+          lines: [142, 142],
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
-          lines: [137, 140],
+          lines: [134, 144],
+        },
+        {
+          title: "Checks",
+          prose:
+            "`nix flake check` on its own only notices that `darwinConfigurations` exists. `checks` lists what should actually be built: the `system.build.toplevel` of every host, every custom package, and a treefmt check that fails on unformatted files. The `check` workflow runs it on every pull request, and the nvfetcher workflow runs it before proposing a bump.",
+          lines: [146, 157],
         },
       ],
     },
@@ -94,7 +100,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["packages", "automation"],
     walkthrough: {
       intro:
-        "The version tracker for CLI tools that nixpkgs doesn't ship. Each entry names an upstream to watch and an artifact to fetch; running `nix run nixpkgs#nvfetcher -- -o pkgs/_sources` resolves the latest release and regenerates `pkgs/_sources/generated.nix` with pinned URLs and hashes. No more hand-editing versions or copy-pasting sha256 values.",
+        "The version tracker for CLI tools that nixpkgs doesn't ship. Each entry names an upstream to watch and an artifact to fetch; running `nix run --inputs-from . nixpkgs#nvfetcher -- -o pkgs/_sources` resolves the latest release and regenerates `pkgs/_sources/generated.nix` with pinned URLs and hashes. No more hand-editing versions or copy-pasting sha256 values.",
       sections: [
         {
           title: "Release binaries",
@@ -262,22 +268,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Running nvfetcher",
           prose:
-            "A throwaway keyfile passes `GITHUB_TOKEN` to nvfetcher so release lookups aren't rate-limited, then `nix run nixpkgs#nvfetcher -- -o pkgs/_sources` regenerates the pins — the same command used locally, so CI and laptop can never disagree.",
-          lines: [21, 24],
+            "A throwaway keyfile passes `GITHUB_TOKEN` to nvfetcher so release lookups aren't rate-limited, then `nix run --inputs-from . nixpkgs#nvfetcher -- -o pkgs/_sources` regenerates the pins — the same command used locally, with nvfetcher itself taken from the nixpkgs this flake locks.",
+          lines: [23, 26],
         },
         {
           title: "Syncing the vite-plus runtime",
           prose:
             "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to evaluate unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything.",
-          lines: [26, 40],
+          lines: [28, 48],
+        },
+        {
+          title: "Checking before proposing",
+          prose:
+            "A pull request opened with `GITHUB_TOKEN` does not trigger other workflows, so the `check` workflow would never see it. The job therefore runs on macOS and runs `nix flake check` itself: a bump that does not evaluate or build fails the run instead of becoming a pull request.",
+          lines: [50, 56],
         },
         {
           title: "The update PR",
           prose:
             "`peter-evans/create-pull-request` commits only `pkgs/_sources/` and `pkgs/vite-plus-runtime/` to a fixed `nvfetcher-update` branch — repeated runs update the same PR rather than piling up new ones, and the branch deletes itself on merge.",
-          lines: [42, 53],
+          lines: [58, 69],
         },
       ],
+    },
+  },
+
+  ".github/workflows/check.yml": {
+    about: "CI — runs `nix flake check` on every pull request.",
+    tags: ["ci"],
+    walkthrough: {
+      intro:
+        "Builds what `checks` in `flake.nix` lists — both hosts, every custom package and the formatting check — on a macOS runner, because the flake only has `aarch64-darwin` outputs. A pull request that breaks evaluation or a build shows a failed check.",
     },
   },
 
