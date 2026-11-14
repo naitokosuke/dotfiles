@@ -16,6 +16,9 @@
     promptInit = "";
   };
 
+  # nixd and devenv (./packages.nix) embed an evaluator and link the CppNix
+  # libraries. nixpkgs' lixPackageSets has no Lix build of either, so that mix
+  # is intentional (#561). nix-direnv has one and uses it (home/direnv.nix).
   nix.package = pkgs.lix;
 
   # Weekly GC via `nh clean all` instead of nix.gc: besides system and user
