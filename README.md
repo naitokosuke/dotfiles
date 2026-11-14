@@ -127,6 +127,7 @@ Tools not available in nixpkgs ([`frog`](https://github.com/wevm/frog),
 are packaged in [`pkgs/`](pkgs/) and reached as `pkgs.naitokosuke.<name>`, so they never shadow a nixpkgs attribute,
 with versions and hashes tracked by [nvfetcher](https://github.com/berberman/nvfetcher) via
 [`nvfetcher.toml`](nvfetcher.toml). A daily GitHub Actions workflow (08:00 JST) regenerates the pins and opens an update PR.
+It skips releases younger than three days; run it by hand with `skip-cooldown` for an urgent fix.
 
 vite-plus is the one package with a second half: `vp` is only a launcher, and the JavaScript toolchain
 it delegates to is built from [`pkgs/vite-plus-runtime/`](pkgs/vite-plus-runtime/) and installed
