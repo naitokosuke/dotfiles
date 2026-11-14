@@ -1,13 +1,9 @@
 # Adrafinil (cask in hosts/common/homebrew.nix) keeps the Mac awake only while
-# an agent is working. Everything that runs its CLI is declared here, next to
-# the assertion that ties the path to the cask: drop the cask and evaluation
-# fails, instead of the hooks silently doing nothing and the server entry
-# pointing at nothing.
-{
-  lib,
-  osConfig,
-  ...
-}:
+# an agent is working. Everything that runs its CLI is declared here, and tied
+# to the cask through ./required-casks.nix: drop the cask and evaluation fails,
+# instead of the hooks silently doing nothing and the server entry pointing at
+# nothing.
+{ lib, ... }:
 
 let
   # Inside the app bundle, so it cannot come from the store.
@@ -40,14 +36,7 @@ let
   subagent = op: "${cli} ${op} --tool claude-code --subagent";
 in
 {
-  # nix-darwin normalises homebrew.casks into submodules, so the names are read
-  # off `name` rather than the list itself.
-  assertions = [
-    {
-      assertion = lib.any (declared: declared.name == "adrafinil") osConfig.homebrew.casks;
-      message = "home/adrafinil.nix runs the Adrafinil CLI, which the adrafinil cask provides, but that cask is not in hosts/common/homebrew.nix.";
-    }
-  ];
+  naitokosuke.requiredCasks.adrafinil = "home/adrafinil.nix runs the Adrafinil CLI";
 
   # The app's one-click installer writes these hooks into
   # ~/.claude/settings.json, which is a read-only store symlink here.

@@ -59,37 +59,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "One nixpkgs instance",
           prose:
             "`pkgs` is imported once, with the overlays and the Nixpkgs config, and used by everything: the flake's own outputs are built from it, and every host takes the same instance through `nixpkgs.pkgs` instead of evaluating nixpkgs again (#554). `customPackages` is the single entry into `./pkgs`, so the `packages` output and the overlay are visibly the same function — a custom package cannot build one way through `nix build .#<pkg>` and another through `darwin-rebuild switch`. The overlay puts the set under `pkgs.naitokosuke` rather than at the top level, so a custom package can never shadow a nixpkgs attribute of the same name: `frog` used to replace nixpkgs' unrelated Dutch NLP tool that way (#545).",
-          lines: [75, 105],
+          lines: [75, 104],
         },
         {
           title: "mkDarwinConfig",
           prose:
             "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module hands every host the `pkgs` defined above through `nixpkgs.pkgs`. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
-          lines: [112, 134],
+          lines: [111, 133],
         },
         {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [136, 136],
+          lines: [135, 135],
         },
         {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay puts under `pkgs.naitokosuke`, so `nix build .#frog` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [148, 148],
+          lines: [147, 147],
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
-          lines: [138, 150],
+          lines: [137, 149],
         },
         {
           title: "Checks",
           prose:
             "`nix flake check` on its own only notices that `darwinConfigurations` exists. `checks` lists what should actually be built: the `system.build.toplevel` of every host, every custom package, a treefmt check that fails on unformatted files, the `bun test` suite of the Claude Code deletion guard, and a check that the JSON tool AGENTS.md rules out has not come back. The `check` workflow runs it on every pull request, and the nvfetcher workflow runs it before proposing a bump.",
-          lines: [152, 189],
+          lines: [151, 188],
         },
       ],
     },
@@ -441,7 +441,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Homebrew on PATH, after Nix",
           prose:
-            "Cask binaries, which today is Orca's `orca`, live in `/opt/homebrew/bin`, which nix-darwin does not put on `$PATH` by itself. `environment.systemPath` adds it with `mkOrder 1100`, after the Nix profiles and before the system directories. nix-homebrew's zsh integration would instead run `brew shellenv` on every interactive start and put Homebrew first, so it is turned off.",
+            "Cask binaries such as `code` and Orca's `orca` live in `/opt/homebrew/bin`, which nix-darwin does not put on `$PATH` by itself. `environment.systemPath` adds it with `mkOrder 1100`, after the Nix profiles and before the system directories. nix-homebrew's zsh integration would instead run `brew shellenv` on every interactive start and put Homebrew first, so it is turned off.",
           lines: [51, 59],
         },
         {
@@ -453,8 +453,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Casks",
           prose:
-            "Everything in `casks` is materialised on `darwin-rebuild`. An app is a cask only for a reason, recorded above the list: it has no darwin build in nixpkgs, or it updates itself in place or holds macOS privacy permissions that are tied to its path, which a changing store path would lose. VS Code and Ghostty come from nixpkgs instead (#556). `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
-          lines: [84, 110],
+            "Everything in `casks` is materialised on `darwin-rebuild`. The rule above the list is that GUI apps are casks and CLIs come from Nix, also for the apps nixpkgs could build, so which layer installs an app is never decided per app (#609). `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
+          lines: [84, 109],
         },
       ],
     },
@@ -603,13 +603,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Tool modules",
           prose:
             "Each tool gets its own file or directory directly under `home/`. Composing them as a flat list keeps every concern shallow — opening `git.nix` shows the full git story, opening `claude.nix` shows the Claude Code settings, with its rm guard and sandbox in their own siblings.",
-          lines: [2, 23],
+          lines: [2, 24],
         },
         {
           title: "State version",
           prose:
             "`home.username` and `home.homeDirectory` aren't set here: home-manager derives them from `users.users`, which `hosts/common/home-manager.nix` fills from `config.naitokosuke`. `home.stateVersion` is pinned at the version this config was first written for — never bump casually.",
-          lines: [25, 25],
+          lines: [26, 26],
         },
       ],
     },
@@ -620,25 +620,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["ai", "macos"],
     walkthrough: {
       intro:
-        "Adrafinil keeps the Mac awake only while an agent is working. Everything that runs its CLI lives in this module: the Claude Code hooks, the MCP server entry, and the assertion that ties both to the cask that installs the app (#553). The CLI sits inside the app bundle, so its path cannot come from the store. It is a plain `let` binding, and the bundle path is used rather than `/usr/local/bin/adrafinil`, which the app only creates asynchronously at launch.",
+        "Adrafinil keeps the Mac awake only while an agent is working. Everything that runs its CLI lives in this module: the Claude Code hooks, the MCP server entry, and the declaration that ties both to the cask that installs the app (#553). The CLI sits inside the app bundle, so its path cannot come from the store. It is a plain `let` binding, and the bundle path is used rather than `/usr/local/bin/adrafinil`, which the app only creates asynchronously at launch.",
       sections: [
         {
           title: "Tied to the cask",
           prose:
-            "`assertions` is the module system's own mechanism for eval-time checks: drop the `adrafinil` cask from `hosts/common/homebrew.nix` and evaluation fails with a message, instead of the hooks silently doing nothing and the server entry pointing at nothing (issue #482). `osConfig` is nix-darwin's configuration as seen from home-manager, which is what makes the cask list visible here. nix-darwin normalises `homebrew.casks` into submodules, so the assertion reads each entry's `name`.",
-          lines: [43, 50],
+            "One line names the cask this module depends on, with the reason. `home/required-casks.nix` turns every such declaration into an eval-time assertion: drop the `adrafinil` cask from `hosts/common/homebrew.nix` and evaluation fails with a message, instead of the hooks silently doing nothing and the server entry pointing at nothing (issue #482).",
+          lines: [39, 39],
         },
         {
           title: "Claude Code hooks",
           prose:
             "The app's one-click installer would write into the read-only `settings.json`, so the seven handlers from upstream's `ClaudeCodeIntegration.swift` are copied here by hand. `UserPromptSubmit` / `Stop` bracket each turn, the sub-agent pair outlives the parent turn, and `Notification`, `SessionEnd` and `SessionStart` cover the turn-ends that fire no `Stop`. The commands match upstream verbatim, which is how Adrafinil recognises them as its own. The module system merges them with the hooks `home/claude.nix` and `home/claude-rm-guard` declare.",
-          lines: [52, 78],
+          lines: [41, 67],
         },
         {
           title: "MCP server",
           prose:
             "The `keep_awake` tool lets an agent keep the Mac awake for work that outlives its turn, which the hooks do not cover. It isn't covered by the built-in modules of `mcp-servers-nix`, so it slots in via the `settings.servers` freeform escape hatch.",
-          lines: [80, 92],
+          lines: [69, 81],
         },
       ],
     },
@@ -727,14 +727,14 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Plan hook",
           prose:
-            'A `PreToolUse` hook on `ExitPlanMode` opens the newest plan file in VS Code, so a plan can be read in the editor before it\'s approved. The glob is resolved into a variable and tested first: with no plan files it would otherwise reach `ls` literally and end up running `code ""` on an empty argument. `code` is the store path of the VS Code that `home/vscode.nix` installs, so the hook does not depend on `$PATH`. The Adrafinil handlers from `home/adrafinil.nix` are merged in alongside it.',
-          lines: [75, 93],
+            'A `PreToolUse` hook on `ExitPlanMode` opens the newest plan file in VS Code, so a plan can be read in the editor before it\'s approved. The glob is resolved into a variable and tested first: with no plan files it would otherwise reach `ls` literally and end up running `code ""` on an empty argument. `code` comes from the VS Code cask through `/opt/homebrew/bin`, and `naitokosuke.requiredCasks` ties the hook to that cask (`home/required-casks.nix`). The Adrafinil handlers from `home/adrafinil.nix` are merged in alongside it.',
+          lines: [75, 94],
         },
         {
           title: "Rules and skills",
           prose:
             "`CLAUDE.md` and the files under `rules/` live in `home/claude-context/` and are installed through `programs.claude-code.context` and `rulesDir`. They used to be out-of-store links into the separate `rule-rule-rule` repository, which dangled silently wherever it was not cloned and stopped taking changes once it was archived (issue #535). Skills come from the locked `skill-skill-skill` input through `programs.claude-code.skills`, so names and content have one source and nothing can dangle (#548): a skill change arrives with `nix flake update skill-skill-skill`. home-manager links the files one by one, which leaves room for the MCP plugin it installs into `~/.claude/skills` itself.",
-          lines: [95, 105],
+          lines: [96, 106],
         },
       ],
     },
@@ -763,13 +763,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["terminal"],
     walkthrough: {
       intro:
-        "Ghostty is the primary terminal. The app is `ghostty-bin`, the upstream macOS build repackaged by nixpkgs, so the terminal and its config come from the same place (#556). The config is declared here: the Catppuccin Mocha theme and ligatures turned off via `font-feature`. No `command` is set, so Ghostty starts the login shell, which is Zsh.",
+        "Ghostty is the primary terminal. The app itself is a Homebrew cask (`package = null` keeps home-manager from installing a second copy), while the config is declared here: the Catppuccin Mocha theme and ligatures turned off via `font-feature`. No `command` is set, so Ghostty starts the login shell, which is Zsh.",
       sections: [
         {
           title: "Shift+Enter",
           prose:
             "Ghostty implements fixterms, so Shift+Enter sends an escape sequence — which breaks multi-line input in Claude Code. The keybind makes it send a literal newline instead, matching iTerm2.",
-          lines: [15, 19],
+          lines: [14, 18],
         },
       ],
     },
@@ -893,6 +893,15 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     },
   },
 
+  "home/required-casks.nix": {
+    about: "One place for the rule that a module needs a Homebrew cask.",
+    tags: ["homebrew", "module"],
+    walkthrough: {
+      intro:
+        "GUI apps are Homebrew casks, so a binary that ships with one cannot be referenced by store path. A module that runs such a binary declares the cask in `naitokosuke.requiredCasks`, with the reason, and this module turns every entry into an `assertions` entry: drop the cask from `hosts/common/homebrew.nix` and evaluation fails, naming the cask and the module that needs it, instead of the binary silently going missing at runtime. `home/adrafinil.nix` and `home/claude.nix` use it, so the rule is written once (#553). `osConfig` is nix-darwin's configuration as seen from home-manager, which is what makes the cask list visible here; nix-darwin normalises `homebrew.casks` into submodules, so the check reads each entry's `name`.",
+    },
+  },
+
   "home/ssh.nix": {
     about: "SSH client — GitHub key via Keychain, private hosts kept out of the repo.",
     tags: ["ssh"],
@@ -953,7 +962,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["editor"],
     walkthrough: {
       intro:
-        "VS Code's `settings.json` and `keybindings.json` are sourced from a separate repo (`naitokosuke/vscode-settings`), pinned via the flake input. Settings are linked as-is; the keybinding file upstream is JSONC (comments included), so it's converted to JSON at build time. The editor itself is `pkgs.vscode`, installed here too, so the `code` that the plan hook in `home/claude.nix` runs is a store path rather than something a cask has to provide (#556).",
+        "VS Code's `settings.json` and `keybindings.json` are sourced from a separate repo (`naitokosuke/vscode-settings`), pinned via the flake input. Settings are linked as-is; the keybinding file upstream is JSONC (comments included), so it's converted to JSON at build time. The editor itself is a Homebrew cask.",
       sections: [
         {
           title: "JSONC → JSON with jsonnet",

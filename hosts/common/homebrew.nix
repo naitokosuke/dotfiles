@@ -54,8 +54,8 @@ in
     enableZshIntegration = false;
   };
 
-  # Cask binaries, which is Orca's CLI. Ordered after the Nix profiles and
-  # before the system directories.
+  # Cask binaries: `code` for the plan hook in home/claude.nix, and Orca's
+  # CLI. Ordered after the Nix profiles and before the system directories.
   environment.systemPath = lib.mkOrder 1100 [ "${config.homebrew.prefix}/bin" ];
 
   homebrew = {
@@ -81,13 +81,10 @@ in
       };
     };
 
-    # An app is a cask only for a reason (#556). obs, dockdoor, dia, the
-    # Claude desktop app and the two tap casks have no darwin build in
-    # nixpkgs. The rest do, but update themselves in place or hold macOS
-    # privacy permissions (TCC), which are tied to the app's path and would
-    # be lost every time a store path changes. Blender would also put a very
-    # large build into every system closure. VS Code and Ghostty come from
-    # nixpkgs (home/vscode.nix, home/ghostty.nix).
+    # The rule: GUI apps are casks, and CLIs come from Nix (#609). It holds
+    # for every app, also the ones nixpkgs could build, so which layer
+    # installs an app is never decided per app. Casks keep updating
+    # themselves, and their Dock icons and file associations stay put.
     casks = [
       # Keeps the Mac awake only while an AI agent is working (see
       # home/adrafinil.nix). Requires macOS 26. Adrafinil updates itself in
@@ -96,6 +93,7 @@ in
       "blender"
       "claude"
       "dockdoor"
+      "ghostty"
       "google-chrome"
       "monitorcontrol"
       "obs"
@@ -107,6 +105,7 @@ in
       # flake.lock pin is only the floor version.
       "stablyai/orca/orca"
       "thebrowsercompany-dia"
+      "visual-studio-code"
     ];
   };
 }

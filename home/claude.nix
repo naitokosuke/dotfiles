@@ -1,11 +1,11 @@
 {
-  lib,
   inputs,
-  pkgs,
   ...
 }:
 
 {
+  naitokosuke.requiredCasks.visual-studio-code = "home/claude.nix runs `code` in its plan hook";
+
   programs.claude-code.enable = true;
 
   programs.claude-code.settings = {
@@ -79,12 +79,13 @@
           hooks = [
             {
               type = "command";
-              # Opens the newest plan in VS Code (installed by ./vscode.nix).
-              # With no plan file the glob would be passed through literally,
-              # so the match is tested before opening anything — the hook is
-              # best-effort, and a failure here is quiet enough to stay
-              # unnoticed.
-              command = ''plan=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n "$plan" ] && ${lib.getExe pkgs.vscode} "$plan" || true'';
+              # Opens the newest plan in VS Code. `code` comes from the cask
+              # through /opt/homebrew/bin (environment.systemPath in
+              # hosts/common/homebrew.nix). With no plan file the glob would
+              # be passed through literally, so the match is tested before
+              # opening anything — the hook is best-effort, and a failure
+              # here is quiet enough to stay unnoticed.
+              command = ''plan=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n "$plan" ] && code "$plan" || true'';
               timeout = 5;
             }
           ];

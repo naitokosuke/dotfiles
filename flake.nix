@@ -87,7 +87,6 @@
           pkg:
           builtins.elem (nixpkgs.lib.getName pkg) [
             "input-fonts"
-            "vscode"
           ];
         input-fonts.acceptLicense = true;
       };
