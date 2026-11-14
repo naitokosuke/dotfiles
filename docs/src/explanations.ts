@@ -274,26 +274,26 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Running nvfetcher",
           prose:
-            "`nix run --inputs-from . nixpkgs#nvfetcher` regenerates the pins from that rewritten config, with nvfetcher itself taken from the nixpkgs this flake locks.",
-          lines: [57, 58],
+            "`nix run --inputs-from . nixpkgs#nvfetcher` regenerates the pins from that rewritten config, with nvfetcher itself taken from the nixpkgs this flake locks. Its `extract` step evaluates `import <nixpkgs>`, and a runner has no channel for that, so the same locked nixpkgs is put on `NIX_PATH` first.",
+          lines: [57, 63],
         },
         {
           title: "Syncing the vite-plus runtime",
           prose:
             "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to build unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything. `--before` holds every dependency it resolves to the same cooldown, and the step does nothing when the launcher version did not change, so the lockfile only moves together with the launcher.",
-          lines: [60, 85],
+          lines: [65, 90],
         },
         {
           title: "Checking before proposing",
           prose:
             "A pull request opened with `GITHUB_TOKEN` does not trigger other workflows, so the `check` workflow would never see it. The job therefore runs on macOS and runs `nix flake check` itself: a bump that does not evaluate or build fails the run instead of becoming a pull request.",
-          lines: [87, 93],
+          lines: [92, 98],
         },
         {
           title: "The update PR",
           prose:
             "`peter-evans/create-pull-request` commits only `pkgs/_sources/` and `pkgs/vite-plus-runtime/` to a fixed `nvfetcher-update` branch — repeated runs update the same PR rather than piling up new ones, and the branch deletes itself on merge.",
-          lines: [95, 106],
+          lines: [100, 111],
         },
       ],
     },
