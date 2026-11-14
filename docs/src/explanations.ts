@@ -350,14 +350,14 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Typed options",
           prose:
-            "Each constant is an `mkOption` with `type = types.str` and a description, so the values are self-documenting and type-checked rather than bare strings copied around the repo.",
-          lines: [7, 32],
+            "Each constant is an `mkOption` with `type = types.str`, a description and a `default`, so the values are self-documenting and type-checked rather than bare strings copied around the repo. Because they are defaults rather than definitions, a host overrides one with a plain assignment (#552).",
+          lines: [8, 23],
         },
         {
-          title: "Defaults",
+          title: "Derived defaults",
           prose:
-            "`config.naitokosuke` sets the defaults for this user. `srcDirectory` is derived from `homeDirectory` and is the one root that ghq, gwq, nh, and the Claude Code rule and skill links all build their paths from. `githubDirectory` goes one step further down ghq's layout to this user's own repositories, so `home/claude.nix`, `home/nh.nix` and `home/zsh.nix` read one option instead of each assembling `<srcDirectory>/github.com/<username>`. Because they're module options, a per-host module can override any field without touching the call sites that consume them.",
-          lines: [34, 41],
+            "`homeDirectory` is derived from `username`, and `srcDirectory` from `homeDirectory`: it is the one root that ghq, gwq and nh build their paths from. `githubDirectory` goes one step further down ghq's layout to this user's own repositories, so `home/nh.nix` and `home/zsh.nix` read one option instead of each assembling `<srcDirectory>/github.com/<username>`. Overriding `username` on a host moves all of them. `hosts/common/home-manager.nix` hands the resolved values to home-manager, where modules read `config.home.homeDirectory` for the home itself and `config.naitokosuke.*` for the rest.",
+          lines: [24, 41],
         },
       ],
     },
@@ -426,7 +426,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["bridge", "home-manager"],
     walkthrough: {
       intro:
-        "Wires `home-manager` into nix-darwin so the user-side configuration ships alongside the system. `useGlobalPkgs` and `useUserPackages` keep both layers on the same nixpkgs instance, and a pre-existing file in the way of a managed one is renamed with a `.backup` extension rather than failing activation. `sharedModules` injects the `modules/naitokosuke` personal-constants module and `mcp-servers-nix`'s home-manager module into the home-manager tree, and `home/` (its `default.nix`) is imported as the user's home configuration. `users.users.<name>.home` is set explicitly because home-manager derives `home.username` / `home.homeDirectory` from it, and nix-darwin leaves it null by default (issue #321). `extraSpecialArgs` forwards nix-darwin's `specialArgs` minus its `modulesPath`, so home modules receive the flake `inputs` from `flake.nix` directly (issue #324).",
+        "Wires `home-manager` into nix-darwin so the user-side configuration ships alongside the system. `useGlobalPkgs` and `useUserPackages` keep both layers on the same nixpkgs instance, and a pre-existing file in the way of a managed one is renamed with a `.backup` extension rather than failing activation. `sharedModules` injects the `modules/naitokosuke` personal-constants module, together with the values this host resolved for it, and `mcp-servers-nix`'s home-manager module into the home-manager tree, and `home/` (its `default.nix`) is imported as the user's home configuration. `users.users.<name>.home` is set explicitly because home-manager derives `home.username` / `home.homeDirectory` from it, and nix-darwin leaves it null by default (issue #321). `extraSpecialArgs` forwards nix-darwin's `specialArgs` minus its `modulesPath`, so home modules receive the flake `inputs` from `flake.nix` directly (issue #324).",
     },
   },
 
