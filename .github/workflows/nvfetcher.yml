@@ -54,8 +54,13 @@ jobs:
               sed -i.bak "s|src.github = \"$repo\"|src.manual = \"$tag\"|" "$RUNNER_TEMP/nvfetcher.toml"
             done
 
+      # nvfetcher's `extract` evaluates `import <nixpkgs>`, which a runner has
+      # no channel for, so the nixpkgs this flake locks is put on NIX_PATH.
       - name: Run nvfetcher
-        run: nix run --inputs-from . nixpkgs#nvfetcher -- -c "$RUNNER_TEMP/nvfetcher.toml" -o pkgs/_sources
+        run: |
+          NIX_PATH="nixpkgs=$(nix flake metadata --json --inputs-from . nixpkgs | jq -r .path)"
+          export NIX_PATH
+          nix run --inputs-from . nixpkgs#nvfetcher -- -c "$RUNNER_TEMP/nvfetcher.toml" -o pkgs/_sources
 
       # The vite-plus launcher that nvfetcher pins and the JavaScript toolchain
       # in pkgs/vite-plus-runtime are two halves of one release, and the
