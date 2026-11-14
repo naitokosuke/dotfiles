@@ -180,29 +180,10 @@ in
   programs.claude-code.context = ./claude-context/CLAUDE.md;
   programs.claude-code.rulesDir = ./claude-context/rules;
 
-  # Skills are linked one by one instead of linking ~/.claude/skills itself:
-  # programs.claude-code installs its generated MCP plugin into
-  # ~/.claude/skills/claude-code-home-manager, which fails with
-  # "outside $HOME" when the directory is a symlink.
-  home.file =
-    let
-      link = path: {
-        source = config.lib.file.mkOutOfStoreSymlink "${config.naitokosuke.githubDirectory}/${path}";
-      };
-      # Skill names are discovered from the locked skill-skill-skill input
-      # (pure eval cannot readDir the live working tree). The links themselves
-      # still point at the working tree, so skill *content* stays live.
-      # After adding/removing a skill: push it, then
-      #   nix flake update skill-skill-skill
-      skillNames = builtins.attrNames (
-        lib.filterAttrs (_: type: type == "directory") (
-          builtins.readDir "${inputs.skill-skill-skill}/.claude/skills"
-        )
-      );
-    in
-    lib.listToAttrs (
-      map (
-        name: lib.nameValuePair ".claude/skills/${name}" (link "skill-skill-skill/.claude/skills/${name}")
-      ) skillNames
-    );
+  # The locked input is the single source for both the skill names and their
+  # content, so a skill change arrives with
+  #   nix flake update skill-skill-skill
+  # home-manager links the files one by one, which leaves room for the MCP
+  # plugin it installs into the same directory.
+  programs.claude-code.skills = "${inputs.skill-skill-skill}/.claude/skills";
 }

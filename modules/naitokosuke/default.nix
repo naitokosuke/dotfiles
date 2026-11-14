@@ -37,7 +37,7 @@ in
       type = types.str;
       default = "${cfg.srcDirectory}/github.com/${cfg.username}";
       defaultText = literalExpression ''"''${config.naitokosuke.srcDirectory}/github.com/''${config.naitokosuke.username}"'';
-      description = "Directory under srcDirectory holding this user's own GitHub repositories, in ghq's layout: where new shells start, and where the dotfiles and skills checkouts are expected.";
+      description = "Directory under srcDirectory holding this user's own GitHub repositories, in ghq's layout: where new shells start, and where the dotfiles checkout is expected.";
     };
   };
 }
