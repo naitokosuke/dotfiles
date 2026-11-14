@@ -28,37 +28,31 @@ jobs:
       # The pinned hash only records what was fetched, so a hijacked release
       # would be pinned as it is. Releases younger than the cooldown are
       # skipped, which leaves time for one to be noticed upstream (#584).
-      # nvfetcher has no such option, so each `src.github` is replaced with
-      # the newest release that is old enough, as a fixed `src.manual`
-      # version. A pin that is already newer than that is kept.
+      # The selection itself is in .github/nvfetcher-cooldown.nix.
       - name: Hold back releases younger than the cooldown
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COOLDOWN_DAYS: ${{ inputs.skip-cooldown && '0' || '3' }}
         run: |
           set -euo pipefail
-          cutoff=$(jq -rn --argjson days "$COOLDOWN_DAYS" 'now - $days * 86400 | todate')
+          cutoff=$(date -u -v"-${COOLDOWN_DAYS}d" +%Y-%m-%dT%H:%M:%SZ)
           echo "COOLDOWN_CUTOFF=$cutoff" >> "$GITHUB_ENV"
-          cp nvfetcher.toml "$RUNNER_TEMP/nvfetcher.toml"
-          nix eval --json --impure --expr 'builtins.fromTOML (builtins.readFile ./nvfetcher.toml)' |
-            jq -r 'to_entries[] | [.key, .value.src.github, .value.src.prefix // ""] | @tsv' |
-            while IFS=$'\t' read -r name repo prefix; do
-              current=$prefix$(jq -r --arg name "$name" '.[$name].version' pkgs/_sources/generated.json)
-              tag=$(gh api "repos/$repo/releases?per_page=100" | jq -r \
-                --arg prefix "$prefix" --arg cutoff "$cutoff" --arg current "$current" '
-                  map(select((.draft or .prerelease | not) and (.tag_name | startswith($prefix)))) as $releases
-                  | ($releases | map(.published_at <= $cutoff) | index(true)) as $eligible
-                  | ($releases | map(.tag_name == $current) | index(true)) as $pinned
-                  | $releases[[$eligible, $pinned] | map(values) | min // empty].tag_name // $current')
-              echo "$name: $tag (pinned: $current)"
-              sed -i.bak "s|src.github = \"$repo\"|src.manual = \"$tag\"|" "$RUNNER_TEMP/nvfetcher.toml"
+          releases=$RUNNER_TEMP/releases
+          mkdir -p "$releases"
+          nix eval --raw --impure --expr '(import ./.github/nvfetcher-cooldown.nix { }).repos' |
+            while read -r name repo; do
+              gh api "repos/$repo/releases?per_page=100" > "$releases/$name.json"
             done
+          nix eval --raw --impure --expr \
+            "(import ./.github/nvfetcher-cooldown.nix { cutoff = \"$cutoff\"; releases = \"$releases\"; }).sed" |
+            tee "$RUNNER_TEMP/pins.sed"
+          sed -f "$RUNNER_TEMP/pins.sed" nvfetcher.toml > "$RUNNER_TEMP/nvfetcher.toml"
 
       # nvfetcher's `extract` evaluates `import <nixpkgs>`, which a runner has
       # no channel for, so the nixpkgs this flake locks is put on NIX_PATH.
       - name: Run nvfetcher
         run: |
-          NIX_PATH="nixpkgs=$(nix flake metadata --json --inputs-from . nixpkgs | jq -r .path)"
+          NIX_PATH="nixpkgs=$(nix eval --raw --inputs-from . nixpkgs#path)"
           export NIX_PATH
           nix run --inputs-from . nixpkgs#nvfetcher -- -c "$RUNNER_TEMP/nvfetcher.toml" -o pkgs/_sources
 
@@ -73,12 +67,15 @@ jobs:
 
       - name: Sync the vite-plus runtime lockfile
         run: |
-          version=$(jq -r '.["vite-plus"].version' pkgs/_sources/generated.json)
-          cd pkgs/vite-plus-runtime
+          read_json() {
+            nix eval --raw --impure --expr "(builtins.fromJSON (builtins.readFile $1)).$2"
+          }
+          version=$(read_json ./pkgs/_sources/generated.json vite-plus.version)
           # The lockfile only moves together with the launcher.
-          if [ "$(jq -r '.dependencies["vite-plus"]' package.json)" = "$version" ]; then
+          if [ "$(read_json ./pkgs/vite-plus-runtime/package.json dependencies.vite-plus)" = "$version" ]; then
             exit 0
           fi
+          cd pkgs/vite-plus-runtime
           npm pkg set "dependencies.vite-plus=$version"
           # vite-plus lists oxlint, oxfmt and vitest as peers of itself, so a
           # bump rearranges a graph npm cannot migrate in place: it holds on to
