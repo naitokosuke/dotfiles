@@ -160,6 +160,32 @@
         ) inputs.self.packages.${system}
         // {
           formatting = treefmtEval.config.build.check inputs.self;
+
+          claude-rm-guard =
+            pkgs.runCommand "claude-rm-guard-test"
+              {
+                nativeBuildInputs = [
+                  pkgs.bun
+                  pkgs.shfmt
+                ];
+              }
+              ''
+                cd ${./home/claude-rm-guard}
+                HOME=$TMPDIR bun test
+                touch $out
+              '';
+
+          # See AGENTS.md. The pattern is spelled so this file does not match
+          # itself.
+          no-json-query-tool =
+            pkgs.runCommand "no-json-query-tool" { nativeBuildInputs = [ pkgs.ripgrep ]; }
+              ''
+                if rg --hidden --line-number --glob '!AGENTS.md' '\bj[q]\b' ${inputs.self}; then
+                  echo "This repository does not use the tool named above; see AGENTS.md." >&2
+                  exit 1
+                fi
+                touch $out
+              '';
         };
     };
 }

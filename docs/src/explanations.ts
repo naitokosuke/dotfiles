@@ -88,8 +88,8 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Checks",
           prose:
-            "`nix flake check` on its own only notices that `darwinConfigurations` exists. `checks` lists what should actually be built: the `system.build.toplevel` of every host, every custom package, and a treefmt check that fails on unformatted files. The `check` workflow runs it on every pull request, and the nvfetcher workflow runs it before proposing a bump.",
-          lines: [152, 163],
+            "`nix flake check` on its own only notices that `darwinConfigurations` exists. `checks` lists what should actually be built: the `system.build.toplevel` of every host, every custom package, a treefmt check that fails on unformatted files, the `bun test` suite of the Claude Code deletion guard, and a check that the JSON tool AGENTS.md rules out has not come back. The `check` workflow runs it on every pull request, and the nvfetcher workflow runs it before proposing a bump.",
+          lines: [152, 189],
         },
       ],
     },
@@ -268,32 +268,32 @@ export const explanations: Readonly<Record<string, Explanation>> = {
         {
           title: "Cooldown",
           prose:
-            "A pinned hash only records what was fetched, so a hijacked release would be pinned as it is. Releases younger than three days are therefore skipped (#584). nvfetcher has no such option, so this step looks up each upstream's releases and rewrites a copy of `nvfetcher.toml`, replacing every `src.github` with the newest release that is old enough as a fixed `src.manual` version. A pin that is already newer is kept, so nothing is downgraded. Dispatching the workflow by hand with `skip-cooldown` sets the window to zero for an urgent fix.",
-          lines: [28, 55],
+            "A pinned hash only records what was fetched, so a hijacked release would be pinned as it is. Releases younger than three days are therefore skipped (#584). nvfetcher has no such option, so this step saves each upstream's release list and lets the Nix function in `.github/nvfetcher-cooldown.nix` rewrite a copy of `nvfetcher.toml`, replacing every `src.github` with the newest release that is old enough as a fixed `src.manual` version. A pin that is already newer is kept, so nothing is downgraded. Dispatching the workflow by hand with `skip-cooldown` sets the window to zero for an urgent fix.",
+          lines: [28, 49],
         },
         {
           title: "Running nvfetcher",
           prose:
             "`nix run --inputs-from . nixpkgs#nvfetcher` regenerates the pins from that rewritten config, with nvfetcher itself taken from the nixpkgs this flake locks. Its `extract` step evaluates `import <nixpkgs>`, and a runner has no channel for that, so the same locked nixpkgs is put on `NIX_PATH` first.",
-          lines: [57, 63],
+          lines: [51, 57],
         },
         {
           title: "Syncing the vite-plus runtime",
           prose:
             "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to build unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything. `--before` holds every dependency it resolves to the same cooldown, and the step does nothing when the launcher version did not change, so the lockfile only moves together with the launcher.",
-          lines: [65, 90],
+          lines: [59, 87],
         },
         {
           title: "Checking before proposing",
           prose:
             "A pull request opened with `GITHUB_TOKEN` does not trigger other workflows, so the `check` workflow would never see it. The job therefore runs on macOS and runs `nix flake check` itself: a bump that does not evaluate or build fails the run instead of becoming a pull request.",
-          lines: [92, 98],
+          lines: [89, 95],
         },
         {
           title: "The update PR",
           prose:
             "`peter-evans/create-pull-request` commits only `pkgs/_sources/` and `pkgs/vite-plus-runtime/` to a fixed `nvfetcher-update` branch — repeated runs update the same PR rather than piling up new ones, and the branch deletes itself on merge.",
-          lines: [100, 111],
+          lines: [97, 108],
         },
       ],
     },
@@ -659,25 +659,23 @@ export const explanations: Readonly<Record<string, Explanation>> = {
     tags: ["ai", "claude"],
     walkthrough: {
       intro:
-        "Instructions in CLAUDE.md or skills can be ignored; a hook runs on every Bash call. This one blocks `rm`, `unlink`, `rmdir`, `shred`, `find -delete` / `-exec rm`, and `git clean` (but not `git rm`, which history can undo), and the reason it returns tells the agent to use `gomi` instead. It is the first of two layers: the Seatbelt sandbox in `home/claude-sandbox.nix` catches whatever slips past, but cannot tell deletion apart from the rename `gomi` relies on, so forcing `gomi` has to happen here.",
+        "Instructions in CLAUDE.md or skills can be ignored; a hook runs on every Bash call. This one blocks `rm`, `unlink`, `rmdir`, `shred`, `find -delete` / `-exec rm`, and `git clean` (but not `git rm`, which history can undo), and the reason it returns tells the agent to use `gomi` instead. It is the first of two layers: the Seatbelt sandbox in `home/claude-sandbox.nix` catches whatever slips past, but cannot tell deletion apart from the rename `gomi` relies on, so forcing `gomi` has to happen here. The logic lives next to this module in `rm-guard.ts`, one TypeScript file run by Bun with the standard library only, so there is no lockfile or hash to keep in step (#599).",
       sections: [
         {
           title: "Parsing instead of matching",
           prose:
-            "The command is parsed with `shfmt --to-json` (zsh dialect, bash as a fallback), and `classify.jq` walks every call in the AST, so `$(...)`, backticks, pipelines, and `&&` chains are all covered. Wrappers such as `sudo`, `env`, `xargs`, `timeout`, and `find -exec` are peeled off before the command name is checked, and `sh -c` / `eval` bodies go through the parser again. Anything that cannot be checked — unparsable input, a script read from stdin, a dynamically built `-c` body — is blocked rather than let through.",
-          lines: [17, 79],
+            "The command is parsed with `shfmt --to-json` (zsh dialect, bash as a fallback), and `rm-guard.ts` walks every call in the AST, so `$(...)`, backticks, pipelines, and `&&` chains are all covered. Wrappers such as `sudo`, `env`, `xargs`, `timeout`, and `find -exec` are peeled off before the command name is checked, and `sh -c` / `eval` bodies go through the parser again. Anything that cannot be checked — unparsable input, a script read from stdin, a dynamically built `-c` body — is blocked rather than let through. The allow and deny cases are covered by `bun test`, which `nix flake check` runs.",
         },
         {
           title: "Denying, and failing closed",
           prose:
-            'A block is returned as a JSON `permissionDecision: "deny"`, which Claude Code shows as a denied call rather than a hook error; exit code 2 is the fallback if the JSON cannot be written. Any other non-zero exit would be a non-blocking error that lets the command run, so an `ERR` trap turns unexpected failures into a deny as well.',
-          lines: [25, 45],
+            'A block is returned as a JSON `permissionDecision: "deny"`, which Claude Code shows as a denied call rather than a hook error; exit code 2 is the fallback if the JSON cannot be written. Any other non-zero exit would be a non-blocking error that lets the command run, so every unexpected failure is caught and turned into a deny as well.',
         },
         {
           title: "Registration",
           prose:
-            "The hook is added to `programs.claude-code.settings.hooks.PreToolUse` for the `Bash` and `Monitor` tools. home-manager merges it with the `ExitPlanMode` hook in `home/claude.nix`.",
-          lines: [82, 93],
+            "A small wrapper runs the script with Bun and hands it the store path of `shfmt`. The hook is added to `programs.claude-code.settings.hooks.PreToolUse` for the `Bash` and `Monitor` tools. home-manager merges it with the `ExitPlanMode` hook in `home/claude.nix`.",
+          lines: [10, 28],
         },
       ],
     },
