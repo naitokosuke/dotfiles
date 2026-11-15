@@ -1,6 +1,10 @@
+# The CLI tools on every user's PATH, from nixpkgs and, as naitokosuke.*, from
+# ../../pkgs. Claude Code is not here: the only `claude` on PATH is the
+# sandboxed one from home/claude-sandbox.nix.
 { pkgs, ... }:
 
 {
+  ## The CLI toolbelt
   # gh and git are installed by home-manager (home/gh.nix, home/git.nix), and
   # rebuilds go through nh (home/nh.nix), which renders nom output itself.
   #

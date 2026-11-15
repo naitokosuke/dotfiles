@@ -1,6 +1,6 @@
-# gh extension: programs.gh.extensions links this package's bin/ under
-# ~/.local/share/gh/extensions/<pname>, so pname and the binary name must
-# both be "gh-sub-issue".
+# A gh extension for GitHub sub-issues. programs.gh.extensions links this
+# package's bin/ under ~/.local/share/gh/extensions/<pname>, so pname and the
+# binary name must both be "gh-sub-issue".
 {
   lib,
   stdenvNoCC,
@@ -13,14 +13,18 @@ stdenvNoCC.mkDerivation {
   version = sources.gh-sub-issue.version;
   src = sources.gh-sub-issue.src;
 
+  ## Fetch and install
+  # The release asset is a bare executable, so there is nothing to unpack.
   dontUnpack = true;
-
   installPhase = ''
     runHook preInstall
     install -Dm755 $src $out/bin/gh-sub-issue
     runHook postInstall
   '';
 
+  ## Install check
+  # A binary that does not run, or is not the pinned release, fails the build
+  # instead of surfacing as a broken gh extension.
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
 

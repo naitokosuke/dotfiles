@@ -36,8 +36,11 @@ let
   subagent = op: "${cli} ${op} --tool claude-code --subagent";
 in
 {
+  ## Tied to the cask
+  # ./required-casks.nix turns this into an evaluation-time check.
   naitokosuke.requiredCasks.adrafinil = "home/adrafinil.nix runs the Adrafinil CLI";
 
+  ## Claude Code hooks
   # The app's one-click installer writes these hooks into
   # ~/.claude/settings.json, which is a read-only store symlink here.
   #
@@ -66,6 +69,7 @@ in
     };
   };
 
+  ## MCP server
   # The `keep_awake` tool, so an agent can hold the Mac awake for work that
   # outlives its turn (e.g. background shells), which the hooks do not cover.
   # Same entry upstream's installer writes to ~/.claude.json. Adrafinil only

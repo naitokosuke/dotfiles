@@ -1,6 +1,12 @@
+# The single entry point: every input is pinned here, and each Mac is a
+# darwinConfigurations entry built from them.
 {
   description = "naito's nix-darwin system flake";
 
+  ## Inputs
+  # Inputs that take a nixpkgs follow this one. The `flake = false` inputs are
+  # source trees read at evaluation time: Homebrew and its taps, and settings
+  # kept in other repositories.
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -74,15 +80,17 @@
     let
       system = "aarch64-darwin";
 
+      ## One nixpkgs instance
       # `pkgs` below is the one nixpkgs instance: the hosts take it through
       # `nixpkgs.pkgs`, and the flake's own outputs are built from it. A custom
       # package therefore builds the same way through `nix build .#<pkg>` as it
       # does through `darwin-rebuild switch`.
       customPackages = final: import ./pkgs { pkgs = final; };
 
+      ## Unfree packages
+      # Named one by one, so a new unfree dependency fails evaluation instead of
+      # slipping in.
       nixpkgsConfig = {
-        # Named one by one, so a new unfree dependency fails evaluation instead
-        # of slipping in.
         allowUnfreePredicate =
           pkg:
           builtins.elem (nixpkgs.lib.getName pkg) [
@@ -91,6 +99,7 @@
         input-fonts.acceptLicense = true;
       };
 
+      ## Custom packages under pkgs.naitokosuke
       # Namespaced, so a custom package never shadows a nixpkgs attribute of
       # the same name (#545).
       overlays = [
@@ -104,11 +113,15 @@
         inherit overlays;
       };
 
+      ## Hosts
+      # Adding a Mac is one entry here and a hosts/<name>/default.nix.
       hosts = [
         "Mac-big"
         "Macbook-heavy"
       ];
 
+      ## One darwinSystem per host
+      # Every module gets the flake inputs, and every host the `pkgs` above.
       mkDarwinConfig =
         hostName:
         nix-darwin.lib.darwinSystem {
@@ -134,6 +147,8 @@
         };
       darwinConfigurations = nixpkgs.lib.genAttrs hosts mkDarwinConfig;
 
+      ## Formatter
+      # `nix fmt` runs nixfmt through treefmt-nix.
       treefmtEval = treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
         programs.nixfmt.enable = true;
@@ -144,10 +159,14 @@
     {
       inherit darwinConfigurations;
 
+      ## Custom packages output
+      # The same set as pkgs.naitokosuke, so `nix build .#<name>` builds one
+      # without evaluating a whole host.
       packages.${system} = customPackages pkgs;
 
       formatter.${system} = treefmtEval.config.build.wrapper;
 
+      ## Checks
       # `nix flake check` only looks at whether `darwinConfigurations` exists,
       # so the hosts and the custom packages are listed here to be built.
       checks.${system} =

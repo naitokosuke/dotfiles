@@ -1,3 +1,5 @@
+# cclens finds wasted time, tokens and effort in Claude Code transcripts and
+# config. Installed from its release tarball.
 {
   lib,
   stdenvNoCC,

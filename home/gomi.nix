@@ -1,3 +1,5 @@
+# gomi, the trash-can replacement for rm: its config and a weekly prune. The
+# package is in hosts/common/packages.nix.
 {
   config,
   lib,
@@ -9,7 +11,13 @@ let
   yamlFormat = pkgs.formats.yaml { };
 in
 {
+  ## Config
+  # Generated from this attribute set, so the source of truth stays in Nix.
   xdg.configFile."gomi/config.yaml".source = yamlFormat.generate "gomi-config.yaml" {
+    ## Trash
+    # Trashed files go to ~/.gomi. System directories and other trash
+    # locations cannot be trashed, restores ask first, and permanent deletion
+    # is off.
     core = {
       trash = {
         strategy = "auto";
@@ -39,6 +47,8 @@ in
       permanent_delete.enable = false;
       trash_dir = "";
     };
+    ## Interface
+    # The layout and colours of the restore list.
     ui = {
       density = "spacious";
       style = {
@@ -83,6 +93,9 @@ in
       };
       paginator_type = "dots";
     };
+    ## History and logging
+    # A year of restorable history without .DS_Store, and a debug log
+    # rotated at 10 MB.
     history = {
       include.within_days = 365;
       exclude = {
@@ -105,6 +118,7 @@ in
     };
   };
 
+  ## The prune agent
   # Weekly prune of trashed files older than 45 days. No StandardOutPath /
   # StandardErrorPath: gomi records each prune in its own log
   # (~/.local/share/gomi/debug.log), so launchd's copy is discarded (#369).

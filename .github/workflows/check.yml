@@ -1,3 +1,4 @@
+# Runs on every pull request: the flake check on macOS, and the docs checks.
 name: check
 
 on:
@@ -26,8 +27,8 @@ jobs:
       - run: nix flake check --print-build-logs --option allow-import-from-derivation false
 
   docs:
-    # The site resolves its walkthrough anchors in the browser, so a stale one
-    # passes `vp build` and only fails here, in `vp test`.
+    # Lints, type-checks and tests the docs site, including how it reads the
+    # walkthroughs out of the source comments (docs/src/colocated.ts).
     runs-on: ubuntu-latest
     defaults:
       run:

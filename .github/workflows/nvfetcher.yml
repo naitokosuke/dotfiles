@@ -1,3 +1,5 @@
+# Every morning, nvfetcher looks for new releases of the tools in
+# nvfetcher.toml, and a bump that builds arrives as a pull request.
 name: nvfetcher
 
 on:
@@ -25,6 +27,7 @@ jobs:
 
       - uses: cachix/install-nix-action@v31.11.3
 
+      ## Cooldown
       # The pinned hash only records what was fetched, so a hijacked release
       # would be pinned as it is. Releases younger than the cooldown are
       # skipped, which leaves time for one to be noticed upstream (#584).
@@ -48,6 +51,7 @@ jobs:
             tee "$RUNNER_TEMP/pins.sed"
           sed -f "$RUNNER_TEMP/pins.sed" nvfetcher.toml > "$RUNNER_TEMP/nvfetcher.toml"
 
+      ## Running nvfetcher
       # nvfetcher's `extract` evaluates `import <nixpkgs>`, which a runner has
       # no channel for, so the nixpkgs this flake locks is put on NIX_PATH.
       - name: Run nvfetcher
@@ -56,6 +60,7 @@ jobs:
           export NIX_PATH
           nix run --inputs-from . nixpkgs#nvfetcher -- -c "$RUNNER_TEMP/nvfetcher.toml" -o pkgs/_sources
 
+      ## Syncing the vite-plus runtime
       # The vite-plus launcher that nvfetcher pins and the JavaScript toolchain
       # in pkgs/vite-plus-runtime are two halves of one release, and the
       # derivation refuses to build if they disagree (issue #413). nvfetcher
@@ -64,7 +69,6 @@ jobs:
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: "26"
-
       - name: Sync the vite-plus runtime lockfile
         run: |
           read_json() {
@@ -86,6 +90,7 @@ jobs:
           rm -f package-lock.json
           npm install --package-lock-only --ignore-scripts --before="$COOLDOWN_CUTOFF"
 
+      ## Checking before proposing
       # A pull request opened with GITHUB_TOKEN does not trigger the check
       # workflow, so the same check runs here: a bump that does not evaluate
       # or build fails this job instead of becoming a pull request.
@@ -94,6 +99,8 @@ jobs:
           git add --intent-to-add pkgs
           nix flake check --print-build-logs --option allow-import-from-derivation false
 
+      ## The update PR
+      # One pull request on a fixed branch, replaced by each new run.
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8.1.2
         with:

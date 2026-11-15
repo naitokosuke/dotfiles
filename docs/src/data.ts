@@ -1,13 +1,5 @@
-import type {
-  DirNode,
-  FileEntry,
-  Lang,
-  TreeNode,
-  Walkthrough,
-  WalkthroughSource,
-} from "./types.ts";
-import { resolveAnchor } from "./anchors.ts";
-import { explanations } from "./explanations.ts";
+import { readWalkthrough } from "./colocated.ts";
+import type { DirNode, FileEntry, Lang, TreeNode } from "./types.ts";
 
 const rawModules: Record<string, string> = {
   ...import.meta.glob("../../README.md", {
@@ -86,43 +78,18 @@ function toRepoPath(viteKey: string): string {
   return viteKey;
 }
 
-function resolveWalkthrough(
-  repoPath: string,
-  content: string,
-  lang: Lang,
-  source: WalkthroughSource,
-): Walkthrough {
-  return {
-    intro: source.intro,
-    sections: source.sections?.map(({ code, ...section }) => {
-      if (!code) return section;
-      try {
-        return { ...section, lines: resolveAnchor(content, lang, code) };
-      } catch (error) {
-        throw new Error(
-          `${repoPath}, section ${JSON.stringify(section.title ?? "")}: ${(error as Error).message}`,
-          { cause: error },
-        );
-      }
-    }),
-  };
-}
-
 function makeEntry(repoPath: string, content: string): FileEntry {
   const name = repoPath.split("/").pop() ?? repoPath;
   const dot = name.lastIndexOf(".");
   const ext = dot === -1 ? "" : name.slice(dot);
   const lang = langFromName(name);
-  const meta = explanations[repoPath];
   return {
     path: repoPath,
     name,
     ext,
     lang,
     content,
-    about: meta?.about,
-    tags: meta?.tags,
-    walkthrough: meta?.walkthrough && resolveWalkthrough(repoPath, content, lang, meta.walkthrough),
+    walkthrough: readWalkthrough(content, lang),
   };
 }
 
@@ -132,11 +99,6 @@ export const files: readonly FileEntry[] = Object.entries(rawModules)
 
 export const filesByPath: ReadonlyMap<string, FileEntry> = new Map(
   files.map((entry) => [entry.path, entry] as const),
-);
-
-/** Explanations for files the site does not include, so their anchors are never checked. */
-export const orphanExplanations: readonly string[] = Object.keys(explanations).filter(
-  (path) => !filesByPath.has(path),
 );
 
 function ensureDir(parent: DirNode, name: string, path: string): DirNode {

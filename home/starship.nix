@@ -1,6 +1,9 @@
+# The Starship prompt, with an explicit format instead of the default module
+# list.
 { lib, pkgs, ... }:
 
 let
+  ## Free disk space
   # Free space on the startup disk, shown as "󰋊 <free> / <size>". Starship
   # has no built-in module for it.
   #
@@ -27,6 +30,9 @@ in
     settings = {
       add_newline = true;
 
+      ## Format
+      # User, host, free disk space, directory, git and command duration, then
+      # the prompt character on its own line.
       format = "$username$hostname\${custom.disk_free}\${custom.disk_free_warning}\${custom.disk_free_critical}$directory$git_branch$git_status$cmd_duration$line_break$character";
 
       character = {
@@ -46,6 +52,9 @@ in
         format = "at [$hostname]($style) ";
       };
 
+      ## Colour by usage
+      # One module per colour, each shown only while the used share is in its
+      # range: cyan below 90%, yellow from 90%, red from 95%.
       custom = {
         disk_free = diskFree "cyan" 0 90;
         disk_free_warning = diskFree "yellow" 90 95;

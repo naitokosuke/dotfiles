@@ -1,3 +1,5 @@
+# The Nix daemon: Lix, flakes only, weekly garbage collection through nh, and
+# store optimisation.
 {
   config,
   inputs,
@@ -7,6 +9,7 @@
 }:
 
 {
+  ## System zsh files
   # nix-darwin writes /etc/zsh*, which load the system environment and put
   # every profile's share/zsh on fpath, so packaged completions work (#544).
   # compinit and the prompt are left to home/zsh.nix and home/starship.nix.
@@ -16,11 +19,13 @@
     promptInit = "";
   };
 
+  ## Lix
   # nixd and devenv (./packages.nix) embed an evaluator and link the CppNix
   # libraries. nixpkgs' lixPackageSets has no Lix build of either, so that mix
   # is intentional (#561). nix-direnv has one and uses it (home/direnv.nix).
   nix.package = pkgs.lix;
 
+  ## Weekly GC with nh
   # Weekly GC via `nh clean all` instead of nix.gc: besides system and user
   # generations it also drops stale GC roots (`result` links, nix-direnv
   # profiles). Keeps the last 14 days as a rollback window. Runs as root, so
@@ -36,6 +41,9 @@
       Minute = 15;
     };
   };
+
+  ## Store optimisation
+  # An hour after the GC, identical files left in the store are hard-linked.
   nix.optimise = {
     automatic = true;
     interval = {
@@ -45,6 +53,9 @@
     };
   };
 
+  ## Flakes, and no trusted user
+  # nix-command and flakes are on everywhere, so no command needs
+  # --extra-experimental-features.
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
@@ -61,6 +72,8 @@
     "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
   ];
 
+  ## Build provenance
+  # The running system records the commit it was built from.
   system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
   system.stateVersion = 5;
 }

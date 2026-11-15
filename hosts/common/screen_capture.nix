@@ -1,3 +1,4 @@
+# Screenshots go to ~/Pictures/screenshots instead of the Desktop.
 {
   config,
   ...

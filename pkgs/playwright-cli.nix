@@ -1,8 +1,8 @@
-# TODO: Once official nixpkgs support (NixOS/nixpkgs#490230) is merged,
-# switch to pkgs.playwright-cli and delete this file and the nvfetcher entry.
-#
 # Unlike the other packages here, this is a source build: @playwright/cli is
 # distributed only on npm, with no prebuilt release binaries.
+#
+# TODO: Once official nixpkgs support (NixOS/nixpkgs#490230) is merged,
+# switch to pkgs.playwright-cli and delete this file and the nvfetcher entry.
 {
   lib,
   buildNpmPackage,
@@ -16,7 +16,9 @@ buildNpmPackage {
   version = lib.removePrefix "v" sources.playwright-cli.version;
   src = sources.playwright-cli.src;
 
-  # nvfetcher copies both files out of the source into pkgs/_sources on every
+  ## Dependencies from the upstream lockfile
+  # importNpmLock leaves no npmDepsHash to update by hand (#411). nvfetcher
+  # copies both files out of the source into pkgs/_sources on every
   # bump (`extract` in nvfetcher.toml), so they are read from the repository.
   # Reading them out of `src` would be import-from-derivation (#546).
   npmDeps = importNpmLock {
@@ -27,10 +29,13 @@ buildNpmPackage {
 
   dontNpmBuild = true;
 
+  ## Browsers stay runtime-managed
   # Browsers stay runtime-managed in Playwright's own cache. Pinning
   # nixpkgs' playwright-driver.browsers would mismatch the vendored
   # Playwright, which tracks alpha releases ahead of nixpkgs.
 
+  ## Install check
+  # `playwright-cli --version` has to start and print the pinned version.
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
 

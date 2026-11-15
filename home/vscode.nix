@@ -1,3 +1,5 @@
+# VS Code's settings and keybindings, from the pinned vscode-settings input.
+# The editor itself is a cask.
 {
   inputs,
   lib,
@@ -6,6 +8,7 @@
 }:
 
 let
+  ## JSONC to JSON with jsonnet
   # keybinding.jsonc → JSON at build time. JSONC is valid Jsonnet input, so
   # this is a real parse: invalid input fails the build (#364).
   keybindings-json = pkgs.runCommand "keybindings.json" { } ''

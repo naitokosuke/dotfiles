@@ -1,3 +1,4 @@
+# The system layer shared by every Mac; each concern is a sibling module.
 {
   imports = [
     ./dock.nix

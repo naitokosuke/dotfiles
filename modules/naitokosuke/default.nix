@@ -1,3 +1,6 @@
+# The personal values the rest of the tree reads as config.naitokosuke.*
+# instead of hardcoding them. Loaded into both nix-darwin and home-manager, and
+# overridable per host with a plain assignment (#552).
 { config, lib, ... }:
 
 let
@@ -6,6 +9,8 @@ let
 in
 {
   options.naitokosuke = {
+    ## Identity
+    # Typed options with defaults, so a host overrides one by assigning it.
     username = mkOption {
       type = types.str;
       default = "naitokosuke";
@@ -21,6 +26,9 @@ in
       default = "kosuke.naito.engineer@gmail.com";
       description = "Primary email address.";
     };
+    ## Derived directories
+    # Each directory derives from the one above it, so overriding `username`
+    # moves them all. srcDirectory is the root ghq, gwq and nh build on.
     homeDirectory = mkOption {
       type = types.str;
       default = "/Users/${cfg.username}";

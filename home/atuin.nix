@@ -1,3 +1,5 @@
+# Shell history in atuin: fuzzy search across every directory, in a compact
+# 20-line view with a preview.
 {
   programs.atuin = {
     enable = true;

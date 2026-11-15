@@ -13,6 +13,9 @@
 let
   home = config.home.homeDirectory;
 
+  ## Writable paths
+  # Besides the session's own directories: temp dirs, Claude Code's state, the
+  # login keychain, gomi's trash and caches that are safe to lose.
   writable = [
     "/private/tmp"
     "${home}/.claude"
@@ -38,6 +41,8 @@ let
     "${home}/.cargo"
   ];
 
+  ## The profile
+  # Everything is allowed except file writes outside the list above.
   # CWD, GIT_COMMON_DIR and MAIN_CHECKOUT_RE are only known at launch, so
   # they come in as parameters (`sandbox-exec -D`) instead of being spliced
   # into the profile. The regex rule admits gwq's sibling worktrees
@@ -57,6 +62,9 @@ let
 
   inherit (pkgs.llm-agents) claude-code;
 
+  ## Wrapping claude
+  # Resolves the launch parameters and execs the real binary through
+  # sandbox-exec, so home-manager's own wrapper ends up inside the sandbox too.
   sandboxed = pkgs.writeShellApplication {
     name = "claude";
     runtimeInputs = [
@@ -87,6 +95,7 @@ let
   };
 in
 {
+  ## The package
   # The wrapped package with only bin/claude replaced, so anything that
   # inspects it (home-manager reads `version`) sees the package it wraps.
   programs.claude-code.package = pkgs.symlinkJoin {

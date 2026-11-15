@@ -1,3 +1,5 @@
+# Frees Ctrl+Space and Ctrl+Option+Space, which macOS takes for switching
+# input sources, for editor and shell keybindings.
 {
   system.defaults.CustomUserPreferences = {
     "com.apple.symbolichotkeys" = {

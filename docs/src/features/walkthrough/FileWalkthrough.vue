@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { icons } from "../../icons.ts";
 import CodeBlock from "../../primitives/CodeBlock.vue";
 import { highlight } from "../../syntax.ts";
 import type { FileEntry } from "../../types.ts";
@@ -13,7 +12,7 @@ const props = defineProps<{
   file: FileEntry;
 }>();
 
-const introText = computed(() => props.file.walkthrough?.intro ?? props.file.about ?? "");
+const introText = computed(() => props.file.walkthrough?.intro ?? "");
 const introHtml = computed(() => (introText.value ? renderProse(introText.value) : ""));
 const sections = computed(() => props.file.walkthrough?.sections ?? []);
 const hasSections = computed(() => sections.value.length > 0);
@@ -24,8 +23,6 @@ const langLabel = computed(() => props.file.lang.toUpperCase());
 const fullHtml = computed(() =>
   hasSections.value ? "" : highlight(props.file.content, props.file.lang),
 );
-
-const hashIcon = icons.hash({ size: 10 });
 </script>
 
 <template>
@@ -33,12 +30,6 @@ const hashIcon = icons.hash({ size: 10 });
     <FileBreadcrumb :path="file.path" />
     <div class="walkthrough-scroller">
       <article class="walkthrough">
-        <ul v-if="file.tags?.length" class="tags">
-          <li v-for="tag in file.tags" :key="tag">
-            <span v-html="hashIcon" />
-            <span>{{ tag }}</span>
-          </li>
-        </ul>
         <div v-if="introHtml" class="walkthrough-intro" v-html="introHtml" />
         <WalkthroughSection
           v-for="(section, idx) in sections"
@@ -87,29 +78,6 @@ const hashIcon = icons.hash({ size: 10 });
       flex-direction: column;
       gap: clamp(28px, 3cqi, 40px);
 
-      .tags {
-        list-style: none;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin: 0;
-        padding: 0;
-
-        li {
-          display: inline-flex;
-          align-items: center;
-          gap: 3px;
-          padding: 3px 8px 3px 6px;
-          font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.02em;
-          color: var(--fg-muted);
-          border: 1px solid var(--border-1);
-          border-radius: 999px;
-          background: var(--bg-elev-1);
-        }
-      }
-
       .walkthrough-intro {
         font-size: clamp(15px, 1.45cqi, 18px);
         line-height: 1.7;
@@ -119,7 +87,8 @@ const hashIcon = icons.hash({ size: 10 });
         border-left: 2px solid var(--border-2);
         padding-inline-start: clamp(14px, 1.8cqi, 22px);
 
-        :deep(p) {
+        :deep(p),
+        :deep(ul) {
           margin: 0 0 0.9em;
 
           &:last-child {

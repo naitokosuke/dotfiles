@@ -8,6 +8,7 @@
 }:
 
 let
+  ## Forbidden formulae
   # Packages managed by Nix - prevent accidental brew install
   # See: https://github.com/Homebrew/brew/issues/19939
   homebrewForbiddenFormulae = [
@@ -30,6 +31,8 @@ let
   ];
 in
 {
+  ## Environment
+  # The forbidden formulae above are exported, so `brew install` refuses them.
   home.sessionVariables = {
     EDITOR = "vim";
     HOMEBREW_FORBIDDEN_FORMULAE = lib.concatStringsSep " " homebrewForbiddenFormulae;
@@ -38,6 +41,8 @@ in
   programs.zsh = {
     enable = true;
 
+    ## Aliases
+    # `cpwd` copies the current directory to the clipboard.
     shellAliases = {
       l = "ls";
       la = "ls -la";
@@ -47,6 +52,9 @@ in
       cpwd = "pwd | pbcopy";
     };
 
+    ## Interactive startup
+    # `mkcd` makes a directory and enters it, and a new terminal starts in this
+    # user's GitHub directory unless VS Code opened it.
     initContent = ''
       mkcd() {
         mkdir -p "$1" && cd "$1"

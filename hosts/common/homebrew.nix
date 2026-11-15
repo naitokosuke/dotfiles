@@ -1,3 +1,5 @@
+# GUI apps come from Homebrew casks, with Homebrew itself, its taps and the
+# cask list pinned through nix-homebrew and the flake.
 {
   config,
   inputs,
@@ -17,6 +19,7 @@ let
       flake.lock has it as: ${builtins.toJSON brewNode}
     '');
 
+  ## Sudo prompts go to a dialog
   # Homebrew asks for sudo repeatedly during a cask upgrade, on the terminal
   # `nh` has `nom` repainting. With SUDO_ASKPASS set it runs `sudo -A`, so
   # the prompt becomes a GUI dialog that says what it is for (#416).
@@ -32,12 +35,19 @@ in
 {
   nix-homebrew = {
     enable = true;
-    # nix-homebrew labels its package with the brew-src ref from its own
-    # flake.lock, so the label is rebuilt from the ref pinned here (#432).
+
+    ## Homebrew ahead of nix-homebrew
+    # Homebrew comes from the brew-src input, pinned ahead of the version
+    # nix-homebrew locks. nix-homebrew labels its package with the ref from its
+    # own flake.lock, so the label is rebuilt from the ref pinned here (#432).
     package = inputs.brew-src // {
       name = "brew-${brewVersion}";
       version = brewVersion;
     };
+
+    ## Pinned, read-only taps
+    # Every tap is a flake input, and `brew tap` is disabled, so a new tap has
+    # to arrive through flake.nix.
     enableRosetta = false;
     user = config.naitokosuke.username;
     autoMigrate = true;
@@ -48,12 +58,14 @@ in
       "stablyai/homebrew-orca" = inputs.homebrew-orca;
     };
     mutableTaps = false;
+
     # `brew shellenv` would put Homebrew ahead of the Nix profiles on every
     # interactive zsh start; environment.systemPath below adds the one
     # directory needed, after them.
     enableZshIntegration = false;
   };
 
+  ## Homebrew on PATH, after Nix
   # Cask binaries: `code` for the plan hook in home/claude.nix, and Orca's
   # CLI. Ordered after the Nix profiles and before the system directories.
   environment.systemPath = lib.mkOrder 1100 [ "${config.homebrew.prefix}/bin" ];
@@ -61,10 +73,12 @@ in
   homebrew = {
     enable = true;
 
+    ## Taps in the Brewfile
     # Mirror the nix-homebrew-pinned taps into the Brewfile so
     # `brew bundle` cleanup does not try to untap them.
     taps = builtins.attrNames config.nix-homebrew.taps;
 
+    ## Activation policy
     # Fully declarative (#363): cask definitions come from the flake-pinned
     # taps, so activation converges the installed apps to flake.lock, and
     # casks removed from the list below are uninstalled. Most of these apps
@@ -81,6 +95,7 @@ in
       };
     };
 
+    ## Casks
     # The rule: GUI apps are casks, and CLIs come from Nix (#609). It holds
     # for every app, also the ones nixpkgs could build, so which layer
     # installs an app is never decided per app. Casks keep updating

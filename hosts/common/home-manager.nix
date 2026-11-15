@@ -1,3 +1,6 @@
+# Runs home-manager inside nix-darwin, on the same nixpkgs, with home/ as the
+# user's configuration. A file in the way of a managed one is renamed to
+# *.backup instead of failing activation.
 {
   config,
   inputs,

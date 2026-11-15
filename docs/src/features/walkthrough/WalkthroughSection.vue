@@ -45,7 +45,8 @@ const proseHtml = computed(() => renderProse(props.section.prose));
     text-wrap: pretty;
     max-width: 68ch;
 
-    :deep(p) {
+    :deep(p),
+    :deep(ul) {
       margin: 0 0 0.85em;
 
       &:last-child {

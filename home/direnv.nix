@@ -1,3 +1,5 @@
+# direnv with nix-direnv: a project's .envrc loads its Nix or devenv shell on
+# `cd`, cached and rooted against garbage collection.
 { pkgs, ... }:
 
 {

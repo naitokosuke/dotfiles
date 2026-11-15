@@ -1,5 +1,5 @@
-# The servers themselves are declared by the modules that own them (see
-# ./adrafinil.nix).
+# MCP servers for Claude Code, through mcp-servers-nix. The servers themselves
+# are declared by the modules that own them (see ./adrafinil.nix).
 {
   programs.mcp.enable = true;
 

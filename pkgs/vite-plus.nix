@@ -1,13 +1,13 @@
-# TODO: Once official nixpkgs support (NixOS/nixpkgs#533925) is merged, switch
-# to pkgs.vite-plus and delete this file, pkgs/vite-plus-runtime and the
-# nvfetcher entry.
-#
 # `vp` is only the Rust launcher. Every subcommand that does real work is
 # handed to a JavaScript toolchain that vp resolves at
 # <prefix>/node_modules/vite-plus, relative to the executable, so the npm
 # dependency tree is built here and installed next to it (#413).
 #
 # The approach follows https://github.com/ryoppippi/nix-vite-plus.
+#
+# TODO: Once official nixpkgs support (NixOS/nixpkgs#533925) is merged, switch
+# to pkgs.vite-plus and delete this file, pkgs/vite-plus-runtime and the
+# nvfetcher entry.
 {
   lib,
   stdenvNoCC,
@@ -29,6 +29,9 @@ let
   lockedVersion =
     (lib.importJSON (runtime + "/package-lock.json")).packages."node_modules/vite-plus".version;
 
+  ## The JavaScript toolchain
+  # node_modules built from the lockfile in pkgs/vite-plus-runtime, on the
+  # system Node.
   nodeModules = importNpmLock.buildNodeModules {
     npmRoot = runtime;
     inherit nodejs;
@@ -66,6 +69,7 @@ stdenvNoCC.mkDerivation {
   inherit version;
   src = sources.vite-plus.src;
 
+  ## Refusing to drift
   # The launcher and the toolchain are two halves of one release and must not
   # drift apart. A mismatch fails this build rather than evaluation, so the
   # rest of the flake still evaluates (#559). The nvfetcher workflow bumps
@@ -91,6 +95,9 @@ stdenvNoCC.mkDerivation {
 
   nativeBuildInputs = [ makeWrapper ];
 
+  ## Install
+  # The launcher with the toolchain linked next to it, and the vpr / vpx
+  # aliases that `vp env setup` would create.
   installPhase = ''
     runHook preInstall
 
@@ -121,10 +128,10 @@ stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
-  doInstallCheck = true;
-
+  ## An install check that runs the toolchain
   # Runs a JavaScript subcommand from a directory with no project-local
   # vite-plus. `--version` would not do: the launcher answers it alone.
+  doInstallCheck = true;
   installCheckPhase = ''
     runHook preInstallCheck
     checkdir=$(mktemp -d)

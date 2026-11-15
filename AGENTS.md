@@ -12,3 +12,8 @@
 
 - Do not use `jq`. The repository is Nix plus thin bash: read JSON with `builtins.fromJSON` (`nix eval`), and write anything larger than a few lines as a Nix function or as a TypeScript file run by Bun
 - `nix flake check` fails when `jq` appears anywhere outside this file
+
+## Docs
+
+- The docs site reads its walkthroughs from comments (`docs/src/colocated.ts`): a file's leading comment is its intro, and a `## <title>` comment opens a section whose excerpt is the code right after it, up to the next blank line
+- When code changes, update the comment above it; there is no separate explanations file

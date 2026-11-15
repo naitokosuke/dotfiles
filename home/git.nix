@@ -1,3 +1,4 @@
+# The user-global git config, with the identity from config.naitokosuke.
 {
   config,
   ...
@@ -6,6 +7,8 @@
 {
   programs.git = {
     enable = true;
+    ## Global ignores
+    # macOS and editor droppings, personal scratch files, and frog's logs.
     ignores = [
       ".tours"
       ".DS_Store"
@@ -20,12 +23,18 @@
       # with "!.agents/" in its own .gitignore (issue #385).
       ".agents/"
     ];
-    # The public key must be registered on GitHub as a signing key.
+    ## Commit signing
+    # Signed with the SSH key home/ssh.nix uses for GitHub, so GitHub marks
+    # commits Verified. The public key must be registered on GitHub as a
+    # signing key.
     signing = {
       format = "ssh";
       key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
       signByDefault = true;
     };
+    ## Defaults
+    # histogram diffs, zdiff3 conflicts, rerere, rebase on pull, and GitHub
+    # HTTPS URLs rewritten to SSH.
     settings = {
       user = {
         name = config.naitokosuke.fullName;

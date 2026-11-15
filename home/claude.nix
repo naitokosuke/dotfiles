@@ -1,3 +1,6 @@
+# Claude Code's user configuration. settings.json, CLAUDE.md, the rules and the
+# skills all come from the store, so runtime edits do not persist. The package
+# is the sandboxed one from ./claude-sandbox.nix.
 {
   inputs,
   ...
@@ -8,6 +11,8 @@
 
   programs.claude-code.enable = true;
 
+  ## settings.json
+  # Global preferences: theme, editor mode, notifications and spinner verbs.
   programs.claude-code.settings = {
     theme = "dark-daltonized";
     verbose = false;
@@ -40,6 +45,9 @@
     autoConnectIde = false;
     autoInstallIdeExtension = true;
     checkpointingEnabled = true;
+    ## Permissions
+    # No reading credentials, wiping / or ~, force-pushing, or raw curl / wget
+    # in place of WebFetch.
     permissions = {
       deny = [
         # Joke: discourage legacy / non-preferred runtimes
@@ -72,6 +80,9 @@
         "Bash(wget:*)"
       ];
     };
+    ## Plan hook
+    # Opens the newest plan file in VS Code before it is approved. `code`
+    # comes from the cask, hence requiredCasks above.
     hooks = {
       PreToolUse = [
         {
@@ -94,13 +105,15 @@
     };
   };
 
+  ## CLAUDE.md and rules
   # Installed from the store, so they cannot dangle (#535).
   programs.claude-code.context = ./claude-context/CLAUDE.md;
   programs.claude-code.rulesDir = ./claude-context/rules;
 
+  ## Skills
   # The locked input is the single source for both the skill names and their
   # content, so a skill change arrives with
-  #   nix flake update skill-skill-skill
+  #   `nix flake update skill-skill-skill`
   # home-manager links the files one by one, which leaves room for the MCP
   # plugin it installs into the same directory.
   programs.claude-code.skills = "${inputs.skill-skill-skill}/.claude/skills";

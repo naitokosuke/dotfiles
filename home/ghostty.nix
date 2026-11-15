@@ -1,3 +1,5 @@
+# Ghostty, the terminal: Catppuccin Mocha with ligatures off. With no
+# `command` set it starts the login shell, Zsh.
 {
   programs.ghostty = {
     enable = true;
@@ -11,6 +13,7 @@
         "-dlig"
       ];
 
+      ## Shift+Enter
       # Ghostty implements fixterms, which sends escape sequence [27;2;13~ for Shift+Enter.
       # This breaks multi-line input in Claude Code CLI (which expects a newline character).
       # Rebind Shift+Enter to send \n directly, matching iTerm2's behavior.

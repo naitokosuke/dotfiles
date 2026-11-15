@@ -1,3 +1,5 @@
+# frog logs the friction coding agents run into. The release is a single
+# gzipped binary rather than an archive.
 {
   lib,
   stdenvNoCC,
@@ -10,8 +12,9 @@ stdenvNoCC.mkDerivation {
   version = sources.frog.version;
   src = sources.frog.src;
 
+  ## Fetch and install
+  # Nothing to unpack: the binary is decompressed straight into $out/bin.
   dontUnpack = true;
-
   installPhase = ''
     runHook preInstall
     install -d $out/bin
@@ -20,6 +23,8 @@ stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
+  ## Install check
+  # `frog --version` has to print the version nvfetcher pinned.
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
 

@@ -1,3 +1,5 @@
+# The GitHub CLI over SSH, with vim as its editor and `gh co` for checking out
+# pull requests. gh-sub-issue is not in nixpkgs, so it comes from ../pkgs.
 {
   pkgs,
   ...
