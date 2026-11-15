@@ -18,6 +18,7 @@
     bun
     naitokosuke.cclens
     devenv
+    dust
     fd
     naitokosuke.frog
     fzf
