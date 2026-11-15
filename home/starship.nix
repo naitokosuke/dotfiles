@@ -1,11 +1,13 @@
+# Starship draws the prompt; home-manager wires it into zsh. A leading newline
+# gives every prompt room, and `format` names exactly what appears instead of
+# the default module list.
 { lib, pkgs, ... }:
 
 let
+  ## Free disk space
   # Free space on the startup disk, shown as "󰋊 <free> / <size>". Starship
-  # has no built-in module for it.
-  #
-  # A custom module can't restyle itself from its own output, so each colour
-  # is a separate module, shown only while the used share falls in its range.
+  # has no built-in module for it. The macOS system and data volumes share one
+  # APFS container, so / reports the same free space as the data volume.
   #
   # macOS's own df and awk are named by path on purpose: the awk programs
   # read the column layout of BSD df, which GNU coreutils' df does not
@@ -27,6 +29,11 @@ in
     settings = {
       add_newline = true;
 
+      ## Format
+      # User, host, free disk space, directory, git branch and status, and
+      # command duration, then a line break and the `❯` character, green on
+      # success and red on failure. User and host show outside SSH too, and
+      # the duration only for commands that took two seconds or more.
       format = "$username$hostname\${custom.disk_free}\${custom.disk_free_warning}\${custom.disk_free_critical}$directory$git_branch$git_status$cmd_duration$line_break$character";
 
       character = {
@@ -46,6 +53,11 @@ in
         format = "at [$hostname]($style) ";
       };
 
+      ## Colour by usage
+      # A custom module can't restyle itself from its own output, so each
+      # colour is a separate module: cyan below 90 % used, yellow from 90 %,
+      # red from 95 %, the levels Powerlevel10k's disk_usage uses. Each one's
+      # `when` shows it only inside its range, so exactly one appears.
       custom = {
         disk_free = diskFree "cyan" 0 90;
         disk_free_warning = diskFree "yellow" 90 95;

@@ -1,3 +1,6 @@
+# atuin replaces the shell history with a synced, fuzzy-searchable store. The
+# search is global, so the same history surfaces from any directory, in a
+# compact 20-line UI with a preview of the selected command.
 {
   programs.atuin = {
     enable = true;

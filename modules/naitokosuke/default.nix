@@ -1,3 +1,7 @@
+# The personal constants the rest of the tree reads as `config.naitokosuke.*`,
+# declared once as typed options instead of literals copied around. The module
+# is loaded into both nix-darwin (flake.nix) and home-manager
+# (hosts/common/home-manager.nix), so both trees resolve the same values.
 { config, lib, ... }:
 
 let
@@ -6,6 +10,9 @@ let
 in
 {
   options.naitokosuke = {
+    ## Identity
+    # Defaults rather than definitions, so a host overrides one with a plain
+    # assignment (#552).
     username = mkOption {
       type = types.str;
       default = "naitokosuke";
@@ -21,6 +28,12 @@ in
       default = "kosuke.naito.engineer@gmail.com";
       description = "Primary email address.";
     };
+    ## Derived directories
+    # `homeDirectory` follows `username`, and `srcDirectory` is the one root
+    # ghq, gwq and nh build their paths from. `githubDirectory` goes one step
+    # further down ghq's layout to this user's own repositories, so
+    # home/nh.nix and home/zsh.nix read one option instead of each assembling
+    # the path. Overriding `username` on a host moves all of them.
     homeDirectory = mkOption {
       type = types.str;
       default = "/Users/${cfg.username}";

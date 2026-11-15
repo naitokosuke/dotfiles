@@ -1,8 +1,11 @@
 # Every `claude` session runs under a Seatbelt profile that denies file
 # writes outside an allowlist, so a deletion that slips past the Bash hooks
 # (e.g. `fs.rmSync` from a script) still cannot touch anything outside the
-# working directory (issue #460). The profile is loaded straight into
-# /usr/bin/sandbox-exec; the approach follows https://github.com/Warashi/cage.
+# working directory (issue #460). Seatbelt cannot block deletion alone:
+# denying unlink also blocks the rename gomi relies on, so this layer limits
+# where writes land rather than what they are. The profile is loaded straight
+# into /usr/bin/sandbox-exec; the approach follows
+# https://github.com/Warashi/cage.
 {
   config,
   lib,
@@ -13,6 +16,10 @@
 let
   home = config.home.homeDirectory;
 
+  ## What stays writable
+  # Everything is allowed except file writes, which are limited to the
+  # per-user temp dirs, Claude Code's own state, the login keychain, gomi's
+  # trash and log, and toolchain caches that are safe to lose.
   writable = [
     "/private/tmp"
     "${home}/.claude"
@@ -38,10 +45,13 @@ let
     "${home}/.cargo"
   ];
 
+  ## The profile
   # CWD, GIT_COMMON_DIR and MAIN_CHECKOUT_RE are only known at launch, so
   # they come in as parameters (`sandbox-exec -D`) instead of being spliced
   # into the profile. The regex rule admits gwq's sibling worktrees
-  # (`<main checkout>---<branch>`) but not the main checkout itself.
+  # (`<main checkout>---<branch>`) but not the main checkout itself, so a
+  # session can create and use worktrees while the main checkout and other
+  # repositories stay read-only.
   profile = pkgs.writeText "claude-sandbox.sb" ''
     (version 1)
     (import "system.sb")
@@ -57,6 +67,11 @@ let
 
   inherit (pkgs.llm-agents) claude-code;
 
+  ## Wrapping claude
+  # Resolves the parameters at launch — the git common dir, so commits from a
+  # worktree reach the main checkout's .git, and the main checkout path,
+  # regex-escaped for the sibling rule — and execs the real binary through
+  # sandbox-exec, so its Bash commands, hooks and MCP servers all run inside.
   sandboxed = pkgs.writeShellApplication {
     name = "claude";
     runtimeInputs = [
@@ -87,8 +102,11 @@ let
   };
 in
 {
+  ## The package
   # The wrapped package with only bin/claude replaced, so anything that
-  # inspects it (home-manager reads `version`) sees the package it wraps.
+  # inspects it sees the package it wraps: home-manager reads `version` to
+  # pick its plugin mechanism (#558). Its own wrapper (plugin dir, MCP
+  # servers) sits on top, so it ends up inside the sandbox too.
   programs.claude-code.package = pkgs.symlinkJoin {
     inherit (claude-code) pname version meta;
     paths = [ claude-code ];

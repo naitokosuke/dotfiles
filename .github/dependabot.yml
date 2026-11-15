@@ -1,12 +1,15 @@
+# Workflows reference actions by tag and .github/workflows/actions.lock
+# records the commit each tag stood for, because a tag can be moved and a
+# commit cannot. Pins do not update themselves, so Dependabot moves both
+# forward weekly, in one grouped pull request.
 version: 2
 
 updates:
-  # Workflows reference actions by tag and actions.lock records the commits;
-  # Dependabot updates both together.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    ## Cooldown
     # Skip releases younger than a week, so a hijacked release is likely
     # caught upstream before it is proposed here.
     cooldown:

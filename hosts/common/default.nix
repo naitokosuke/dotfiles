@@ -1,3 +1,5 @@
+# The system layer: every nix-darwin module that applies to each Mac. A new
+# system-wide concern is a sibling file, imported here.
 {
   imports = [
     ./dock.nix

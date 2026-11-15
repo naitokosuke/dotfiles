@@ -1,3 +1,6 @@
+# The user half of gomi, the trash-can `rm` (the package is in
+# hosts/common/packages.nix): its YAML config generated from Nix, and the
+# weekly prune agent, together in one module (#557).
 {
   config,
   lib,
@@ -10,6 +13,10 @@ let
 in
 {
   xdg.configFile."gomi/config.yaml".source = yamlFormat.generate "gomi-config.yaml" {
+    ## Trash
+    # Trashed files go to ~/.gomi. `forbidden_paths` refuses to trash system
+    # directories and other trash locations, restores ask for confirmation,
+    # and permanent deletion is disabled.
     core = {
       trash = {
         strategy = "auto";
@@ -39,6 +46,7 @@ in
       permanent_delete.enable = false;
       trash_dir = "";
     };
+
     ui = {
       density = "spacious";
       style = {
@@ -83,6 +91,10 @@ in
       };
       paginator_type = "dots";
     };
+
+    ## History and logging
+    # The restore list covers the past year and skips .DS_Store. Debug logging
+    # rotates at 10 MB with three files kept.
     history = {
       include.within_days = 365;
       exclude = {
@@ -105,7 +117,9 @@ in
     };
   };
 
-  # Weekly prune of trashed files older than 45 days. No StandardOutPath /
+  ## The prune agent
+  # Every Sunday at 03:00, trashed files older than 45 days are pruned, with
+  # gomi resolved from the store rather than PATH. No StandardOutPath /
   # StandardErrorPath: gomi records each prune in its own log
   # (~/.local/share/gomi/debug.log), so launchd's copy is discarded (#369).
   launchd.agents.gomi-prune = {

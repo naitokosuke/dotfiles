@@ -27,6 +27,11 @@ export default defineConfig({
         name: "sanity",
         description: "Proves `vp test` can resolve its Vitest runner and execute a test file.",
       },
+      {
+        name: "walkthrough",
+        description:
+          "Pins the comment conventions the walkthrough parser reads from the config files.",
+      },
     ],
   },
 });

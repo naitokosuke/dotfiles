@@ -15,6 +15,7 @@ in
 {
   homebrew.masApps.Xcode = 497799835;
 
+  ## First-launch setup
   # Runs after the homebrew activation step, so Xcode is already installed on
   # a fresh machine. Each step only runs when Xcode reports it is still
   # needed, and a failing step warns instead of aborting the rest of the

@@ -14,7 +14,7 @@ const proseHtml = computed(() => renderProse(props.section.prose));
 
 <template>
   <section class="walkthrough-section">
-    <h2 v-if="section.title" class="section-title">{{ section.title }}</h2>
+    <h2 class="section-title">{{ section.title }}</h2>
     <div class="section-prose" v-html="proseHtml" />
     <CodeExcerpt v-if="section.lines" :file="file" :range="section.lines" />
   </section>

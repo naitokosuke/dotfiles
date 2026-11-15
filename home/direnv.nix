@@ -1,3 +1,6 @@
+# Per-project shells: a .envrc plus `direnv allow` loads the project's nix
+# shell or devenv on cd. nix-direnv caches the evaluated environment and roots
+# it against GC, so entering a project is instant after the first load.
 { pkgs, ... }:
 
 {

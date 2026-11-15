@@ -1,3 +1,6 @@
+# frog records the friction coding agents run into, for review later (see
+# AGENTS.md). Upstream releases a gzipped single binary rather than an
+# archive, so the derivation decompresses it itself.
 {
   lib,
   stdenvNoCC,
@@ -12,6 +15,9 @@ stdenvNoCC.mkDerivation {
 
   dontUnpack = true;
 
+  ## Install
+  # The asset is a single gzipped file, not an archive: `dontUnpack` skips the
+  # unpack phase, and the source is gunzipped straight into $out/bin.
   installPhase = ''
     runHook preInstall
     install -d $out/bin
@@ -20,6 +26,10 @@ stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
+  ## Install check
+  # `versionCheckHook` runs `frog --version` and expects the derivation's
+  # `version` in the output: the binary runs on this platform and is the
+  # release nvfetcher pinned.
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
 

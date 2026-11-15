@@ -1,6 +1,15 @@
+# The single source of truth for both Macs: every upstream input is pinned
+# here, and `darwinConfigurations` is assembled per host from the same pinned
+# set, so a given flake.lock evaluates to the same system every time.
 {
   description = "naito's nix-darwin system flake";
 
+  ## Inputs
+  # Inputs that depend on nixpkgs `follow` this one, so everything ships one
+  # package set. The `flake = false` inputs are locked source snapshots read
+  # at eval time: Homebrew itself and its taps, the VS Code settings and the
+  # Claude Code skills. `llm-agents` supplies Claude Code and `mcp-servers-nix`
+  # the MCP module.
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -74,10 +83,8 @@
     let
       system = "aarch64-darwin";
 
-      # `pkgs` below is the one nixpkgs instance: the hosts take it through
-      # `nixpkgs.pkgs`, and the flake's own outputs are built from it. A custom
-      # package therefore builds the same way through `nix build .#<pkg>` as it
-      # does through `darwin-rebuild switch`.
+      # The single entry into ./pkgs, used by both the overlay and the
+      # `packages` output below.
       customPackages = final: import ./pkgs { pkgs = final; };
 
       nixpkgsConfig = {
@@ -91,13 +98,22 @@
         input-fonts.acceptLicense = true;
       };
 
-      # Namespaced, so a custom package never shadows a nixpkgs attribute of
-      # the same name (#545).
+      ## Overlays
+      # The custom packages sit under `pkgs.naitokosuke` rather than at the top
+      # level, so one can never shadow a nixpkgs attribute of the same name
+      # (#545). The same set is the flake's `packages` output, so
+      # `nix build .#frog` works standalone.
       overlays = [
         (final: _: { naitokosuke = customPackages final; })
         llm-agents.overlays.shared-nixpkgs
       ];
 
+      ## One nixpkgs instance
+      # Imported once, with the overlays and the nixpkgs config, and used by
+      # everything: the hosts take it through `nixpkgs.pkgs` and the flake's
+      # own outputs are built from it (#554). A custom package therefore builds
+      # the same way through `nix build .#<pkg>` as through
+      # `darwin-rebuild switch`.
       pkgs = import nixpkgs {
         localSystem = system;
         config = nixpkgsConfig;
@@ -109,6 +125,14 @@
         "Macbook-heavy"
       ];
 
+      ## mkDarwinConfig
+      # One `darwinSystem` per host. `specialArgs` hands the flake `inputs` to
+      # every module, and the inline module gives each host the `pkgs` above
+      # through `nixpkgs.pkgs`, with `system.primaryUser` read from
+      # `config.naitokosuke.username`. `./modules/naitokosuke` loads first,
+      # then the home-manager and nix-homebrew modules, `hosts/common` and
+      # `hosts/<hostName>`. Adding a Mac is one entry in `hosts` plus a
+      # `hosts/<host>/default.nix`.
       mkDarwinConfig =
         hostName:
         nix-darwin.lib.darwinSystem {
@@ -134,6 +158,9 @@
         };
       darwinConfigurations = nixpkgs.lib.genAttrs hosts mkDarwinConfig;
 
+      ## Formatter
+      # `nix fmt` runs nixfmt through treefmt-nix, with flake.nix marking the
+      # project root.
       treefmtEval = treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
         programs.nixfmt.enable = true;
@@ -148,8 +175,13 @@
 
       formatter.${system} = treefmtEval.config.build.wrapper;
 
-      # `nix flake check` only looks at whether `darwinConfigurations` exists,
-      # so the hosts and the custom packages are listed here to be built.
+      ## Checks
+      # `nix flake check` on its own only notices that `darwinConfigurations`
+      # exists, so the hosts and the custom packages are listed here to be
+      # built, along with the formatting check, the deletion guard's `bun test`
+      # suite, and a check that the JSON tool AGENTS.md rules out has not come
+      # back. The check workflow runs this on every pull request, and the
+      # nvfetcher workflow before proposing a bump.
       checks.${system} =
         nixpkgs.lib.mapAttrs' (
           name: host: nixpkgs.lib.nameValuePair "host-${name}" host.config.system.build.toplevel

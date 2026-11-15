@@ -1,4 +1,8 @@
-# Custom packages for tools not available in nixpkgs (issue #342).
+# Custom packages for tools not available in nixpkgs (issue #342). The pins
+# come from the colocated _sources/generated.nix that nvfetcher writes. The
+# set is put under `pkgs.naitokosuke` by an overlay in flake.nix, so no custom
+# package shadows a nixpkgs one, and exposed as the flake's `packages` output
+# for a standalone `nix build .#<name>`.
 #
 # Most of these install the upstream release binary instead of building from
 # source, which is the opposite of what nixpkgs does. The choice is made per
