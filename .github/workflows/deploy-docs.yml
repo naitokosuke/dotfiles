@@ -1,13 +1,18 @@
+# The walkthrough site in docs/ reads the repository's own files at build
+# time, so it is only as current as its last deploy: every push to main
+# redeploys it to void.
 name: deploy-docs
 
+## Triggers
+# No paths filter: the site globs *.nix, README.md, workflows, etc. from
+# across the repository at build time, so almost any change to main alters
+# what it renders.
 on:
   workflow_dispatch:
-  # No paths filter: the site globs *.nix, README.md, workflows, etc. from
-  # across the repository at build time, so almost any change to main alters
-  # what it renders.
   push:
     branches: [main]
 
+## Permissions
 # id-token: write lets `void deploy` mint a GitHub OIDC token and exchange it
 # for a short-lived deploy token, so no long-lived VOID_TOKEN secret is stored.
 # The repository is authorized with `void github connect`, which names this
@@ -16,6 +21,7 @@ permissions:
   contents: read
   id-token: write
 
+## Concurrency
 # Queue deploys instead of cancelling one mid-upload; only the newest pending
 # run is kept, so a burst of merges still ends on the latest main.
 concurrency:
@@ -37,6 +43,10 @@ jobs:
           node-version: "26"
           cache: true
 
+      ## Deploy
+      # setup-vp above installs Vite+ and runs `vp install`; `vp run deploy`
+      # is the same `void deploy` used locally.
+      #
       # .void/project.json is gitignored, so the project is named explicitly.
       # Void 1.x has no default platform, so VOID_API_URL is set explicitly.
       # It also only deploys to a saved connection, which a fresh runner lacks.

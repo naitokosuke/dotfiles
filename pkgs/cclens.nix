@@ -1,3 +1,5 @@
+# cclens analyses Claude Code transcripts and config for wasted time, tokens
+# and effort. Installed from the release archive (see ./default.nix).
 {
   lib,
   stdenvNoCC,
@@ -10,7 +12,9 @@ stdenvNoCC.mkDerivation {
   version = lib.removePrefix "v" sources.cclens.version;
   src = sources.cclens.src;
 
-  # The tarball has no top-level directory — the `cclens` binary sits at the root.
+  ## Install
+  # The tarball has no top-level directory: the `cclens` binary sits at the
+  # root, so `sourceRoot` is the unpack directory itself.
   sourceRoot = ".";
 
   installPhase = ''
@@ -19,6 +23,9 @@ stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
+  ## Install check
+  # `versionCheckHook` runs `cclens --version` and expects `version` in the
+  # output, the same check the other binary packages here use.
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;
 

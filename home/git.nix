@@ -1,3 +1,5 @@
+# The user-global git config. The identity comes from `config.naitokosuke`, so
+# the name and email are the same values the rest of the tree uses.
 {
   config,
   ...
@@ -6,6 +8,9 @@
 {
   programs.git = {
     enable = true;
+    ## Global ignores
+    # Beyond .DS_Store and CodeTour's .tours: personal scratch files, VS Code's
+    # file-nesting dummy, local Claude Code settings, and frog's friction logs.
     ignores = [
       ".tours"
       ".DS_Store"
@@ -20,12 +25,19 @@
       # with "!.agents/" in its own .gitignore (issue #385).
       ".agents/"
     ];
-    # The public key must be registered on GitHub as a signing key.
+    ## Commit signing
+    # Commits and tags are signed with the same SSH key ./ssh.nix uses for
+    # GitHub, so GitHub marks them Verified. The public key must be registered
+    # on GitHub as a signing key, the one step outside Nix (see the README).
     signing = {
       format = "ssh";
       key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
       signByDefault = true;
     };
+    ## Defaults
+    # histogram diffs, zdiff3 conflict markers, rerere, rebase on pull with
+    # autostash, `push.autoSetupRemote` and `fetch.prune`. `ghq.root` is the
+    # shared source root, and GitHub HTTPS URLs are rewritten to SSH.
     settings = {
       user = {
         name = config.naitokosuke.fullName;

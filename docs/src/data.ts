@@ -1,5 +1,5 @@
 import type { DirNode, FileEntry, Lang, TreeNode } from "./types.ts";
-import { explanations } from "./explanations.ts";
+import { parseWalkthrough } from "./walkthrough.ts";
 
 const rawModules: Record<string, string> = {
   ...import.meta.glob("../../README.md", {
@@ -82,16 +82,14 @@ function makeEntry(repoPath: string, content: string): FileEntry {
   const name = repoPath.split("/").pop() ?? repoPath;
   const dot = name.lastIndexOf(".");
   const ext = dot === -1 ? "" : name.slice(dot);
-  const meta = explanations[repoPath];
+  const lang = langFromName(name);
   return {
     path: repoPath,
     name,
     ext,
-    lang: langFromName(name),
+    lang,
     content,
-    about: meta?.about,
-    tags: meta?.tags,
-    walkthrough: meta?.walkthrough,
+    walkthrough: parseWalkthrough(content, lang),
   };
 }
 

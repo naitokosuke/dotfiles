@@ -1,14 +1,22 @@
-# Version tracker for CLI tools not available in nixpkgs (issue #342).
-# Regenerate pkgs/_sources/generated.nix after editing:
+# Version tracker for CLI tools not available in nixpkgs (issue #342). Each
+# entry names an upstream to watch and an artifact to fetch; the derivations
+# in pkgs/ read the result as `sources.<tool>`. Regenerate
+# pkgs/_sources/generated.nix after editing:
 #   nix run --inputs-from . nixpkgs#nvfetcher -- -o pkgs/_sources
+# That file is committed on purpose: evaluation is pure, so the pinned hashes
+# must exist in-tree, and its diff in an update PR is the version bump.
 
-# The asset name embeds the version without the "v" tag prefix, so strip it
-# here instead of in the derivation.
+## gh-sub-issue
+# `src.github` watches the upstream releases and `fetch.url` downloads one
+# asset for the tag, with `$ver` substituted. The asset name embeds the
+# version without the "v" tag prefix, so it is stripped here instead of in the
+# derivation, and the URL re-adds it.
 [gh-sub-issue]
 src.github = "yahsan2/gh-sub-issue"
 src.prefix = "v"
 fetch.url = "https://github.com/yahsan2/gh-sub-issue/releases/download/v$ver/gh-sub-issue_$ver_darwin-arm64"
 
+## vite-plus
 # `vp` is only the Rust launcher; the JavaScript toolchain it delegates to is
 # built from pkgs/vite-plus-runtime (issue #413). The release assets carry the
 # launcher alone, so it is taken from npm instead, where both halves are
@@ -19,6 +27,7 @@ src.github = "voidzero-dev/vite-plus"
 src.prefix = "v"
 fetch.url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-$ver.tgz"
 
+## playwright-cli
 # npm-only distribution (no release binaries), so this is built from source
 # with buildNpmPackage. Dependencies come from the upstream package-lock.json
 # via importNpmLock, so a version bump needs no extra manual step. `extract`
@@ -29,6 +38,7 @@ src.github = "microsoft/playwright-cli"
 fetch.github = "microsoft/playwright-cli"
 extract = ["package.json", "package-lock.json"]
 
+## frog
 # Release tags carry an npm-style "frog@" prefix, stripped here so $ver is
 # the bare version. The release asset is a gzipped single binary.
 [frog]
@@ -36,6 +46,8 @@ src.github = "wevm/frog"
 src.prefix = "frog@"
 fetch.url = "https://github.com/wevm/frog/releases/download/frog@$ver/frog-darwin-arm64.gz"
 
+## cclens
+# The tags carry no prefix, so $ver is used as-is in the asset name.
 [cclens]
 src.github = "lambdalisue/cclens"
 fetch.url = "https://github.com/lambdalisue/cclens/releases/download/$ver/cclens-$ver-aarch64-apple-darwin.tar.gz"

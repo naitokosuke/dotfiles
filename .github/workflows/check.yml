@@ -1,3 +1,6 @@
+# Runs `nix flake check` on every pull request: every host, every custom
+# package and the formatting check (see `checks` in flake.nix). The flake only
+# has aarch64-darwin outputs, so building them needs a macOS runner.
 name: check
 
 on:
@@ -13,14 +16,10 @@ concurrency:
 
 jobs:
   flake-check:
-    # The flake only has aarch64-darwin outputs, and building them needs a
-    # machine of that platform.
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7.0.1
 
       - uses: cachix/install-nix-action@v31.11.3
 
-      # Evaluates and builds every host, every custom package and the
-      # formatting check (see `checks` in flake.nix).
       - run: nix flake check --print-build-logs --option allow-import-from-derivation false

@@ -8,8 +8,9 @@
 }:
 
 let
-  # Packages managed by Nix - prevent accidental brew install
-  # See: https://github.com/Homebrew/brew/issues/19939
+  ## Nix-managed binaries stay out of Homebrew
+  # Exported as HOMEBREW_FORBIDDEN_FORMULAE below, so `brew install` can never
+  # shadow one of these with a Homebrew copy (Homebrew/brew#19939).
   homebrewForbiddenFormulae = [
     "bun"
     "claude"
@@ -38,6 +39,10 @@ in
   programs.zsh = {
     enable = true;
 
+    ## Aliases and helpers
+    # `cpwd` copies the current directory to the clipboard, `mkcd` makes a
+    # directory and enters it, and a new terminal starts in the ghq directory
+    # unless VS Code opened it.
     shellAliases = {
       l = "ls";
       la = "ls -la";
@@ -46,7 +51,6 @@ in
       cl = "clear";
       cpwd = "pwd | pbcopy";
     };
-
     initContent = ''
       mkcd() {
         mkdir -p "$1" && cd "$1"

@@ -1,8 +1,6 @@
 # Adrafinil (cask in hosts/common/homebrew.nix) keeps the Mac awake only while
-# an agent is working. Everything that runs its CLI is declared here, and tied
-# to the cask through ./required-casks.nix: drop the cask and evaluation fails,
-# instead of the hooks silently doing nothing and the server entry pointing at
-# nothing.
+# an agent is working. Everything that runs its CLI is declared here: the
+# Claude Code hooks, the MCP server entry, and the cask they depend on (#553).
 { lib, ... }:
 
 let
@@ -36,16 +34,24 @@ let
   subagent = op: "${cli} ${op} --tool claude-code --subagent";
 in
 {
+  ## Tied to the cask
+  # One line names the cask and the reason; ./required-casks.nix turns it into
+  # an assertion, so dropping the cask fails evaluation instead of leaving the
+  # hooks silently doing nothing and the server entry pointing at nothing.
   naitokosuke.requiredCasks.adrafinil = "home/adrafinil.nix runs the Adrafinil CLI";
 
+  ## Claude Code hooks
   # The app's one-click installer writes these hooks into
-  # ~/.claude/settings.json, which is a read-only store symlink here.
-  #
-  # Hand-maintained copy of ClaudeCodeIntegration.swift at v1.7.0: the app
-  # self-updates past the flake.lock pin, so re-check upstream when it does.
-  # The commands must match upstream byte for byte — Adrafinil recognises its
-  # hooks by command and compares them verbatim, so Settings → Agents reports
-  # Claude Code as connected without the `_adrafinil` marker.
+  # ~/.claude/settings.json, which is a read-only store symlink here, so they
+  # are a hand-maintained copy of ClaudeCodeIntegration.swift at v1.7.0: the
+  # app self-updates past the flake.lock pin, so re-check upstream when it
+  # does. The commands must match upstream byte for byte — Adrafinil
+  # recognises its hooks by command and compares them verbatim, so
+  # Settings → Agents reports Claude Code as connected without the
+  # `_adrafinil` marker. UserPromptSubmit / Stop bracket each turn, the
+  # sub-agent pair outlives the parent turn, and the rest cover turn ends that
+  # fire no Stop. The module system merges them with the hooks ./claude.nix
+  # and ./claude-rm-guard declare.
   programs.claude-code.settings.hooks = {
     UserPromptSubmit = hook { command = turn "acquire"; };
     Stop = hook { command = turn "release"; };
@@ -66,11 +72,13 @@ in
     };
   };
 
+  ## MCP server
   # The `keep_awake` tool, so an agent can hold the Mac awake for work that
   # outlives its turn (e.g. background shells), which the hooks do not cover.
-  # Same entry upstream's installer writes to ~/.claude.json. Adrafinil only
-  # inspects that file, so its Settings → Agents tab still reports the MCP
-  # server as not installed.
+  # mcp-servers-nix has no module for it, so it goes through the freeform
+  # `settings.servers`. Same entry upstream's installer writes to
+  # ~/.claude.json. Adrafinil only inspects that file, so its Settings → Agents
+  # tab still reports the MCP server as not installed.
   mcp-servers.settings.servers.adrafinil = {
     command = cli;
     args = [

@@ -60,11 +60,6 @@ export const icons = {
       '<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',
       a,
     ),
-  hash: (a?: IconAttrs) =>
-    svg(
-      '<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>',
-      a,
-    ),
   close: (a?: IconAttrs) => svg('<path d="M18 6 6 18M6 6l12 12"/>', a),
   search: (a?: IconAttrs) => svg('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>', a),
   menu: (a?: IconAttrs) =>

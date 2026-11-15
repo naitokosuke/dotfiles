@@ -29,6 +29,9 @@ let
   lockedVersion =
     (lib.importJSON (runtime + "/package-lock.json")).packages."node_modules/vite-plus".version;
 
+  ## The JavaScript toolchain
+  # `node_modules` is built from the lockfile in pkgs/vite-plus-runtime, on the
+  # same Node as the system, then trimmed to what vp reaches by path.
   nodeModules = importNpmLock.buildNodeModules {
     npmRoot = runtime;
     inherit nodejs;
@@ -66,10 +69,12 @@ stdenvNoCC.mkDerivation {
   inherit version;
   src = sources.vite-plus.src;
 
+  ## Refusing to drift
   # The launcher and the toolchain are two halves of one release and must not
-  # drift apart. A mismatch fails this build rather than evaluation, so the
-  # rest of the flake still evaluates (#559). The nvfetcher workflow bumps
-  # both together and builds the result before proposing it.
+  # drift apart. nvfetcher bumps the launcher but never touches the lockfile,
+  # so a mismatch fails this build rather than evaluation, and the rest of the
+  # flake still evaluates (#559). The nvfetcher workflow bumps both together
+  # and builds the result before proposing it.
   preUnpack = lib.optionalString (lockedVersion != version) ''
     cat >&2 <<'MESSAGE'
     vite-plus: the launcher is at ${version}, but pkgs/vite-plus-runtime pins vite-plus ${lockedVersion}.
@@ -91,6 +96,10 @@ stdenvNoCC.mkDerivation {
 
   nativeBuildInputs = [ makeWrapper ];
 
+  ## Install
+  # The launcher comes from the npm platform tarball. The toolchain is
+  # symlinked next to it, Nix's Node is put on PATH for the JavaScript half,
+  # and the `vpr` / `vpx` aliases are linked the way `vp env setup` would.
   installPhase = ''
     runHook preInstall
 
@@ -123,8 +132,12 @@ stdenvNoCC.mkDerivation {
 
   doInstallCheck = true;
 
-  # Runs a JavaScript subcommand from a directory with no project-local
-  # vite-plus. `--version` would not do: the launcher answers it alone.
+  ## An install check that runs the toolchain
+  # `vp --version` is answered by the launcher alone, so it passes even when
+  # every JavaScript subcommand is broken. This runs a JavaScript subcommand
+  # from a directory with no project-local vite-plus instead, which only
+  # succeeds when the launcher finds the toolchain installed next to it, and
+  # fails if vp wrote anything into a throwaway HOME.
   installCheckPhase = ''
     runHook preInstallCheck
     checkdir=$(mktemp -d)

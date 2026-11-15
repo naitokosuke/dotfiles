@@ -1,3 +1,8 @@
+# Every morning at 08:00 JST, or on dispatch, nvfetcher reruns here. When a
+# tracked tool has released, the regenerated pins in pkgs/_sources/, plus the
+# vite-plus runtime lockfile that has to move with them, land in one pull
+# request. Needs the repository setting that lets Actions create pull
+# requests.
 name: nvfetcher
 
 on:
@@ -25,10 +30,16 @@ jobs:
 
       - uses: cachix/install-nix-action@v31.11.3
 
+      ## Cooldown
       # The pinned hash only records what was fetched, so a hijacked release
       # would be pinned as it is. Releases younger than the cooldown are
       # skipped, which leaves time for one to be noticed upstream (#584).
-      # The selection itself is in .github/nvfetcher-cooldown.nix.
+      # nvfetcher has no such option, so this step saves each upstream's
+      # release list and lets .github/nvfetcher-cooldown.nix rewrite a copy of
+      # nvfetcher.toml, replacing every `src.github` with the newest release
+      # that is old enough as a fixed `src.manual` version. A pin that is
+      # already newer is kept, so nothing is downgraded. `skip-cooldown` sets
+      # the window to zero for an urgent fix.
       - name: Hold back releases younger than the cooldown
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,23 +59,27 @@ jobs:
             tee "$RUNNER_TEMP/pins.sed"
           sed -f "$RUNNER_TEMP/pins.sed" nvfetcher.toml > "$RUNNER_TEMP/nvfetcher.toml"
 
-      # nvfetcher's `extract` evaluates `import <nixpkgs>`, which a runner has
-      # no channel for, so the nixpkgs this flake locks is put on NIX_PATH.
+      ## Running nvfetcher
+      # Regenerates the pins from that rewritten config, with nvfetcher itself
+      # taken from the nixpkgs this flake locks. Its `extract` step evaluates
+      # `import <nixpkgs>`, which a runner has no channel for, so the same
+      # locked nixpkgs is put on NIX_PATH first.
       - name: Run nvfetcher
         run: |
           NIX_PATH="nixpkgs=$(nix eval --raw --inputs-from . nixpkgs#path)"
           export NIX_PATH
           nix run --inputs-from . nixpkgs#nvfetcher -- -c "$RUNNER_TEMP/nvfetcher.toml" -o pkgs/_sources
 
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "26"
+
+      ## Syncing the vite-plus runtime
       # The vite-plus launcher that nvfetcher pins and the JavaScript toolchain
       # in pkgs/vite-plus-runtime are two halves of one release, and the
       # derivation refuses to build if they disagree (issue #413). nvfetcher
       # only knows about the launcher, so the lockfile is brought along here
       # rather than left as a manual step after every bump.
-      - uses: actions/setup-node@v7.1.0
-        with:
-          node-version: "26"
-
       - name: Sync the vite-plus runtime lockfile
         run: |
           read_json() {
@@ -86,6 +101,7 @@ jobs:
           rm -f package-lock.json
           npm install --package-lock-only --ignore-scripts --before="$COOLDOWN_CUTOFF"
 
+      ## Checking before proposing
       # A pull request opened with GITHUB_TOKEN does not trigger the check
       # workflow, so the same check runs here: a bump that does not evaluate
       # or build fails this job instead of becoming a pull request.
@@ -94,6 +110,10 @@ jobs:
           git add --intent-to-add pkgs
           nix flake check --print-build-logs --option allow-import-from-derivation false
 
+      ## The update PR
+      # Only pkgs/_sources/ and pkgs/vite-plus-runtime/ are committed, to a
+      # fixed branch, so repeated runs update the same pull request instead of
+      # piling up new ones, and the branch deletes itself on merge.
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8.1.2
         with:

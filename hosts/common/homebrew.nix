@@ -1,3 +1,6 @@
+# GUI apps are Homebrew casks and CLIs come from Nix (#609). nix-homebrew pins
+# Homebrew itself and the taps as flake inputs, and activation converges the
+# installed casks onto the list below on every rebuild.
 {
   config,
   inputs,
@@ -7,8 +10,10 @@
 }:
 
 let
+  ## Homebrew's version label
   # A flake input reaches modules as a source tree, without the tag it is
-  # pinned to, so the tag is read from the lock.
+  # pinned to, so the tag is read from the lock and the nix-homebrew package
+  # below is labelled with it (#432).
   brewNode = (lib.importJSON (inputs.self + "/flake.lock")).nodes.brew-src.original;
   brewVersion =
     brewNode.ref or (throw ''
@@ -17,6 +22,7 @@ let
       flake.lock has it as: ${builtins.toJSON brewNode}
     '');
 
+  ## Sudo prompts go to a dialog
   # Homebrew asks for sudo repeatedly during a cask upgrade, on the terminal
   # `nh` has `nom` repainting. With SUDO_ASKPASS set it runs `sudo -A`, so
   # the prompt becomes a GUI dialog that says what it is for (#416).
@@ -30,10 +36,15 @@ let
 in
 
 {
+  ## nix-homebrew
+  # Homebrew itself comes from the `brew-src` input, pinned in flake.nix ahead
+  # of the one nix-homebrew locks (#432), and every tap from a flake input.
+  # `mutableTaps = false` disables `brew tap`, so a new tap arrives as an
+  # input.
   nix-homebrew = {
     enable = true;
     # nix-homebrew labels its package with the brew-src ref from its own
-    # flake.lock, so the label is rebuilt from the ref pinned here (#432).
+    # flake.lock, so the label is rebuilt from the ref pinned here.
     package = inputs.brew-src // {
       name = "brew-${brewVersion}";
       version = brewVersion;
@@ -54,21 +65,26 @@ in
     enableZshIntegration = false;
   };
 
-  # Cask binaries: `code` for the plan hook in home/claude.nix, and Orca's
-  # CLI. Ordered after the Nix profiles and before the system directories.
+  ## Homebrew on PATH, after Nix
+  # Cask binaries such as `code` (the plan hook in home/claude.nix) and Orca's
+  # CLI live in /opt/homebrew/bin, which nix-darwin does not put on PATH by
+  # itself. Ordered after the Nix profiles and before the system directories.
   environment.systemPath = lib.mkOrder 1100 [ "${config.homebrew.prefix}/bin" ];
 
   homebrew = {
     enable = true;
 
-    # Mirror the nix-homebrew-pinned taps into the Brewfile so
-    # `brew bundle` cleanup does not try to untap them.
+    ## Taps
+    # Mirror the nix-homebrew-pinned taps into the Brewfile so `brew bundle`
+    # cleanup does not try to untap them.
     taps = builtins.attrNames config.nix-homebrew.taps;
 
-    # Fully declarative (#363): cask definitions come from the flake-pinned
-    # taps, so activation converges the installed apps to flake.lock, and
-    # casks removed from the list below are uninstalled. Most of these apps
-    # still update themselves independently.
+    ## Activation policy
+    # Fully declarative (#363): HOMEBREW_NO_INSTALL_FROM_API makes cask
+    # definitions come from the flake-pinned taps rather than Homebrew's API,
+    # so activation converges the installed apps to flake.lock, and casks
+    # removed from the list below are uninstalled. Most of these apps still
+    # update themselves independently.
     onActivation = {
       autoUpdate = false;
       upgrade = true;
@@ -81,10 +97,12 @@ in
       };
     };
 
+    ## Casks
     # The rule: GUI apps are casks, and CLIs come from Nix (#609). It holds
     # for every app, also the ones nixpkgs could build, so which layer
     # installs an app is never decided per app. Casks keep updating
     # themselves, and their Dock icons and file associations stay put.
+    # Third-party taps slot in as `<tap>/<cask>`.
     casks = [
       # Keeps the Mac awake only while an AI agent is working (see
       # home/adrafinil.nix). Requires macOS 26. Adrafinil updates itself in
