@@ -79,11 +79,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794278858,
-        "narHash": "sha256-rkrJwLgLSHBnXfgoSKIDa+2LLGdTqynsV3GAxOTGhUU=",
+        "lastModified": 1794715309,
+        "narHash": "sha256-awkBBs5ctFKgEYjpNGpi3t/VqF589n5EWfdinRb2gNI=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "82ce401aa350502897c3f2e85f384d61cd3b0b6d",
+        "rev": "a1293da7dd8e497e08d26173f97e2976b36a31ea",
         "type": "github"
       },
       "original": {
@@ -95,11 +95,11 @@
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1794484570,
-        "narHash": "sha256-zuS69WifqRNTBRPIQPe70PUCq/j8KEx6OSnGvGOVWk4=",
+        "lastModified": 1794734498,
+        "narHash": "sha256-4R5OfTtLDyVLjEuHM7cx+OYFvLlUxA9I9MRQlFxE2i8=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "78013f1540eb13fea8ca1ba3a63704596202f738",
+        "rev": "5e7642544043a7a51120b11b4ae153b5e6f84257",
         "type": "github"
       },
       "original": {
@@ -111,11 +111,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1794486558,
-        "narHash": "sha256-FOAMK5trRebWx6SmHxHGE0z3kocNCAGcf5Ux4Qhy+ak=",
+        "lastModified": 1794737744,
+        "narHash": "sha256-/IGA6WJ0yHcYGhUInzF+cu7NK2s1l6brzT9Bnns92gs=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "551d59745330f41bdf4fb4fcb3bc37e5b1684108",
+        "rev": "e6a33a0aa63ed7f907bdfcd4b3bb34cdcf069780",
         "type": "github"
       },
       "original": {
@@ -127,11 +127,11 @@
     "homebrew-orca": {
       "flake": false,
       "locked": {
-        "lastModified": 1794446474,
-        "narHash": "sha256-0SlzLJA06tEKUSnfY1a4fJDS7qzL1S5qoOGIiyU8Vac=",
+        "lastModified": 1794691269,
+        "narHash": "sha256-ve759S1T4d7k/PDCbg9QvHZ++ySB/UZX/M+rfECNfCA=",
         "owner": "stablyai",
         "repo": "homebrew-orca",
-        "rev": "35781e7d4ee1957afc74003262529cd6c1a9bfd4",
+        "rev": "e028763e7885190b3ab5d0af309eae8f769c8465",
         "type": "github"
       },
       "original": {
@@ -143,11 +143,11 @@
     "homebrew-productdevbook": {
       "flake": false,
       "locked": {
-        "lastModified": 1792409089,
-        "narHash": "sha256-+Jfz35cwmPPbLIFwe9Yr9QW/F+q9xyEHKIU32WNTwF4=",
+        "lastModified": 1794520073,
+        "narHash": "sha256-90wK6DPTV3vZYLqrZ3RSKaM63Oqx2vJTqVRaBzJ5VA0=",
         "owner": "productdevbook",
         "repo": "homebrew-tap",
-        "rev": "277bd813bf202d48ca3ce30646fee417aa879114",
+        "rev": "69a06a4f450c893d4c403bf65660cd5a8a07d93c",
         "type": "github"
       },
       "original": {
@@ -169,11 +169,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794487092,
-        "narHash": "sha256-yoswsYkpk9XPEr5SzlWePHmE8aj/6tqG5QeM41kcYo0=",
+        "lastModified": 1794721493,
+        "narHash": "sha256-7extb+ld6xPCzcVuhVdvcvGPLu/qtDRrhFJmH68jXfM=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "8eef039ea61f3e60c53289539e5a6d21f846aad3",
+        "rev": "aeb1afe1529c5dc7dcdc54d644a8aed212d99dd0",
         "type": "github"
       },
       "original": {
@@ -244,11 +244,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1794408178,
-        "narHash": "sha256-OUDRQTMmN/6cQ/ebDsazUmLj84RxSLaHznKv5As9E1k=",
+        "lastModified": 1794554816,
+        "narHash": "sha256-PqJ89Z/qwQa2fB2C0j/GjiviARAtBzVPDUxnbIY6EPA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "9397dcb09c9598a33509fbc0cce699bd4e6c84d5",
+        "rev": "e126e9e73c335158ff8279ac14d5f4afec153716",
         "type": "github"
       },
       "original": {
@@ -330,11 +330,11 @@
     "vscode-settings": {
       "flake": false,
       "locked": {
-        "lastModified": 1780909052,
-        "narHash": "sha256-IN9+818l2aSQM3bt3jw+fypGUJcm0ex1vlNCeJmwyd0=",
+        "lastModified": 1794639282,
+        "narHash": "sha256-jsgoqN0UDoJT4ZhNUh41zBVAptsUpTrYT5i9MRpUONM=",
         "owner": "naitokosuke",
         "repo": "vscode-settings",
-        "rev": "11cc8cd2eae87de1fe0461888fafccbfdb557bc6",
+        "rev": "7e2571c2e485a5d9baad5db79185cd88b6c6af9e",
         "type": "github"
       },
       "original": {
