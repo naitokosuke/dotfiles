@@ -27,3 +27,6 @@ dist-ssr
 *.sln
 *.sw?
 .void-wrangler.jsonc
+
+# Written by `vp run facts` from `nix eval --json .#docsData` (facts.nix)
+src/facts.generated.json

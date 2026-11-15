@@ -187,10 +187,14 @@ VSCode settings are automatically synchronized from the [vscode-settings](https:
 [`docs/`](docs/) is a [Vite+](https://viteplus.dev/) / [void](https://void.app/) single-page app that renders this
 repository as an interactive, VS Code-flavoured walkthrough. It reads the actual `*.nix` files, `nvfetcher.toml`, the
 GitHub workflows, and this README at build time, so the published site always mirrors the real configuration.
+Each file's walkthrough is its own comments: the leading comment is the intro, and a `## <title>` comment opens a
+section about the code right below it. Facts such as installed casks, package versions and locked inputs are not
+written down anywhere; they come from `nix eval --json .#docsData` ([`docs/facts.nix`](docs/facts.nix)).
 
 ```bash
 cd docs
 vp install   # install dependencies
+vp run facts # evaluate the facts the pages show (build and deploy do this first)
 vp dev       # local dev server
 vp build     # production build
 vp check     # format, lint, and type-check
