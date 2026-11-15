@@ -175,6 +175,18 @@
 
       formatter.${system} = treefmtEval.config.build.wrapper;
 
+      ## Docs data
+      # The facts the walkthrough site in docs/ shows (casks, package versions,
+      # enabled programs, locked inputs, options), evaluated rather than
+      # restated in prose (#612). The site reads it as JSON:
+      #   nix eval --json .#docsData
+      docsData = import ./docs/facts.nix {
+        inherit (nixpkgs) lib;
+        inherit darwinConfigurations;
+        inherit (inputs) self;
+        packages = inputs.self.packages.${system};
+      };
+
       ## Checks
       # `nix flake check` on its own only notices that `darwinConfigurations`
       # exists, so the hosts and the custom packages are listed here to be

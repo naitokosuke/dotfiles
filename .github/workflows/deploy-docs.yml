@@ -37,6 +37,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
+      ## Nix, for the facts
+      # `vp run deploy` first writes the pages' fact tables with
+      # `nix eval --json .#docsData` (#612). The darwin hosts are only
+      # evaluated, not built, so this Linux runner is enough.
+      - uses: cachix/install-nix-action@v31.11.3
+
       - uses: voidzero-dev/setup-vp@v1.22.0
         with:
           working-directory: docs

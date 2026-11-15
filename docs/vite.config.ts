@@ -32,6 +32,11 @@ export default defineConfig({
         description:
           "Pins the comment conventions the walkthrough parser reads from the config files.",
       },
+      {
+        name: "facts",
+        description:
+          "Pins how `nix eval --json .#docsData` maps onto the fact tables of each page.",
+      },
     ],
   },
 });

@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "tsc && vp build",
+    "facts": "nix eval --json ..#docsData > src/facts.generated.json",
+    "build": "vp run facts && tsc && vp build",
     "preview": "vp preview",
-    "deploy": "vp exec void deploy"
+    "deploy": "vp run facts && vp exec void deploy"
   },
   "dependencies": {
     "@void/vue": "^1.6.2"

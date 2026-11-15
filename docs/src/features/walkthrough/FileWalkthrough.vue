@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { facts, factsFor } from "../../facts.ts";
 import CodeBlock from "../../primitives/CodeBlock.vue";
 import { highlight } from "../../syntax.ts";
 import type { FileEntry } from "../../types.ts";
+import FactTable from "./FactTable.vue";
 import FileBreadcrumb from "./FileBreadcrumb.vue";
 import FullSourceDetails from "./FullSourceDetails.vue";
 import { renderProse } from "./markdown.ts";
@@ -16,6 +18,7 @@ const introText = computed(() => props.file.walkthrough?.intro ?? "");
 const introHtml = computed(() => (introText.value ? renderProse(introText.value) : ""));
 const sections = computed(() => props.file.walkthrough?.sections ?? []);
 const hasSections = computed(() => sections.value.length > 0);
+const factTables = computed(() => factsFor(props.file.path, facts));
 
 const lineCount = computed(() => props.file.content.split("\n").length);
 const charCount = computed(() => props.file.content.length.toLocaleString());
@@ -31,6 +34,7 @@ const fullHtml = computed(() =>
     <div class="walkthrough-scroller">
       <article class="walkthrough">
         <div v-if="introHtml" class="walkthrough-intro" v-html="introHtml" />
+        <FactTable v-for="table in factTables" :key="table.title" :table="table" />
         <WalkthroughSection
           v-for="(section, idx) in sections"
           :key="idx"
