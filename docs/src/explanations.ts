@@ -1,9 +1,9 @@
-import type { Walkthrough } from "./types.ts";
+import type { WalkthroughSource } from "./types.ts";
 
 interface Explanation {
   readonly about: string;
   readonly tags?: readonly string[];
-  readonly walkthrough?: Walkthrough;
+  readonly walkthrough?: WalkthroughSource;
 }
 
 export const explanations: Readonly<Record<string, Explanation>> = {
@@ -18,25 +18,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Prerequisites",
           prose:
             "Apple Silicon and Lix only — no Intel support and no upstream `nix` installer. Xcode CLT is required because the Homebrew layer depends on it.",
-          lines: [8, 12],
+          code: { from: "## Prerequisites" },
         },
         {
           title: "Bootstrapping",
           prose:
             "Install the Xcode CLT and Lix, clone, then run nix-darwin once through `sudo nix run nix-darwin -- switch --flake .#<host>`. The `--extra-experimental-features` flag is only needed for that first run, before `hosts/common/nix.nix` has turned flakes on globally; after it, `sudo darwin-rebuild switch` takes over — activation runs as root.",
-          lines: [14, 35],
+          code: { from: "## Installation" },
         },
         {
           title: "What activation can't do",
           prose:
             "`darwin-rebuild switch` builds everything this repository declares and nothing outside it, so a machine set up from the Installation steps alone looks healthy right up to its first `git commit` — `home/git.nix` signs every commit with an SSH key that nothing here creates. This section is the manual remainder, in order: the key pair, registering it on GitHub twice (authentication *and* signing, which needs extra `gh` scopes), and installing the Playwright browsers that are runtime-managed by design (issue #484). It also records why there is no `sops-nix` or `agenix` here: nothing currently wants to be encrypted, and an age key derived from the SSH key would inherit this section's own ordering problem rather than remove it.",
-          lines: [37, 80],
+          code: { from: "## First-Time Setup on a New Machine" },
         },
         {
           title: "Packages outside nixpkgs",
           prose:
             "Tools nixpkgs doesn't ship are packaged under `pkgs/` and version-tracked by nvfetcher, with a daily workflow opening the update PR. vite-plus is the one package in two halves — the `vp` launcher and the JavaScript toolchain it delegates to — which must stay on the same version.",
-          lines: [112, 132],
+          code: { from: "### CLI Packages" },
         },
       ],
     },
@@ -53,43 +53,49 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Inputs",
           prose:
             "Flake inputs that depend on nixpkgs `follow` this one, so the world ships one pkgs set. `flake = false` inputs are locked source snapshots read at eval time: `brew-src`, the Homebrew taps (`homebrew-core` included, because `brew bundle` loads it whenever `HOMEBREW_NO_INSTALL_FROM_API` is set), `vscode-settings` and `skill-skill-skill`. `brew-src` pins Homebrew itself at a release tag (7.0.1) ahead of the one nix-homebrew locks, and nix-homebrew's own `brew-src` follows it. `llm-agents` supplies Claude Code and `mcp-servers-nix` the MCP module.",
-          lines: [4, 62],
+          code: { from: "inputs = {" },
         },
         {
           title: "One nixpkgs instance",
           prose:
             "`pkgs` is imported once, with the overlays and the Nixpkgs config, and used by everything: the flake's own outputs are built from it, and every host takes the same instance through `nixpkgs.pkgs` instead of evaluating nixpkgs again (#554). `customPackages` is the single entry into `./pkgs`, so the `packages` output and the overlay are visibly the same function — a custom package cannot build one way through `nix build .#<pkg>` and another through `darwin-rebuild switch`. The overlay puts the set under `pkgs.naitokosuke` rather than at the top level, so a custom package can never shadow a nixpkgs attribute of the same name: `frog` used to replace nixpkgs' unrelated Dutch NLP tool that way (#545).",
-          lines: [75, 104],
+          code: { from: 'system = "aarch64-darwin";', to: "inherit overlays;" },
         },
         {
           title: "mkDarwinConfig",
           prose:
             "A small helper that builds one `darwinSystem` per host. `specialArgs` passes the flake `inputs` to every module, and `hosts/common/home-manager.nix` forwards them to home-manager as well. An inline module hands every host the `pkgs` defined above through `nixpkgs.pkgs`. The module is a `{ config, ... }:` function so `system.primaryUser` derives from `config.naitokosuke.username` rather than a hardcoded literal. `./modules/naitokosuke` loads first, then the home-manager and nix-homebrew darwin modules, `hosts/common`, and `hosts/<hostName>`.",
-          lines: [111, 133],
+          code: { from: "mkDarwinConfig =", to: "nix-darwin.lib.darwinSystem {" },
         },
         {
           title: "Per-host configurations",
           prose:
             "`darwinConfigurations` is built by mapping the `hosts` list (defined above `mkDarwinConfig`) through it with `nixpkgs.lib.genAttrs`. Adding a new Mac is a one-line append to that list — plus a `hosts/<host>/default.nix` for the diff — with no per-host `darwinConfigurations` attribute to hand-write.",
-          lines: [135, 135],
+          code: { from: "darwinConfigurations = nixpkgs.lib.genAttrs hosts mkDarwinConfig;" },
         },
         {
           title: "Custom packages output",
           prose:
             "`packages.<system>` exposes the same `./pkgs` set that the overlay puts under `pkgs.naitokosuke`, so `nix build .#frog` works standalone — handy for testing a derivation without evaluating a whole darwin configuration.",
-          lines: [147, 147],
+          code: { from: "packages.${system} = customPackages pkgs;" },
         },
         {
           title: "Formatter",
           prose:
             "`nix fmt` runs nixfmt through treefmt-nix, with `flake.nix` marking the project root. It formats through the configured `pkgs` too, so there is no second package set left in the flake.",
-          lines: [137, 149],
+          code: {
+            from: "treefmtEval = treefmt-nix.lib.evalModule pkgs {",
+            to: "formatter.${system} = treefmtEval.config.build.wrapper;",
+          },
         },
         {
           title: "Checks",
           prose:
             "`nix flake check` on its own only notices that `darwinConfigurations` exists. `checks` lists what should actually be built: the `system.build.toplevel` of every host, every custom package, a treefmt check that fails on unformatted files, the `bun test` suite of the Claude Code deletion guard, and a check that the JSON tool AGENTS.md rules out has not come back. The `check` workflow runs it on every pull request, and the nvfetcher workflow runs it before proposing a bump.",
-          lines: [151, 188],
+          code: {
+            from: "# `nix flake check` only looks at whether `darwinConfigurations` exists,",
+            to: "// {",
+          },
         },
       ],
     },
@@ -106,25 +112,37 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Release binaries",
           prose:
             '`src.github` watches each upstream for releases, and `fetch.url` downloads one asset for that tag (`$ver` is substituted). Each entry is named after the tool, so the derivations read `sources.<tool>`.`gh-sub-issue` ships a bare binary whose asset name embeds the version without the tag\'s `v` prefix, so `src.prefix = "v"` strips it at the tracker level and the URL re-adds it where needed.',
-          lines: [5, 10],
+          code: {
+            from: '# The asset name embeds the version without the "v" tag prefix, so strip it',
+            to: 'fetch.url = "https://github.com/yahsan2/gh-sub-issue/releases/download/v$ver/gh-sub-issue_$ver_darwin-arm64"',
+          },
         },
         {
           title: "vite-plus from npm",
           prose:
             "The GitHub release carries only the `vp` launcher, while the JavaScript toolchain it delegates to is built separately from `pkgs/vite-plus-runtime`. Both halves are published to npm under one version, so the entry watches GitHub tags but fetches the launcher's npm tarball, with the prefix stripped so `$ver` is exactly that npm version.",
-          lines: [12, 20],
+          code: {
+            from: "# `vp` is only the Rust launcher; the JavaScript toolchain it delegates to is",
+            to: 'fetch.url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-darwin-arm64/-/vite-plus-cli-darwin-arm64-$ver.tgz"',
+          },
         },
         {
           title: "playwright-cli from source",
           prose:
             "`@playwright/cli` has no release binaries, so `fetch.github` pins the source tree at the tag instead, and `pkgs/playwright-cli.nix` builds it with `buildNpmPackage`. `extract` copies `package.json` and `package-lock.json` out of that tree into `pkgs/_sources`, so the derivation can read them without fetching anything during evaluation.",
-          lines: [22, 28],
+          code: {
+            from: "# npm-only distribution (no release binaries), so this is built from source",
+            to: 'src.github = "microsoft/playwright-cli"',
+          },
         },
         {
           title: "frog",
           prose:
             "frog's tags carry a project-name prefix (`frog@`) that `src.prefix` strips, and its release asset is a gzipped single binary.",
-          lines: [32, 37],
+          code: {
+            from: '# Release tags carry an npm-style "frog@" prefix, stripped here so $ver is',
+            to: 'fetch.url = "https://github.com/wevm/frog/releases/download/frog@$ver/frog-darwin-arm64.gz"',
+          },
         },
       ],
     },
@@ -159,13 +177,16 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Fetch and install",
           prose:
             "The asset is a single gzipped file, not an archive, so `dontUnpack` skips stdenv's unpack phase and `installPhase` gunzips the source straight into `$out/bin/frog`, then makes it executable.",
-          lines: [13, 21],
+          code: { from: "dontUnpack = true;", to: "installPhase = ''" },
         },
         {
           title: "Install check",
           prose:
             "nixpkgs' `versionCheckHook` runs `frog --version` and checks that the output contains the derivation's `version`, which confirms the decompressed binary executes on this platform and is the release nvfetcher pinned. The same two lines do this in every binary package here.",
-          lines: [23, 24],
+          code: {
+            from: "nativeInstallCheckInputs = [ versionCheckHook ];",
+            to: "doInstallCheck = true;",
+          },
         },
       ],
     },
@@ -182,13 +203,16 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Fetch and install",
           prose:
             "`dontUnpack` plus `install -Dm755` places the pinned binary as `$out/bin/gh-sub-issue`. The version comes from nvfetcher with the tag's `v` already stripped.",
-          lines: [11, 22],
+          code: { from: "stdenvNoCC.mkDerivation {", to: "installPhase = ''" },
         },
         {
           title: "Install check",
           prose:
             "`versionCheckHook` runs `gh-sub-issue --version` and checks that the output contains `version`, so a binary that does not execute, or belongs to a different release than nvfetcher pinned, fails the build instead of surfacing as a broken `gh` extension.",
-          lines: [24, 25],
+          code: {
+            from: "nativeInstallCheckInputs = [ versionCheckHook ];",
+            to: "doInstallCheck = true;",
+          },
         },
       ],
     },
@@ -205,19 +229,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Dependencies from the upstream lockfile",
           prose:
             "`importNpmLock` builds the dependencies from the upstream `package.json` and `package-lock.json`, so there's no `npmDepsHash` to update by hand after each nvfetcher bump (issue #411). nvfetcher copies both files into `pkgs/_sources` on every bump, so they are read from the repository: reading them out of the fetched source would be import-from-derivation, and the flake has to evaluate with that disabled (#546). `dontNpmBuild` skips `npm run build`.",
-          lines: [14, 28],
+          code: { from: "buildNpmPackage {", to: "dontNpmBuild = true;" },
         },
         {
           title: "Browsers stay runtime-managed",
           prose:
             "Browsers are left to Playwright's own cache. Pinning nixpkgs' `playwright-driver.browsers` would pair them with a different Playwright version than the one vendored here.",
-          lines: [30, 32],
+          code: {
+            from: "# Browsers stay runtime-managed in Playwright's own cache. Pinning",
+            to: "# Playwright, which tracks alpha releases ahead of nixpkgs.",
+          },
         },
         {
           title: "Install check",
           prose:
             "`versionCheckHook` runs `playwright-cli --version` and checks that the output contains `version`, the same check the binary packages here use, so the installed entry point is known to start before it lands on `$PATH`.",
-          lines: [34, 35],
+          code: {
+            from: "nativeInstallCheckInputs = [ versionCheckHook ];",
+            to: "doInstallCheck = true;",
+          },
         },
       ],
     },
@@ -234,25 +264,30 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "The JavaScript toolchain",
           prose:
             "`importNpmLock.buildNodeModules` materialises `node_modules` from the lockfile in `pkgs/vite-plus-runtime`, on `nodejs_26` to match the system Node. `postInstall` then patches `vp create` so templates it copies out of the store come out writable, drops `node_modules/.bin` so a second oxlint / oxfmt never reaches `$PATH`, and deletes npm's `.package-lock.json`, whose store references would otherwise keep around 300 MB of source tarballs in the closure.",
-          lines: [32, 62],
+          code: { from: "nodeModules = importNpmLock.buildNodeModules {" },
         },
         {
           title: "Refusing to drift",
           prose:
             "The launcher and the toolchain are two halves of one release. nvfetcher bumps the launcher but never touches the lockfile, so the build fails in `preUnpack` whenever the two versions disagree, printing the commands that regenerate the lockfile. It fails the build rather than evaluation, so a mismatch does not take the rest of the flake down with it (#559). The nvfetcher workflow runs those same commands and builds the result, so update PRs arrive with both halves in step.",
-          lines: [69, 87],
+          code: {
+            from: "# The launcher and the toolchain are two halves of one release and must not",
+          },
         },
         {
           title: "Install",
           prose:
             "The launcher comes from the npm platform tarball (everything under `package/`). `node_modules` is symlinked next to it rather than copied, `wrapProgram` puts Nix's Node on `$PATH` for the JavaScript half, and `vpr` / `vpx` are linked the way the official installer's `vp env setup` would — vp dispatches on `argv[0]` (`vpr` → `vp run`, `vpx` → `vp dlx`), which the wrapper preserves. The `node` / `npm` / `npx` / `corepack` shims that step also creates are deliberately omitted: they belong to vp's Node version manager and would shadow Nix-managed Node. Finally, a `.vp-setup-complete` marker next to the binary stops vp from installing a second, unmanaged copy of itself into `$HOME` on first start (issue #434).",
-          lines: [89, 122],
+          code: {
+            from: "# The npm tarball keeps everything under a single `package/` directory.",
+            to: "installPhase = ''",
+          },
         },
         {
           title: "An install check that runs the toolchain",
           prose:
             "`vp --version` is answered by the launcher alone, so it passes even when every JavaScript subcommand is broken. The check runs `vp fmt --help` from an empty directory instead, which only succeeds when the launcher finds the toolchain installed next to it. It runs against a throwaway `$HOME` holding the same `shimMode` config as `home/vite-plus.nix`, and fails if vp wrote anything into it, so a change in how upstream skips self-setup is caught at build time rather than in the user's home.",
-          lines: [124, 152],
+          code: { from: "doInstallCheck = true;", to: "installCheckPhase = ''" },
         },
       ],
     },
@@ -269,31 +304,43 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Cooldown",
           prose:
             "A pinned hash only records what was fetched, so a hijacked release would be pinned as it is. Releases younger than three days are therefore skipped (#584). nvfetcher has no such option, so this step saves each upstream's release list and lets the Nix function in `.github/nvfetcher-cooldown.nix` rewrite a copy of `nvfetcher.toml`, replacing every `src.github` with the newest release that is old enough as a fixed `src.manual` version. A pin that is already newer is kept, so nothing is downgraded. Dispatching the workflow by hand with `skip-cooldown` sets the window to zero for an urgent fix.",
-          lines: [28, 49],
+          code: {
+            from: "# The pinned hash only records what was fetched, so a hijacked release",
+            to: 'sed -f "$RUNNER_TEMP/pins.sed" nvfetcher.toml > "$RUNNER_TEMP/nvfetcher.toml"',
+          },
         },
         {
           title: "Running nvfetcher",
           prose:
             "`nix run --inputs-from . nixpkgs#nvfetcher` regenerates the pins from that rewritten config, with nvfetcher itself taken from the nixpkgs this flake locks. Its `extract` step evaluates `import <nixpkgs>`, and a runner has no channel for that, so the same locked nixpkgs is put on `NIX_PATH` first.",
-          lines: [51, 57],
+          code: {
+            from: "# nvfetcher's `extract` evaluates `import <nixpkgs>`, which a runner has",
+            to: 'nix run --inputs-from . nixpkgs#nvfetcher -- -c "$RUNNER_TEMP/nvfetcher.toml" -o pkgs/_sources',
+          },
         },
         {
           title: "Syncing the vite-plus runtime",
           prose:
             "nvfetcher only knows about the vite-plus launcher, but `pkgs/vite-plus.nix` refuses to build unless the runtime lockfile pins the same version. So CI reads the new version from `generated.json`, sets it as the runtime's `vite-plus` dependency, and regenerates `package-lock.json` without installing anything. `--before` holds every dependency it resolves to the same cooldown, and the step does nothing when the launcher version did not change, so the lockfile only moves together with the launcher.",
-          lines: [59, 87],
+          code: {
+            from: "# The vite-plus launcher that nvfetcher pins and the JavaScript toolchain",
+            to: 'npm install --package-lock-only --ignore-scripts --before="$COOLDOWN_CUTOFF"',
+          },
         },
         {
           title: "Checking before proposing",
           prose:
             "A pull request opened with `GITHUB_TOKEN` does not trigger other workflows, so the `check` workflow would never see it. The job therefore runs on macOS and runs `nix flake check` itself: a bump that does not evaluate or build fails the run instead of becoming a pull request.",
-          lines: [89, 95],
+          code: {
+            from: "# A pull request opened with GITHUB_TOKEN does not trigger the check",
+            to: "nix flake check --print-build-logs --option allow-import-from-derivation false",
+          },
         },
         {
           title: "The update PR",
           prose:
             "`peter-evans/create-pull-request` commits only `pkgs/_sources/` and `pkgs/vite-plus-runtime/` to a fixed `nvfetcher-update` branch — repeated runs update the same PR rather than piling up new ones, and the branch deletes itself on merge.",
-          lines: [97, 108],
+          code: { from: "- name: Create pull request", to: "delete-branch: true" },
         },
       ],
     },
@@ -319,13 +366,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Triggers and concurrency",
           prose:
             "There's no `paths` filter: the build globs `*.nix`, the README, and the workflows from across the repository, so almost any change to `main` alters what the site renders. Deploys share one concurrency group without cancelling, so an upload is never interrupted midway, and since only the newest pending run is kept, a burst of merges still ends on the latest `main`.",
-          lines: [3, 18],
+          code: { from: "workflow_dispatch:", to: "cancel-in-progress: false" },
         },
         {
           title: "Deploy",
           prose:
             "`voidzero-dev/setup-vp` installs Vite+ and runs `vp install` in `docs/`, then `vp run deploy` runs the same `void deploy` used locally. There is no stored token: `void deploy` exchanges a GitHub OIDC token for a short-lived deploy token. void only does that for the current head of `main`, so when several merges land together a run that a newer commit has overtaken skips the deploy and succeeds, and the run queued behind it deploys the newer commit (#605). The local project link in `.void/project.json` is gitignored, so `VOID_PROJECT` names the project explicitly — without it, `void deploy` would fail in CI rather than prompt.",
-          lines: [26, 57],
+          code: { from: "deploy:", to: "VOID_PROJECT: naitokosuke-dotfiles" },
         },
       ],
     },
@@ -351,13 +398,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Typed options",
           prose:
             "Each constant is an `mkOption` with `type = types.str`, a description and a `default`, so the values are self-documenting and type-checked rather than bare strings copied around the repo. Because they are defaults rather than definitions, a host overrides one with a plain assignment (#552).",
-          lines: [8, 23],
+          code: { from: "options.naitokosuke = {", to: "email = mkOption {" },
         },
         {
           title: "Derived defaults",
           prose:
             "`homeDirectory` is derived from `username`, and `srcDirectory` from `homeDirectory`: it is the one root that ghq, gwq and nh build their paths from. `githubDirectory` goes one step further down ghq's layout to this user's own repositories, so `home/nh.nix` and `home/zsh.nix` read one option instead of each assembling `<srcDirectory>/github.com/<username>`. Overriding `username` on a host moves all of them. `hosts/common/home-manager.nix` hands the resolved values to home-manager, where modules read `config.home.homeDirectory` for the home itself and `config.naitokosuke.*` for the rest.",
-          lines: [24, 41],
+          code: { from: "homeDirectory = mkOption {", to: "githubDirectory = mkOption {" },
         },
       ],
     },
@@ -383,13 +430,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Auto-hide and suppress recents",
           prose:
             "`autohide` reclaims the bottom of the screen by default; the Dock only appears when the cursor hits the edge. `show-recents = false` stops the Dock from growing unpredictably as you switch projects.",
-          lines: [2, 4],
+          code: { from: "system.defaults.dock = {", to: "show-recents = false;" },
         },
         {
           title: "Sizing and animation",
           prose:
             "Tiles render at 50px and magnify to 64px on hover — enough feedback without being noisy. `mineffect = scale` is sharper than the genie default, and `launchanim = false` removes the bouncing icon during app launch.",
-          lines: [5, 10],
+          code: { from: "tilesize = 50;", to: "launchanim = false;" },
         },
       ],
     },
@@ -424,37 +471,43 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Sudo prompts go to a dialog",
           prose:
             "Homebrew resets sudo's timestamp on every invocation, and some cask uninstall steps shell out to sudo repeatedly, so a cask upgrade during activation would ask for a password over and over on the very terminal `nom` is repainting. `SUDO_ASKPASS` points at a small `osascript` dialog instead — Homebrew adds `-A` to sudo whenever it's set, so the prompt appears as a GUI dialog that says what it's for (issue #416).",
-          lines: [20, 26],
+          code: {
+            from: "# Homebrew asks for sudo repeatedly during a cask upgrade",
+            to: "sudoAskpass = pkgs.writeShellScript",
+          },
         },
         {
           title: "Homebrew ahead of nix-homebrew",
           prose:
             "`nix-homebrew` installs and pins the Homebrew binary itself via Nix. That binary comes from the `brew-src` input in `flake.nix`, pinned at 7.0.1 ahead of the version nix-homebrew locks (issue #432). nix-homebrew labels its package with the ref from its own `flake.lock`, so the store path would otherwise name that ref rather than the one pinned here; `package` rebuilds the name and version from this repository's `flake.lock` (`brewVersion` at the top of the file) so they match the ref pinned in `flake.nix`. A flake input reaches a module as a source tree, and the tag it is pinned to is not part of that interface — hence reading the lock as data, via `inputs.self` rather than a relative path, with a `throw` that explains itself if `brew-src` is ever pinned to something other than a tag.",
-          lines: [30, 37],
+          code: { from: "nix-homebrew = {", to: "package = inputs.brew-src // {" },
         },
         {
           title: "Pinned, read-only taps",
           prose:
             "`taps` pulls every tap from a flake input, so even Homebrew's tap repos are pinned. `mutableTaps = false` makes them read-only — `brew tap` is disabled, and a new tap has to arrive as a flake input.",
-          lines: [41, 50],
+          code: { from: "enableRosetta = false;", to: "mutableTaps = false;" },
         },
         {
           title: "Homebrew on PATH, after Nix",
           prose:
             "Cask binaries such as `code` and Orca's `orca` live in `/opt/homebrew/bin`, which nix-darwin does not put on `$PATH` by itself. `environment.systemPath` adds it with `mkOrder 1100`, after the Nix profiles and before the system directories. nix-homebrew's zsh integration would instead run `brew shellenv` on every interactive start and put Homebrew first, so it is turned off.",
-          lines: [51, 59],
+          code: {
+            from: "# `brew shellenv` would put Homebrew ahead of the Nix profiles on every",
+            to: 'environment.systemPath = lib.mkOrder 1100 [ "${config.homebrew.prefix}/bin" ];',
+          },
         },
         {
           title: "Taps and activation policy",
           prose:
             'The Brewfile mirrors the pinned tap list so `brew bundle` cleanup does not untap them. `HOMEBREW_NO_INSTALL_FROM_API` forces cask definitions to come from those pinned taps rather than Homebrew\'s API, and `cleanup = "uninstall"` converges the machine onto exactly the cask list below — new versions arrive via `nix flake update`.',
-          lines: [61, 82],
+          code: { from: "# Mirror the nix-homebrew-pinned taps", to: "onActivation = {" },
         },
         {
           title: "Casks",
           prose:
             "Everything in `casks` is materialised on `darwin-rebuild`. The rule above the list is that GUI apps are casks and CLIs come from Nix, also for the apps nixpkgs could build, so which layer installs an app is never decided per app (#609). `productdevbook/tap/portkiller` and `stablyai/orca/orca` show how third-party taps slot in. Orca's cask also ships the `orca` CLI. DockDoor supplies the window switcher and Dock previews. Adrafinil and Orca both update themselves in place, so the flake.lock pin is only the floor version a fresh machine starts from. Adrafinil's cask also requires macOS 26, and its Claude Code hooks are declared in `home/claude.nix`.",
-          lines: [84, 109],
+          code: { from: "# The rule: GUI apps are casks, and CLIs come from Nix (#609). It holds" },
         },
       ],
     },
@@ -480,31 +533,41 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "System zsh files",
           prose:
             "nix-darwin writes `/etc/zshenv`, `/etc/zprofile` and `/etc/zshrc`. They load the system environment, including `$PATH`, into every zsh, and link each profile's `share/zsh` onto `fpath`, so the completions that packages ship are found (#544). The global `compinit` and the default prompt are turned off, because home-manager runs `compinit` in `~/.zshrc` and Starship draws the prompt.",
-          lines: [10, 17],
+          code: {
+            from: "# nix-darwin writes /etc/zsh*, which load the system environment and put",
+          },
         },
         {
           title: "Weekly GC with nh",
           prose:
             "`nix.package = pkgs.lix` opts into the Lix fork of CppNix. Two tools still link the CppNix libraries, `nixd` and `devenv`: both embed an evaluator, and nixpkgs has no Lix build of either, so that mix is a recorded decision (#561). nix-direnv has a Lix build, which `home/direnv.nix` uses. Garbage collection doesn't use `nix.gc`: a root launchd daemon runs `nh clean all --keep-since 14d` every Sunday at 03:15. Besides system and user generations, that also drops stale GC roots — forgotten `result` links and nix-direnv profiles — while keeping two weeks of rollback. Running as root means nh never has to elevate itself; home-manager's `programs.nh.clean` isn't used because on Darwin it only cleans user profiles.",
-          lines: [19, 38],
+          code: {
+            from: "# nixd and devenv (./packages.nix) embed an evaluator and link the CppNix",
+            to: "launchd.daemons.nh-clean = {",
+          },
         },
         {
           title: "Store optimisation",
           prose:
             "An hour after the GC, `nix.optimise` hard-links identical files across whatever the cleanup left in the store.",
-          lines: [39, 46],
+          code: { from: "nix.optimise = {" },
         },
         {
           title: "Flakes, and no trusted user",
           prose:
             "`experimental-features` turns on `nix-command` and `flakes` globally so every shell can do `nix run`, `nix build`, etc., without `--extra-experimental-features` flags. `nix.channel.enable = false` drops the channels a flakes-only setup has no use for, so `NIX_PATH` no longer carries them. The primary user is deliberately left out of `trusted-users`: a trusted user can set any daemon setting, including substituters and `post-build-hook`, which amounts to root, and every process running as that user inherits it (#560). What needed that trust is declared globally instead: the binary cache that the nixpkgs of devenv is built into, with its public key.",
-          lines: [48, 62],
+          code: {
+            from: "nix.settings.experimental-features = [",
+            to: "nix.settings.trusted-public-keys = [",
+          },
         },
         {
           title: "Build provenance",
           prose:
             "`system.configurationRevision` records the flake's git revision (or its dirty revision), so the running system can always be traced back to the commit it was built from.",
-          lines: [64, 64],
+          code: {
+            from: "system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;",
+          },
         },
       ],
     },
@@ -521,19 +584,25 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Key repeat",
           prose:
             "macOS's default key repeat is glacial for vim muscle memory. `KeyRepeat = 1` is the fastest tick the OS exposes, and `InitialKeyRepeat = 20` (≈ 200 ms) cuts the dead time before repeat kicks in.",
-          lines: [4, 7],
+          code: {
+            from: "# The fastest key repeat the OS exposes, with the delay before it kicks",
+            to: "InitialKeyRepeat = 20;",
+          },
         },
         {
           title: "Menu bar",
           prose:
             "`_HIHideMenuBar = true` hides the menu bar permanently — it slides in only when the cursor hits the top edge. Combined with the auto-hidden Dock, every pixel of vertical space is reclaimed for the editor or terminal.",
-          lines: [9, 10],
+          code: { from: "# The menu bar slides in only when the cursor hits the top edge." },
         },
         {
           title: "Scrolling",
           prose:
             "Two small ergonomics toggles. `swipescrolldirection = true` keeps macOS's natural direction (drag content, not viewport). `AppleShowScrollBars = \"WhenScrolling\"` shows the scrollbar only during active scroll so it doesn't pin a column of pixels.",
-          lines: [12, 14],
+          code: {
+            from: "# Natural scroll direction, and scrollbars only while scrolling.",
+            to: 'AppleShowScrollBars = "WhenScrolling";',
+          },
         },
       ],
     },
@@ -550,7 +619,9 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "The CLI toolbelt",
           prose:
             "Daily drivers: `ghq`, `fd`, `fzf`, `ripgrep`, `sd`, `tree`, `vim`, `herdr`, and `gomi` as a safer `rm`. Only tools used outside any project belong here; a project pins its own toolchain in a devShell or devenv, which is why there is no Rust toolchain in this list (#550). The language tools that stay are used without a project: `nodejs_26` runs `vp`, `bun` and `pnpm` cover one-off scripts and the JavaScript checkouts without a shell of their own, `uv` runs one-off Python tools, `idris2` is for exercises, and `oxfmt` formats. Nix workflow tools: `nixd` and `devenv`. `agent-browser` drives the Homebrew-installed Chrome for browser checks by agents. Claude Code is deliberately absent: the only `claude` on `$PATH` is the sandboxed one from `home/claude-sandbox.nix`. `cclens`, `frog`, `playwright-cli`, and `vite-plus` (`vp`) come from `./pkgs` as `naitokosuke.*`.",
-          lines: [4, 37],
+          code: {
+            from: "# gh and git are installed by home-manager (home/gh.nix, home/git.nix), and",
+          },
         },
       ],
     },
@@ -603,13 +674,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Tool modules",
           prose:
             "Each tool gets its own file or directory directly under `home/`. Composing them as a flat list keeps every concern shallow — opening `git.nix` shows the full git story, opening `claude.nix` shows the Claude Code settings, with its rm guard and sandbox in their own siblings.",
-          lines: [2, 24],
+          code: { from: "imports = [" },
         },
         {
           title: "State version",
           prose:
             "`home.username` and `home.homeDirectory` aren't set here: home-manager derives them from `users.users`, which `hosts/common/home-manager.nix` fills from `config.naitokosuke`. `home.stateVersion` is pinned at the version this config was first written for — never bump casually.",
-          lines: [26, 26],
+          code: { from: 'home.stateVersion = "25.05";' },
         },
       ],
     },
@@ -626,19 +697,23 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Tied to the cask",
           prose:
             "One line names the cask this module depends on, with the reason. `home/required-casks.nix` turns every such declaration into an eval-time assertion: drop the `adrafinil` cask from `hosts/common/homebrew.nix` and evaluation fails with a message, instead of the hooks silently doing nothing and the server entry pointing at nothing (issue #482).",
-          lines: [39, 39],
+          code: {
+            from: 'naitokosuke.requiredCasks.adrafinil = "home/adrafinil.nix runs the Adrafinil CLI";',
+          },
         },
         {
           title: "Claude Code hooks",
           prose:
             "The app's one-click installer would write into the read-only `settings.json`, so the seven handlers from upstream's `ClaudeCodeIntegration.swift` are copied here by hand. `UserPromptSubmit` / `Stop` bracket each turn, the sub-agent pair outlives the parent turn, and `Notification`, `SessionEnd` and `SessionStart` cover the turn-ends that fire no `Stop`. The commands match upstream verbatim, which is how Adrafinil recognises them as its own. The module system merges them with the hooks `home/claude.nix` and `home/claude-rm-guard` declare.",
-          lines: [41, 67],
+          code: { from: "# The app's one-click installer writes these hooks into" },
         },
         {
           title: "MCP server",
           prose:
             "The `keep_awake` tool lets an agent keep the Mac awake for work that outlives its turn, which the hooks do not cover. It isn't covered by the built-in modules of `mcp-servers-nix`, so it slots in via the `settings.servers` freeform escape hatch.",
-          lines: [69, 81],
+          code: {
+            from: "# The `keep_awake` tool, so an agent can hold the Mac awake for work that",
+          },
         },
       ],
     },
@@ -675,7 +750,10 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Registration",
           prose:
             "A small wrapper runs the script with Bun and hands it the store path of `shfmt`. The hook is added to `programs.claude-code.settings.hooks.PreToolUse` for the `Bash` and `Monitor` tools. home-manager merges it with the `ExitPlanMode` hook in `home/claude.nix`.",
-          lines: [10, 28],
+          code: {
+            from: "rm-guard = pkgs.writeShellScript",
+            to: "programs.claude-code.settings.hooks.PreToolUse = [",
+          },
         },
       ],
     },
@@ -693,13 +771,16 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "The profile",
           prose:
             "Everything is allowed except file writes, which are limited to the per-user temp dirs, `/private/tmp`, Claude Code's own state, the login keychain, `gomi`'s trash and log directories, and toolchain caches that are safe to lose. On top of that come the working directory, the git common dir, and — through a regex rule — any `<main checkout>---<branch>` sibling, so gwq can create and use worktrees next to the main checkout while the main checkout itself and other repositories stay read-only. These are only known at launch, so they arrive as SBPL parameters instead of being spliced into the profile text.",
-          lines: [16, 56],
+          code: { from: "writable = [", to: "profile = pkgs.writeText \"claude-sandbox.sb\" ''" },
         },
         {
           title: "Wrapping claude",
           prose:
             "`programs.claude-code.package` is a script that resolves the parameters — the git common dir lets commits from a worktree reach the main checkout's `.git`, and the main checkout path is regex-escaped for the sibling rule — and execs the real binary through `sandbox-exec`. home-manager's own wrapper — plugin dir, MCP servers — sits on top, so it ends up inside the sandbox too. The package itself is a `symlinkJoin` over the real `claude-code` with only `bin/claude` replaced by that script, inheriting `pname`, `version` and `meta`, so anything that inspects it sees the package it wraps: home-manager picks its plugin mechanism from the package version and falls back to the legacy `--plugin-dir` wrapper without one (#558).",
-          lines: [58, 99],
+          code: {
+            from: "inherit (pkgs.llm-agents) claude-code;",
+            to: "programs.claude-code.package = pkgs.symlinkJoin {",
+          },
         },
       ],
     },
@@ -716,25 +797,28 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "settings.json",
           prose:
             'Global preferences — theme, editor mode, notifications, Japanese spinner verbs. The binary comes from the store, so nothing may update it in place: `env` turns off Claude Code\'s own auto-updater and installation checks, which is the mechanism the CLI actually reads (`DISABLE_AUTOUPDATER` from the process environment; the legacy `autoUpdates` preference is migrated out of `~/.claude.json` into exactly this block). The `installMethod = "unknown"` and `autoUpdates = true` lines that used to sit at the top were never read from `settings.json`, and the second one claimed the opposite of what the machine does — both dropped in issue #485.',
-          lines: [11, 42],
+          code: { from: "programs.claude-code.settings = {", to: "checkpointingEnabled = true;" },
         },
         {
           title: "Permissions",
           prose:
             "`permissions.deny` blocks reading credentials (`.env*`, `secrets/`, `~/.ssh`, `~/.aws`, `~/.gnupg`), wiping `/` or `~`, force-pushing, and raw `curl` / `wget` in favour of WebFetch with an explicit domain — plus a tongue-in-cheek ban on `perl` and `python`.",
-          lines: [43, 74],
+          code: { from: "permissions = {" },
         },
         {
           title: "Plan hook",
           prose:
             'A `PreToolUse` hook on `ExitPlanMode` opens the newest plan file in VS Code, so a plan can be read in the editor before it\'s approved. The glob is resolved into a variable and tested first: with no plan files it would otherwise reach `ls` literally and end up running `code ""` on an empty argument. `code` comes from the VS Code cask through `/opt/homebrew/bin`, and `naitokosuke.requiredCasks` ties the hook to that cask (`home/required-casks.nix`). The Adrafinil handlers from `home/adrafinil.nix` are merged in alongside it.',
-          lines: [75, 94],
+          code: { from: "hooks = {" },
         },
         {
           title: "Rules and skills",
           prose:
             "`CLAUDE.md` and the files under `rules/` live in `home/claude-context/` and are installed through `programs.claude-code.context` and `rulesDir`. They used to be out-of-store links into the separate `rule-rule-rule` repository, which dangled silently wherever it was not cloned and stopped taking changes once it was archived (issue #535). Skills come from the locked `skill-skill-skill` input through `programs.claude-code.skills`, so names and content have one source and nothing can dangle (#548): a skill change arrives with `nix flake update skill-skill-skill`. home-manager links the files one by one, which leaves room for the MCP plugin it installs into `~/.claude/skills` itself.",
-          lines: [96, 106],
+          code: {
+            from: "# Installed from the store, so they cannot dangle",
+            to: "programs.claude-code.skills =",
+          },
         },
       ],
     },
@@ -769,7 +853,9 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Shift+Enter",
           prose:
             "Ghostty implements fixterms, so Shift+Enter sends an escape sequence — which breaks multi-line input in Claude Code. The keybind makes it send a literal newline instead, matching iTerm2.",
-          lines: [14, 18],
+          code: {
+            from: "# Ghostty implements fixterms, which sends escape sequence [27;2;13~ for Shift+Enter.",
+          },
         },
       ],
     },
@@ -786,19 +872,19 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Global ignores",
           prose:
             "Beyond `.DS_Store` and CodeTour's `.tours`, the list covers personal scratch files (`*.memo.local.md`, `___naito___`), `.claude/settings.local.json`, the `___config___` dummy file that VS Code's file nesting hangs config files under, and `.agents/` for frog's friction logs — kept as a directory pattern so a repository that wants them tracked can re-include it.",
-          lines: [9, 22],
+          code: { from: "ignores = [" },
         },
         {
           title: "Commit signing",
           prose:
             "Commits and tags are signed by default with `~/.ssh/id_ed25519`, the same key `home/ssh.nix` uses for GitHub, so GitHub marks them Verified and nobody can pass off a commit as this identity. The public key also has to be registered on GitHub as a signing key, which is the one step outside Nix.",
-          lines: [23, 29],
+          code: { from: "# The public key must be registered on GitHub as a signing key." },
         },
         {
           title: "Defaults",
           prose:
             "`histogram` diffs, `zdiff3` conflict markers, `rerere`, rebase on pull with auto-stash, `push.autoSetupRemote`, and `fetch.prune`. Branches sort by recent commit, non-ASCII filenames print verbatim, `ghq.root` is `~/src`, and GitHub HTTPS URLs are rewritten to SSH.",
-          lines: [30, 50],
+          code: { from: "settings = {" },
         },
       ],
     },
@@ -815,19 +901,21 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Trash",
           prose:
             "Trashed files go to `~/.gomi`, and `forbidden_paths` refuses to trash system directories, `/`, or other trash locations. Restores ask for confirmation, and permanent deletion is disabled.",
-          lines: [13, 41],
+          code: { from: "core = {" },
         },
         {
           title: "History and logging",
           prose:
             "The restore list covers the past year and skips `.DS_Store`. Debug logging is on, rotated at 10 MB with three files kept.",
-          lines: [86, 105],
+          code: { from: "history = {", to: "logging = {" },
         },
         {
           title: "The prune agent",
           prose:
             "A home-manager `launchd` agent runs `gomi --prune=45d,orphans` every Sunday at 03:00, so the trash doesn't accumulate forever. `gomi` is resolved from the Nix store via `lib.getExe`, with no `$PATH` dependency. No stdout/stderr paths are set, since gomi already records each prune in its own log (`~/.local/share/gomi/debug.log`).",
-          lines: [108, 125],
+          code: {
+            from: "# Weekly prune of trashed files older than 45 days. No StandardOutPath /",
+          },
         },
       ],
     },
@@ -844,7 +932,9 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Where worktrees land",
           prose:
             "`worktree.basedir` is `~/src`, the same root as ghq, and the naming template appends `---<branch>` to the repository path. Each worktree therefore sits right beside the clone it came from.",
-          lines: [11, 14],
+          code: {
+            from: 'xdg.configFile."gwq/config.toml".source = tomlFormat.generate "gwq-config.toml" {',
+          },
         },
       ],
     },
@@ -870,7 +960,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Pointing nh at this flake",
           prose:
             "`darwinFlake` is this checkout under `naitokosuke.githubDirectory`, so `nh darwin switch` picks `darwinConfigurations.<hostname>` without a `--flake` argument.",
-          lines: [5, 10],
+          code: { from: "programs.nh = {" },
         },
       ],
     },
@@ -887,7 +977,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "One variable, nothing else moves",
           prose:
             "Playwright resolves its registry directory from `PLAYWRIGHT_BROWSERS_PATH` at runtime, so pointing that at `~/.cache/ms-playwright` — Playwright's own default on Linux, and ordinary data as far as macOS is concerned — is the whole fix. Browsers stay runtime-managed by Playwright, the same decision recorded in `pkgs/playwright-cli.nix`, and the cache stays keyed by browser build id, so every project on a matching build shares one copy.",
-          lines: [9, 14],
+          code: { from: "let", to: "{" },
         },
       ],
     },
@@ -913,7 +1003,7 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "github.com",
           prose:
             "A single ed25519 key, with `IdentitiesOnly` so ssh doesn't offer every key in the agent. The key is added to the agent on first use, and `UseKeychain` stores its passphrase in the macOS Keychain.",
-          lines: [14, 19],
+          code: { from: 'settings."github.com" = {' },
         },
       ],
     },
@@ -930,19 +1020,21 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Format",
           prose:
             "User, host, free disk space, directory, git branch and status, and command duration, then a line break and the `❯` character — green on success, red on failure. The user and host show even outside SSH, and the command duration only for commands that took two seconds or more.",
-          lines: [30, 30],
+          code: {
+            from: 'format = "$username$hostname\\${custom.disk_free}\\${custom.disk_free_warning}\\${custom.disk_free_critical}$directory$git_branch$git_status$cmd_duration$line_break$character";',
+          },
         },
         {
           title: "Free disk space",
           prose:
             "Starship has no built-in module for disk space, so `diskFree` builds a `custom` module that runs `/bin/df -h /` and prints a hard disk glyph followed by the available space over the disk size, as in `with 󰋊 120Gi / 500Gi`. The macOS system and data volumes share one APFS container, so `/` reports the same free space as the data volume. `df` and `awk` are macOS's own and spelled out in full: the awk programs read the column layout of BSD `df`, which GNU coreutils' would not reproduce, so this is one place where staying out of the store is the right answer and the comment says so (issue #482). `sh`, which only runs a pipeline and a test, is pinned to the store instead — the prompt then depends on no `$PATH` ordering at all.",
-          lines: [3, 22],
+          code: { from: "# Free space on the startup disk", to: "diskFree = style: min: max: {" },
         },
         {
           title: "Colour by usage",
           prose:
             "A custom module can't restyle itself from its own output, so there are three of them, one per colour: cyan below 90% used, yellow from 90%, and red from 95% — the same levels as Powerlevel10k's `disk_usage`. Each one's `when` computes the used share and shows the module only inside its own range, so exactly one appears.",
-          lines: [49, 53],
+          code: { from: "custom = {" },
         },
       ],
     },
@@ -968,7 +1060,9 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "JSONC → JSON with jsonnet",
           prose:
             "JSONC — `//` and `/* */` comments, trailing commas — is valid Jsonnet input, and jsonnet emits plain JSON. So the conversion is a real parse: malformed input fails the build instead of being silently corrupted (issue #364).",
-          lines: [9, 13],
+          code: {
+            from: "# keybinding.jsonc → JSON at build time. JSONC is valid Jsonnet input, so",
+          },
         },
       ],
     },
@@ -994,13 +1088,13 @@ export const explanations: Readonly<Record<string, Explanation>> = {
           title: "Environment",
           prose:
             "`HOMEBREW_FORBIDDEN_FORMULAE` (`bun`, `claude`, `node`, …) is exported so `brew install` can never shadow a Nix-managed binary.",
-          lines: [33, 36],
+          code: { from: "home.sessionVariables = {" },
         },
         {
           title: "Aliases and helpers",
           prose:
             "`cpwd` copies the current directory to the clipboard and `mkcd` makes a directory and enters it. A new terminal starts in `~/src/github.com/<user>` unless it was opened by VS Code.",
-          lines: [41, 59],
+          code: { from: "shellAliases = {", to: "initContent = ''" },
         },
       ],
     },

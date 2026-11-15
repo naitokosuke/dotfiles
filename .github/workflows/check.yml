@@ -24,3 +24,22 @@ jobs:
       # Evaluates and builds every host, every custom package and the
       # formatting check (see `checks` in flake.nix).
       - run: nix flake check --print-build-logs --option allow-import-from-derivation false
+
+  docs:
+    # The site resolves its walkthrough anchors in the browser, so a stale one
+    # passes `vp build` and only fails here, in `vp test`.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: voidzero-dev/setup-vp@v1.22.0
+        with:
+          working-directory: docs
+          node-version: "26"
+          cache: true
+
+      - run: vp check
+      - run: vp test

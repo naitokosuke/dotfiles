@@ -37,6 +37,10 @@ jobs:
           node-version: "26"
           cache: true
 
+      # A stale walkthrough anchor throws when the page loads, not at build
+      # time, so the tests run before anything is uploaded.
+      - run: vp test
+
       # .void/project.json is gitignored, so the project is named explicitly.
       # Void 1.x has no default platform, so VOID_API_URL is set explicitly.
       # It also only deploys to a saved connection, which a fresh runner lacks.

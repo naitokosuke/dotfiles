@@ -1,5 +1,24 @@
 export type Lang = "nix" | "md" | "ts" | "json" | "lock" | "yaml" | "toml" | "text";
 
+/** Where a walkthrough section points in its file; see `resolveAnchor`. */
+export interface CodeAnchor {
+  readonly from: string;
+  readonly to?: string;
+}
+
+/** A walkthrough section as written in `explanations.ts`. */
+export interface WalkthroughSectionSource {
+  readonly title?: string;
+  readonly prose: string;
+  readonly code?: CodeAnchor;
+}
+
+export interface WalkthroughSource {
+  readonly intro: string;
+  readonly sections?: readonly WalkthroughSectionSource[];
+}
+
+/** A walkthrough section with its anchor resolved against the file. */
 export interface WalkthroughSection {
   readonly title?: string;
   readonly prose: string;
