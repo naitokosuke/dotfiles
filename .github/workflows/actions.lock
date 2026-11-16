@@ -6,6 +6,7 @@ workflows:
     '.github/workflows/check.yml':
         - 'actions/checkout@v7.0.1'
         - 'cachix/install-nix-action@v31.11.3'
+        - 'voidzero-dev/setup-vp@v1.22.0'
     '.github/workflows/deploy-docs.yml':
         - 'actions/checkout@v7.0.1'
         - 'cachix/install-nix-action@v31.11.3'

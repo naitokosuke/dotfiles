@@ -49,6 +49,11 @@ jobs:
           node-version: "26"
           cache: true
 
+      ## Tests
+      # `vp build` does not run the tests, so they run before anything is
+      # deployed.
+      - run: vp test
+
       ## Deploy
       # setup-vp above installs Vite+ and runs `vp install`; `vp run deploy`
       # is the same `void deploy` used locally.

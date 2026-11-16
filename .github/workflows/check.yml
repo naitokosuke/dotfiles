@@ -1,6 +1,7 @@
 # Runs `nix flake check` on every pull request: every host, every custom
 # package and the formatting check (see `checks` in flake.nix). The flake only
-# has aarch64-darwin outputs, so building them needs a macOS runner.
+# has aarch64-darwin outputs, so building them needs a macOS runner. The docs
+# site is checked and tested in a separate job.
 name: check
 
 on:
@@ -23,3 +24,21 @@ jobs:
       - uses: cachix/install-nix-action@v31.11.3
 
       - run: nix flake check --print-build-logs --option allow-import-from-derivation false
+
+  docs:
+    # `vp build` does not run the docs tests, so they run here.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: voidzero-dev/setup-vp@v1.22.0
+        with:
+          working-directory: docs
+          node-version: "26"
+          cache: true
+
+      - run: vp check
+      - run: vp test
