@@ -35,7 +35,12 @@ in
   # System Settings > Privacy & Security > App Management, so a failure only
   # warns instead of failing activation.
   home.activation.vscodeBackground = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    PATH=${lib.makeBinPath [ pkgs.perl ]}:$PATH \
+    PATH=${
+      lib.makeBinPath [
+        pkgs.openssl
+        pkgs.perl
+      ]
+    }:$PATH \
       run ${lib.getExe pkgs.bash} ${inputs.vscode-settings}/scripts/vscode-background.sh apply \
       || warnEcho "VS Code background was not applied. Allow your terminal under App Management and switch again."
   '';
