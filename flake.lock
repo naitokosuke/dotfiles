@@ -330,11 +330,11 @@
     "vscode-settings": {
       "flake": false,
       "locked": {
-        "lastModified": 1794794047,
-        "narHash": "sha256-ABJvxw6PRyL7MWpqHjVPTQiYCAsFyushFV27Rhs/vKo=",
+        "lastModified": 1794798916,
+        "narHash": "sha256-eXzfOLWZ46OQkqZumb/m+99pqyr86pv7ZUj5lUBvLw0=",
         "owner": "naitokosuke",
         "repo": "vscode-settings",
-        "rev": "56901cd99ed6c590d3c7d7365c61fbbe0f426edd",
+        "rev": "4fa026ff81d701eae730837dffcda5cacdf5522e",
         "type": "github"
       },
       "original": {
