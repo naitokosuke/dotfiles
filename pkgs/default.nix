@@ -16,7 +16,8 @@
 #   in step with version bumps.
 # * vite-plus: the launcher is one crate of a large Rust workspace, and the
 #   toolchain it runs is prebuilt on npm either way.
-# * playwright-cli: built from source, because it is only published on npm.
+# * playwright-cli, fxtwitter: built from source, because they are only
+#   published on npm.
 { pkgs }:
 let
   sources = pkgs.callPackage ./_sources/generated.nix { };
@@ -24,6 +25,7 @@ in
 {
   cclens = pkgs.callPackage ./cclens.nix { inherit sources; };
   frog = pkgs.callPackage ./frog.nix { inherit sources; };
+  fxtwitter = pkgs.callPackage ./fxtwitter.nix { inherit sources; };
   gh-sub-issue = pkgs.callPackage ./gh-sub-issue.nix { inherit sources; };
   playwright-cli = pkgs.callPackage ./playwright-cli.nix { inherit sources; };
   vite-plus = pkgs.callPackage ./vite-plus.nix { inherit sources; };
