@@ -29,6 +29,30 @@
         },
         "version": "1.1.0"
     },
+    "fxtwitter": {
+        "cargoLock": null,
+        "date": null,
+        "extract": {
+            "package-lock.json": "sha256-+uz6tE_lcoC6Ilp3BoqJ2M+8ljMphQBLrp6SKbe9XK8=/package-lock.json",
+            "package.json": "sha256-+uz6tE_lcoC6Ilp3BoqJ2M+8ljMphQBLrp6SKbe9XK8=/package.json"
+        },
+        "name": "fxtwitter",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "otnc",
+            "repo": "fxtwitter-wrapper",
+            "rev": "v2.1.0",
+            "sha256": "sha256-+uz6tE/lcoC6Ilp3BoqJ2M+8ljMphQBLrp6SKbe9XK8=",
+            "sparseCheckout": [],
+            "type": "github"
+        },
+        "version": "v2.1.0"
+    },
     "gh-sub-issue": {
         "cargoLock": null,
         "date": null,

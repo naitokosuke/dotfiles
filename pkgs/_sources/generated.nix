@@ -22,6 +22,21 @@
       sha256 = "sha256-9QbnCokyF7VHcRpyy/S9pnZ6FcI2YBzg1gAhlcI3+pM=";
     };
   };
+  fxtwitter = {
+    pname = "fxtwitter";
+    version = "v2.1.0";
+    src = fetchFromGitHub {
+      owner = "otnc";
+      repo = "fxtwitter-wrapper";
+      rev = "v2.1.0";
+      fetchSubmodules = false;
+      sha256 = "sha256-+uz6tE/lcoC6Ilp3BoqJ2M+8ljMphQBLrp6SKbe9XK8=";
+    };
+    extract = {
+      "package-lock.json" = ./. + "/sha256-+uz6tE_lcoC6Ilp3BoqJ2M+8ljMphQBLrp6SKbe9XK8=/package-lock.json";
+      "package.json" = ./. + "/sha256-+uz6tE_lcoC6Ilp3BoqJ2M+8ljMphQBLrp6SKbe9XK8=/package.json";
+    };
+  };
   gh-sub-issue = {
     pname = "gh-sub-issue";
     version = "0.5.1";

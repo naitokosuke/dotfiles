@@ -22,6 +22,7 @@
     fd
     naitokosuke.frog
     fzf
+    naitokosuke.fxtwitter
     ghq
     gomi
     gwq

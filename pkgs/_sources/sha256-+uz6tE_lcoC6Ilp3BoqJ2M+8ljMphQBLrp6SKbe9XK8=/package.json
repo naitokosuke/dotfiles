@@ -1,0 +1,96 @@
+{
+  "name": "fxtwitter",
+  "version": "2.1.0",
+  "description": "Typed wrapper for the FxTwitter API.",
+  "keywords": [
+    "x",
+    "twitter",
+    "fxtwitter",
+    "wrapper",
+    "api"
+  ],
+  "homepage": "https://github.com/otnc/fxtwitter-wrapper#readme",
+  "bugs": {
+    "url": "https://github.com/otnc/fxtwitter-wrapper/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otnc/fxtwitter-wrapper.git"
+  },
+  "license": "MIT",
+  "author": "otoneko.",
+  "type": "module",
+  "bin": {
+    "fxtwitter": "./dist/cli.mjs"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./v1": {
+      "types": {
+        "import": "./dist/v1.d.mts",
+        "require": "./dist/v1.d.cts"
+      },
+      "import": "./dist/v1.mjs",
+      "require": "./dist/v1.cjs"
+    },
+    "./v2": {
+      "types": {
+        "import": "./dist/v2.d.mts",
+        "require": "./dist/v2.d.cts"
+      },
+      "import": "./dist/v2.mjs",
+      "require": "./dist/v2.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "check": "prettier --write . && eslint --fix .",
+    "ci": "prettier --check . && eslint .",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "defu": "^6.1.7",
+    "ofetch": "^1.5.1",
+    "std-env": "^4.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "citty": "^0.2.2",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.8.0",
+    "prettier": "^3.9.6",
+    "tsdown": "^0.22.14",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  }
+}
