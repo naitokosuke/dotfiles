@@ -12,24 +12,28 @@
 let
   flake = "${config.naitokosuke.githubDirectory}/dotfiles";
 
-  ## nhup
-  # Updates every flake input, switches, and pushes the new lock (#629). A
-  # command of its own rather than an `nh` shell function: nh has no external
-  # subcommands, and shadowing it would break outside interactive shells. The
-  # git steps run against the flake checkout, so it works from any directory.
-  nhup = pkgs.writeShellApplication {
-    name = "nhup";
-    runtimeInputs = [
-      config.programs.nh.package
-      pkgs.git
-    ];
-    text = ''
-      nh darwin switch -u
-      git -C ${flake} add .
-      git -C ${flake} commit -m "Update flake.lock"
-      git -C ${flake} push
-    '';
-  };
+  ## nhup and nhu
+  # Update every flake input, rebuild with `nh darwin <action>`, and push the
+  # new lock (#629): nhup switches, nhu only builds, so a lock that does not
+  # build is never pushed either way. Arguments go to nh. Commands of their
+  # own rather than an `nh` shell function: nh has no external subcommands,
+  # and shadowing it would break outside interactive shells. The git steps run
+  # against the flake checkout, so they work from any directory.
+  mkUpdate =
+    name: action:
+    pkgs.writeShellApplication {
+      inherit name;
+      runtimeInputs = [
+        config.programs.nh.package
+        pkgs.git
+      ];
+      text = ''
+        nh darwin ${action} -u "$@"
+        git -C ${flake} add .
+        git -C ${flake} commit -m "Update flake.lock"
+        git -C ${flake} push
+      '';
+    };
 in
 {
   programs.nh = {
@@ -37,5 +41,8 @@ in
     darwinFlake = flake;
   };
 
-  home.packages = [ nhup ];
+  home.packages = [
+    (mkUpdate "nhup" "switch")
+    (mkUpdate "nhu" "build")
+  ];
 }
