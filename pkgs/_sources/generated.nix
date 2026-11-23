@@ -8,10 +8,10 @@
 {
   cclens = {
     pname = "cclens";
-    version = "v0.4.0";
+    version = "v0.5.0";
     src = fetchurl {
-      url = "https://github.com/lambdalisue/cclens/releases/download/v0.4.0/cclens-v0.4.0-aarch64-apple-darwin.tar.gz";
-      sha256 = "sha256-2XfMbv/GM8nPHTlaOUPd7nMM6euH98x5yN+9rN1lpeM=";
+      url = "https://github.com/lambdalisue/cclens/releases/download/v0.5.0/cclens-v0.5.0-aarch64-apple-darwin.tar.gz";
+      sha256 = "sha256-3Aw4YDKpLFom8OG9xVOwWfxIimswXsDGaw4g7rM/2Y0=";
     };
   };
   frog = {
@@ -47,17 +47,17 @@
   };
   playwright-cli = {
     pname = "playwright-cli";
-    version = "v0.1.24";
+    version = "v0.1.25";
     src = fetchFromGitHub {
       owner = "microsoft";
       repo = "playwright-cli";
-      rev = "v0.1.24";
+      rev = "v0.1.25";
       fetchSubmodules = false;
-      sha256 = "sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q/hO6EA6DXDKA=";
+      sha256 = "sha256-WCtATa/1WKl7XJxvgrbgslKdH0vh4Bf/p6VX3nGC9rQ=";
     };
     extract = {
-      "package-lock.json" = ./. + "/sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q_hO6EA6DXDKA=/package-lock.json";
-      "package.json" = ./. + "/sha256-7dKRvxQ+ntqr4JPqGoWN+CHEZVg6E6Q_hO6EA6DXDKA=/package.json";
+      "package-lock.json" = ./. + "/sha256-WCtATa_1WKl7XJxvgrbgslKdH0vh4Bf_p6VX3nGC9rQ=/package-lock.json";
+      "package.json" = ./. + "/sha256-WCtATa_1WKl7XJxvgrbgslKdH0vh4Bf_p6VX3nGC9rQ=/package.json";
     };
   };
   vite-plus = {
